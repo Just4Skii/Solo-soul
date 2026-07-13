@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Solo Soul Experiences | Fall in Love with Your Own Company</title>
+  <meta name="description" content="Solo Soul Experiences creates meaningful solo adventures in Durban to help you reconnect with yourself, build confidence, and create unforgettable memories. Book now." />
+  <meta name="keywords" content="solo experiences Durban, solo activities, self-love, healing experiences, solo travel, women's experiences Durban, mindful activities" />
+  <meta property="og:title" content="Solo Soul Experiences | Fall in Love with Your Own Company" />
+  <meta property="og:description" content="Curated solo experiences designed to help you reconnect with yourself, build confidence and create unforgettable memories in Durban, South Africa." />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="apple-touch-icon" href="assets/images/logo.png" />
+  <meta name="theme-color" content="#2E5E4E" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Font Awesome for Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <!-- AOS Animation Library -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ======================== PRELOADER ======================== -->
+  <div id="preloader" class="preloader">
+    <div class="preloader-inner">
+      <div class="preloader-logo">✦</div>
+      <div class="preloader-text">Solo Soul Experiences</div>
+      <div class="preloader-tagline">Fall in Love with Your Own Company</div>
+      <div class="preloader-bar"><div class="preloader-fill"></div></div>
+    </div>
+  </div>
+
+  <!-- ======================== NAVIGATION ======================== -->
+  <header id="navbar" class="navbar">
+    <div class="nav-container">
+      <a href="#home" class="nav-logo" id="nav-logo-link">
+        <img src="assets/images/logo.png" alt="Solo Soul Experiences logo" class="nav-logo-img" />
+        <span class="logo-text">Solo Soul</span>
+      </a>
+
+      <nav class="nav-menu" id="nav-menu" role="navigation" aria-label="Main navigation">
+        <a href="#about" class="nav-link">About</a>
+        <a href="#experiences" class="nav-link">Experiences</a>
+        <a href="#events" class="nav-link">Events</a>
+        <a href="#gallery" class="nav-link">Gallery</a>
+        <a href="#blog" class="nav-link">Blog</a>
+        <a href="#founder" class="nav-link">Meet Hazel</a>
+        <a href="#contact" class="nav-link">Contact</a>
+      </nav>
+
+      <a href="#booking" id="nav-book-btn" class="btn btn-primary nav-cta" onclick="openBookingModal()">Book Now</a>
+
+      <button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Mobile Menu Overlay -->
+  <div class="mobile-overlay" id="mobile-overlay"></div>
+  <div class="mobile-menu" id="mobile-menu">
+    <button class="mobile-close" id="mobile-close" aria-label="Close menu">✕</button>
+    <nav>
+      <a href="#about" class="mobile-nav-link">About</a>
+      <a href="#experiences" class="mobile-nav-link">Experiences</a>
+      <a href="#events" class="mobile-nav-link">Events</a>
+      <a href="#gallery" class="mobile-nav-link">Gallery</a>
+      <a href="#blog" class="mobile-nav-link">Blog</a>
+      <a href="#founder" class="mobile-nav-link">Meet Hazel</a>
+      <a href="#contact" class="mobile-nav-link">Contact</a>
+      <a href="#booking" class="btn btn-primary mobile-nav-btn" onclick="openBookingModal()">Book Now</a>
+    </nav>
+  </div>
+
+  <!-- ======================== HERO SECTION ======================== -->
+  <section id="home" class="hero">
+    <div class="hero-bg">
+      <img src="assets/images/hero_ocean_sunrise_1783927366146.png" alt="Woman enjoying sunrise ocean view with coffee" class="hero-img" />
+      <div class="hero-overlay"></div>
+    </div>
+
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="hero-badge-dot"></span>
+        Durban's Premier Solo Experiences
+      </div>
+      <h1 class="hero-headline">
+        You Don't Have to <br/>
+        <em>Wait for Someone Else</em><br/>
+        to Start Living.
+      </h1>
+      <p class="hero-subline">
+        Discover curated solo experiences designed to help you reconnect with yourself,<br class="br-desktop"/>
+        build confidence and create unforgettable memories.
+      </p>
+      <div class="hero-tagline">Fall in Love with Your Own Company.</div>
+      <div class="hero-actions">
+        <a href="#booking" class="btn btn-hero-primary" id="hero-book-btn" onclick="openBookingModal()">
+          <i class="fas fa-heart"></i> Book an Experience
+        </a>
+        <a href="#experiences" class="btn btn-hero-secondary" id="hero-explore-btn">
+          <i class="fas fa-compass"></i> Explore Events
+        </a>
+        <a href="#about" class="btn btn-hero-ghost" id="hero-about-btn">
+          About Us
+        </a>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="stat-row">
+            <span class="stat-num" data-target="200">0</span><span class="stat-plus">+</span>
+          </div>
+          <span class="stat-label">Experiences Hosted</span>
+        </div>
+        <div class="hero-stat-divider"></div>
+        <div class="hero-stat">
+          <div class="stat-row">
+            <span class="stat-num" data-target="500">0</span><span class="stat-plus">+</span>
+          </div>
+          <span class="stat-label">Happy Souls</span>
+        </div>
+        <div class="hero-stat-divider"></div>
+        <div class="hero-stat">
+          <div class="stat-row">
+            <span class="stat-num" data-target="12">0</span><span class="stat-plus">+</span>
+          </div>
+          <span class="stat-label">Unique Activities</span>
+        </div>
+      </div>
+    </div>
+
+    <a href="#about" class="hero-scroll" aria-label="Scroll to about section">
+      <span class="scroll-label">Scroll to explore</span>
+      <div class="scroll-arrow"><i class="fas fa-chevron-down"></i></div>
+    </a>
+
+    <!-- Floating particles -->
+    <div class="hero-particles">
+      <div class="particle p1">✦</div>
+      <div class="particle p2">✦</div>
+      <div class="particle p3">✦</div>
+      <div class="particle p4">✦</div>
+    </div>
+  </section>
+
+  <!-- ======================== ABOUT SECTION ======================== -->
+  <section id="about" class="about section-padding">
+    <div class="container">
+      <div class="about-grid">
+        <div class="about-image-wrap" data-aos="fade-right">
+          <div class="about-img-frame">
+            <img src="assets/images/about_section_image_1783927472281.png" alt="Woman on coastal cliffs journaling with ocean view" />
+            <div class="about-img-badge">
+              <span>❤️</span>
+              <span>Because you are enough</span>
+            </div>
+          </div>
+        </div>
+        <div class="about-content" data-aos="fade-left">
+          <div class="section-eyebrow">Our Story</div>
+          <h2 class="section-title">Welcome to<br/><em>Solo Soul Experiences</em></h2>
+          <p class="about-lead">Life is too short to wait for the perfect partner, the right friends, or the ideal moment.</p>
+          <p class="about-body">Solo Soul Experiences creates meaningful experiences for people who want to explore, heal, celebrate themselves and enjoy life—<strong>alone, but never lonely.</strong></p>
+          <p class="about-body">Whether you're recovering from heartbreak, overcoming anxiety, rebuilding confidence or simply choosing yourself, our experiences are designed to remind you that your own company can be enough.</p>
+          <div class="about-pillars">
+            <div class="pillar">
+              <div class="pillar-icon">❤️</div>
+              <div class="pillar-text"><strong>Self Love</strong><span>Intentional adventures</span></div>
+            </div>
+            <div class="pillar">
+              <div class="pillar-icon">🌍</div>
+              <div class="pillar-text"><strong>Explore</strong><span>Beautiful places</span></div>
+            </div>
+            <div class="pillar">
+              <div class="pillar-icon">✨</div>
+              <div class="pillar-text"><strong>Heal</strong><span>Reconnect with self</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================== WHY SOLO SECTION ======================== -->
+  <section id="why-solo" class="why-solo section-padding">
+    <div class="container">
+      <div class="section-header" data-aos="fade-up">
+        <div class="section-eyebrow">Why Solo?</div>
+        <h2 class="section-title">The Power of <em>Your Own Company</em></h2>
+        <p class="section-subtitle">Intentional solitude is not loneliness—it's where your best self begins to emerge.</p>
+      </div>
+      <div class="why-grid">
+        <div class="why-card" data-aos="fade-up" data-aos-delay="100">
+          <div class="why-icon-wrap">
+            <div class="why-icon">❤️</div>
+          </div>
+          <h3>Self Love</h3>
+          <p>Build unshakeable confidence through intentional solo adventures that remind you of your own worth and power.</p>
+          <div class="why-learn-more">Discover more <i class="fas fa-arrow-right"></i></div>
+        </div>
+        <div class="why-card featured" data-aos="fade-up" data-aos-delay="200">
+          <div class="why-icon-wrap">
+            <div class="why-icon">🌍</div>
+          </div>
+          <h3>Explore</h3>
+          <p>Discover beautiful places and hidden gems in Durban and beyond—no compromise, no waiting, entirely on your terms.</p>
+          <div class="why-learn-more">Start exploring <i class="fas fa-arrow-right"></i></div>
+        </div>
+        <div class="why-card" data-aos="fade-up" data-aos-delay="300">
+          <div class="why-icon-wrap">
+            <div class="why-icon">✨</div>
+          </div>
+          <h3>Heal</h3>
+          <p>Reconnect with yourself through mindful, guided experiences designed for restoration, reflection, and joy.</p>
+          <div class="why-learn-more">Begin healing <i class="fas fa-arrow-right"></i></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================== EXPERIENCES SECTION ======================== -->
+  <section id="experiences" class="experiences section-padding">
+    <div class="container">
+      <div class="section-header" data-aos="fade-up">
+        <div class="section-eyebrow">What We Offer</div>
+        <h2 class="section-title">Our <em>Experiences</em></h2>
+        <p class="section-subtitle">Each experience is crafted to nourish your soul, spark joy, and help you fall in love with your own company.</p>
+      </div>
+      <div class="exp-grid">
+
+        <div class="exp-card" data-aos="fade-up" data-aos-delay="50">
+          <div class="exp-img-wrap">
+            <img src="assets/images/experience_brunch_1783927375716.png" alt="Solo brunch club experience" />
+            <div class="exp-badge">Popular</div>
+            <div class="exp-overlay">
+              <button class="exp-cta" onclick="openBookingModal('Solo Brunch Club')">Book Experience</button>
+            </div>
+          </div>
+          <div class="exp-body">
+            <div class="exp-category"><i class="fas fa-utensils"></i> Dining</div>
+            <h3>Solo Brunch Club</h3>
+            <p>Enjoy beautiful restaurants with guided conversation prompts designed to unlock self-reflection and connection.</p>
+            <div class="exp-footer">
+              <span class="exp-price">From R350</span>
+              <span class="exp-duration"><i class="fas fa-clock"></i> 2–3 hrs</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="exp-card" data-aos="fade-up" data-aos-delay="100">
+          <div class="exp-img-wrap">
+            <img src="assets/images/experience_sunset_walk_1783927384287.png" alt="Sunset beach walk experience" />
+            <div class="exp-badge new-badge">New</div>
+            <div class="exp-overlay">
+              <button class="exp-cta" onclick="openBookingModal('Sunset Beach Walk')">Book Experience</button>
+            </div>
+          </div>
+          <div class="exp-body">
+            <div class="exp-category"><i class="fas fa-water"></i> Nature</div>
+            <h3>Sunset Walks</h3>
+            <p>Mindful walks along Durban's golden beaches—breathe in the salt air, feel the sand, and simply be present.</p>
+            <div class="exp-footer">
+              <span class="exp-price">From R250</span>
+              <span class="exp-duration"><i class="fas fa-clock"></i> 1–2 hrs</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="exp-card" data-aos="fade-up" data-aos-delay="150">
+          <div class="exp-img-wrap">
+            <img src="assets/images/experience_sip_paint_1783927393574.png" alt="Sip and paint experience" />
+            <div class="exp-overlay">
+              <button class="exp-cta" onclick="openBookingModal('Sip & Paint')">Book Experience</button>
+            </div>
+          </div>
+          <div class="exp-body">
+            <div class="exp-category"><i class="fas fa-palette"></i> Creative</div>
+            <h3>Sip & Paint</h3>
+            <p>Relax, unleash your creativity, and meet like-minded solo adventurers in a warm, inclusive studio setting.</p>
+            <div class="exp-footer">
+              <span class="exp-price">From R450</span>
+              <span class="exp-duration"><i class="fas fa-clock"></i> 3 hrs</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="exp-card" data-aos="fade-up" data-aos-delay="200">
+          <div class="exp-img-wrap">
+            <img src="assets/images/experience_coffee_journal_1783927404043.png" alt="Solo coffee date journaling experience" />
+            <div class="exp-overlay">
+              <button class="exp-cta" onclick="openBookingModal('Coffee Date')">Book Experience</button>
+            </div>
+          </div>
+          <div class="exp-body">
+            <div class="exp-category"><i class="fas fa-coffee"></i> Mindfulness</div>
+            <h3>Coffee Dates</h3>
+            <p>Treat yourself to premium cafés and guided reflective journaling prompts that help you know yourself better.</p>
+            <div class="exp-footer">
+              <span class="exp-price">From R150</span>
+              <span class="exp-duration"><i class="fas fa-clock"></i> 1–2 hrs</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="exp-card" data-aos="fade-up" data-aos-delay="250">
+          <div class="exp-img-wrap">
+            <img src="assets/images/experience_nature_hike_1783927415406.png" alt="Nature escape hiking experience" />
+            <div class="exp-overlay">
+              <button class="exp-cta" onclick="openBookingModal('Nature Escape')">Book Experience</button>
+            </div>
+          </div>
+          <div class="exp-body">
+            <div class="exp-category"><i class="fas fa-mountain"></i> Adventure</div>
+            <h3>Nature Escapes</h3>
+            <p>Hiking and reconnecting with nature's healing power—step into green forests, fresh air, and beautiful trails.</p>
+            <div class="exp-footer">
+              <span class="exp-price">From R300</span>
+              <span class="exp-duration"><i class="fas fa-clock"></i> 3–5 hrs</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="exp-card" data-aos="fade-up" data-aos-delay="300">
+          <div class="exp-img-wrap">
+            <img src="assets/images/experience_luxury_spa_1783927426028.png" alt="Luxury solo spa day experience" />
+            <div class="exp-badge luxury-badge">Luxury</div>
+            <div class="exp-overlay">
+              <button class="exp-cta" onclick="openBookingModal('Luxury Solo Day')">Book Experience</button>
+            </div>
+          </div>
+          <div class="exp-body">
+            <div class="exp-category"><i class="fas fa-spa"></i> Luxury</div>
+            <h3>Luxury Solo Days</h3>
+            <p>Spa treatments, wine tasting and five-star experiences designed to celebrate and honour exactly who you are.</p>
+            <div class="exp-footer">
+              <span class="exp-price">From R850</span>
+              <span class="exp-duration"><i class="fas fa-clock"></i> Full day</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================== UPCOMING EVENTS SECTION ======================== -->
+  <section id="events" class="events section-padding">
+    <div class="container">
+      <div class="section-header" data-aos="fade-up">
+        <div class="section-eyebrow">What's On</div>
+        <h2 class="section-title">Upcoming <em>Experiences</em></h2>
+        <p class="section-subtitle">Our carefully curated calendar of solo soul events in Durban. Reserve your spot before they fill up.</p>
+      </div>
+
+      <!-- Filter Tabs -->
+      <div class="event-filters" data-aos="fade-up">
+        <button class="filter-btn active" data-filter="all" id="filter-all">All Events</button>
+        <button class="filter-btn" data-filter="dining" id="filter-dining">Dining</button>
+        <button class="filter-btn" data-filter="nature" id="filter-nature">Nature</button>
+        <button class="filter-btn" data-filter="creative" id="filter-creative">Creative</button>
+        <button class="filter-btn" data-filter="luxury" id="filter-luxury">Luxury</button>
+        <button class="filter-btn" data-filter="mindful" id="filter-mindful">Mindful</button>
+      </div>
+
+      <div class="events-table-wrap" data-aos="fade-up">
+        <table class="events-table" id="events-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Experience</th>
+              <th>Location</th>
+              <th>Duration</th>
+              <th>Price</th>
+              <th>Spots</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="events-tbody">
+            <!-- Events injected by JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Durban Real Events Banner -->
+      <div class="durban-events-banner" data-aos="fade-up">
+        <div class="durban-banner-content">
+          <div class="durban-banner-icon"><i class="fas fa-city"></i></div>
+          <div>
+            <h4>Happening in Durban This Season</h4>
+            <p>We stay connected to the best of Durban's calendar to enhance your solo experience. Check out these city events that pair beautifully with our offerings.</p>
+          </div>
+          <a href="https://www.eventbrite.com/d/south-africa--durban/events/" target="_blank" rel="noopener noreferrer" class="btn btn-outline-light">View Durban Events <i class="fas fa-external-link-alt"></i></a>
+        </div>
+      </div>
+
+      <!-- City Events Cards -->
+      <div class="city-events-grid" id="city-events-grid" data-aos="fade-up">
+        <!-- Injected by JS -->
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ======================== TESTIMONIALS ======================== -->
+  <section id="testimonials" class="testimonials section-padding">
+    <div class="container">
+      <div class="section-header" data-aos="fade-up">
+        <div class="section-eyebrow">Testimonials</div>
+        <h2 class="section-title">What Our <em>Souls Say</em></h2>
+      </div>
+      <div class="testimonials-track-wrap">
+        <div class="testimonials-track" id="testimonials-track">
+          <div class="testimonial-card">
+            <div class="testimonial-stars">★★★★★</div>
+            <p class="testimonial-quote">"I realised I didn't need anyone else to enjoy life. Solo Soul Experiences completely transformed my Sunday mornings."</p>
+            <div class="testimonial-author">
+              <div class="testimonial-avatar">N</div>
+              <div>
+                <strong>Nomsa T.</strong>
+                <span>Attended: Sunset Beach Walk</span>
+              </div>
+            </div>
+          </div>
+          <div class="testimonial-card">
+            <div class="testimonial-stars">★★★★★</div>
+            <p class="testimonial-quote">"It completely changed how I see myself. I walked away from the brunch feeling like a queen—alone and absolutely whole."</p>
+            <div class="testimonial-author">
+              <div class="testimonial-avatar" style="background:#A8B8A5">T</div>
+              <div>
+                <strong>Thandeka M.</strong>
+                <span>Attended: Solo Brunch Club</span>
+              </div>
+            </div>
+          </div>
+          <div class="testimonial-card">
+            <div class="testimonial-stars">★★★★★</div>
+            <p class="testimonial-quote">"I made the most beautiful friendships while learning to enjoy being alone. The Sip & Paint was magical—Hazel is incredible."</p>
+            <div class="testimonial-author">
+              <div class="testimonial-avatar" style="background:#E9DFC9; color:#2E5E4E">L</div>
+              <div>
+                <strong>Lerato K.</strong>
+                <span>Attended: Sip & Paint</span>
+              </div>
+            </div>
+          </div>
+          <div class="testimonial-card">
+            <div class="testimonial-stars">★★★★★</div>
+            <p class="testimonial-quote">"After my divorce I thought I'd never feel whole again. Solo Soul Experiences gave me my confidence back, one sunrise at a time."</p>
+            <div class="testimonial-author">
+              <div class="testimonial-avatar" style="background:#2E5E4E">S</div>
+              <div>
+                <strong>Sibongile R.</strong>
+                <span>Attended: Nature Escape</span>
+              </div>
+            </div>
+          </div>
+          <div class="testimonial-card">
+            <div class="testimonial-stars">★★★★★</div>
+            <p class="testimonial-quote">"I was terrified to do things alone. Now I book Solo Soul events every month. Best investment I've ever made in myself."</p>
+            <div class="testimonial-author">
+              <div class="testimonial-avatar" style="background:#F5EFE6; color:#333">P</div>
+              <div>
+                <strong>Priya N.</strong>
+                <span>Attended: Luxury Solo Day</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="testimonials-nav">
+          <button class="testi-btn" id="testi-prev" aria-label="Previous testimonial"><i class="fas fa-chevron-left"></i></button>
+          <div class="testi-dots" id="testi-dots"></div>
+          <button class="testi-btn" id="testi-next" aria-label="Next testimonial"><i class="fas fa-chevron-right"></i></button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================== GALLERY SECTION ======================== -->
+  <section id="gallery" class="gallery section-padding">
+    <div class="container">
+      <div class="section-header" data-aos="fade-up">
+        <div class="section-eyebrow">Our Moments</div>
+        <h2 class="section-title">Gallery of <em>Beautiful Souls</em></h2>
+        <p class="section-subtitle">Snapshots from our experiences — real moments of joy, healing, and self-discovery.</p>
+      </div>
+      <div class="gallery-grid" data-aos="fade-up">
+        <div class="gallery-item g-large" onclick="openLightbox(this)">
+          <img src="assets/images/hero_ocean_sunrise_1783927366146.png" alt="Woman enjoying ocean sunrise with coffee" />
+          <div class="gallery-item-overlay"><i class="fas fa-expand"></i></div>
+        </div>
+        <div class="gallery-item" onclick="openLightbox(this)">
+          <img src="assets/images/gallery_beach_1783927493607.png" alt="Beautiful Durban beach at sunset" />
+          <div class="gallery-item-overlay"><i class="fas fa-expand"></i></div>
+        </div>
+        <div class="gallery-item" onclick="openLightbox(this)">
+          <img src="assets/images/gallery_cafe_1783927503191.png" alt="Cozy café corner for solo journaling" />
+          <div class="gallery-item-overlay"><i class="fas fa-expand"></i></div>
+        </div>
+        <div class="gallery-item" onclick="openLightbox(this)">
+          <img src="assets/images/experience_sip_paint_1783927393574.png" alt="Sip and paint evening experience" />
+          <div class="gallery-item-overlay"><i class="fas fa-expand"></i></div>
+        </div>
+        <div class="gallery-item g-tall" onclick="openLightbox(this)">
+          <img src="assets/images/gallery_botanical_garden_1783927452910.png" alt="Reading in botanical gardens" />
+          <div class="gallery-item-overlay"><i class="fas fa-expand"></i></div>
+        </div>
+        <div class="gallery-item" onclick="openLightbox(this)">
+          <img src="assets/images/gallery_wine_tasting_1783927462303.png" alt="Elegant solo wine tasting" />
+          <div class="gallery-item-overlay"><i class="fas fa-expand"></i></div>
+        </div>
+        <div class="gallery-item" onclick="openLightbox(this)">
+          <img src="assets/images/experience_nature_hike_1783927415406.png" alt="Nature hike through forest" />
+          <div class="gallery-item-overlay"><i class="fas fa-expand"></i></div>
+        </div>
+        <div class="gallery-item" onclick="openLightbox(this)">
+          <img src="assets/images/gallery_paint_night_1783927512455.png" alt="Colorful paint night session" />
+          <div class="gallery-item-overlay"><i class="fas fa-expand"></i></div>
+        </div>
+        <div class="gallery-item g-large" onclick="openLightbox(this)">
+          <img src="assets/images/experience_luxury_spa_1783927426028.png" alt="Luxury spa solo day experience" />
+          <div class="gallery-item-overlay"><i class="fas fa-expand"></i></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================== BLOG SECTION ======================== -->
+  <section id="blog" class="blog section-padding">
+    <div class="container">
+      <div class="section-header" data-aos="fade-up">
+        <div class="section-eyebrow">Inspiration</div>
+        <h2 class="section-title">Recent <em>Articles</em></h2>
+        <p class="section-subtitle">Thoughts, stories, and reflections to inspire your solo journey.</p>
+      </div>
+      <div class="blog-grid">
+
+        <div class="blog-card featured-blog" data-aos="fade-up" data-aos-delay="50" onclick="openBlogModal('blog1')">
+          <div class="blog-img">
+            <img src="assets/images/experience_coffee_journal_1783927404043.png" alt="Solo dating journaling" />
+            <div class="blog-category-badge">Self Love</div>
+          </div>
+          <div class="blog-body">
+            <div class="blog-meta"><i class="fas fa-calendar"></i> July 2026 · <i class="fas fa-clock"></i> 5 min read</div>
+            <h3>Why Dating Yourself Might Be the Best Relationship You'll Ever Have</h3>
+            <p>The most powerful relationship you will ever have is the one with yourself. Here's why choosing yourself first changes everything...</p>
+            <span class="blog-read-more">Read Article <i class="fas fa-arrow-right"></i></span>
+          </div>
+        </div>
+
+        <div class="blog-card" data-aos="fade-up" data-aos-delay="100" onclick="openBlogModal('blog2')">
+          <div class="blog-img">
+            <img src="assets/images/experience_nature_hike_1783927415406.png" alt="Solo travel hiking" />
+            <div class="blog-category-badge adventure">Adventure</div>
+          </div>
+          <div class="blog-body">
+            <div class="blog-meta"><i class="fas fa-calendar"></i> June 2026 · <i class="fas fa-clock"></i> 4 min read</div>
+            <h3>5 Ways Solo Travel Builds Unshakeable Confidence</h3>
+            <p>Every solo adventure is a small act of self-trust. Here are five profound ways that travelling alone builds confidence you never knew you had...</p>
+            <span class="blog-read-more">Read Article <i class="fas fa-arrow-right"></i></span>
+          </div>
+        </div>
+
+        <div class="blog-card" data-aos="fade-up" data-aos-delay="150" onclick="openBlogModal('blog3')">
+          <div class="blog-img">
+            <img src="assets/images/gallery_cafe_1783927503191.png" alt="Enjoying coffee alone" />
+            <div class="blog-category-badge mindful">Mindfulness</div>
+          </div>
+          <div class="blog-body">
+            <div class="blog-meta"><i class="fas fa-calendar"></i> June 2026 · <i class="fas fa-clock"></i> 3 min read</div>
+            <h3>Learning to Enjoy Your Own Company</h3>
+            <p>For most of us, being alone feels uncomfortable at first. The good news? It's a skill you can learn—and once you do, it becomes your superpower...</p>
+            <span class="blog-read-more">Read Article <i class="fas fa-arrow-right"></i></span>
+          </div>
+        </div>
+
+        <div class="blog-card" data-aos="fade-up" data-aos-delay="200" onclick="openBlogModal('blog4')">
+          <div class="blog-img">
+            <img src="assets/images/experience_nature_hike_1783927415406.png" alt="Healing through nature" />
+            <div class="blog-category-badge healing">Healing</div>
+          </div>
+          <div class="blog-body">
+            <div class="blog-meta"><i class="fas fa-calendar"></i> May 2026 · <i class="fas fa-clock"></i> 6 min read</div>
+            <h3>Healing Through Nature: A Solo Soul's Guide</h3>
+            <p>Nature has always been humanity's oldest therapist. Discover how stepping outside alone—without distractions—can reset your mind, body and spirit...</p>
+            <span class="blog-read-more">Read Article <i class="fas fa-arrow-right"></i></span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================== FOUNDER SECTION ======================== -->
+  <section id="founder" class="founder section-padding">
+    <div class="container">
+      <div class="founder-grid">
+        <div class="founder-image-wrap" data-aos="fade-right">
+          <div class="founder-img-frame">
+            <img src="assets/images/founder_hazel_portrait_1783927435953.png" alt="Hazel, founder of Solo Soul Experiences" />
+          </div>
+          <div class="founder-quote-bubble">
+            <p>"You are enough, exactly as you are."</p>
+            <span>— Hazel, Founder</span>
+          </div>
+        </div>
+        <div class="founder-content" data-aos="fade-left">
+          <div class="section-eyebrow">Our Founder</div>
+          <h2 class="section-title">Meet <em>Hazel</em></h2>
+          <p class="founder-story">Hi, I'm <strong>Hazel</strong>.</p>
+          <p class="founder-story">Solo Soul Experiences was born from my own journey through depression, healing and rediscovering myself.</p>
+          <p class="founder-story">I realised that many people spend their lives waiting—for love, friends or permission to start living. I created Solo Soul Experiences to inspire others to embrace solitude, build confidence and discover that joy can begin with a table for one, a sunrise walk or an adventure taken alone.</p>
+          <p class="founder-story founder-mission">My hope is that every experience reminds you that <strong>you are enough, exactly as you are.</strong></p>
+          <div class="founder-social">
+            <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" class="founder-social-btn" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer" class="founder-social-btn" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="https://www.tiktok.com" target="_blank" rel="noopener noreferrer" class="founder-social-btn" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================== FAQ SECTION ======================== -->
+  <section id="faq" class="faq section-padding">
+    <div class="container">
+      <div class="section-header" data-aos="fade-up">
+        <div class="section-eyebrow">Common Questions</div>
+        <h2 class="section-title">Frequently Asked <em>Questions</em></h2>
+      </div>
+      <div class="faq-grid">
+        <div class="faq-item" data-aos="fade-up" data-aos-delay="50">
+          <button class="faq-question" id="faq-q1" aria-expanded="false" aria-controls="faq-a1">
+            <span>Is this only for single people?</span>
+            <div class="faq-icon"><i class="fas fa-plus"></i></div>
+          </button>
+          <div class="faq-answer" id="faq-a1" role="region" aria-labelledby="faq-q1">
+            <p>Not at all! Anyone who wants intentional time for themselves is welcome. Whether you're in a relationship, married, or simply seeking some mindful alone time, Solo Soul Experiences is for you.</p>
+          </div>
+        </div>
+        <div class="faq-item" data-aos="fade-up" data-aos-delay="100">
+          <button class="faq-question" id="faq-q2" aria-expanded="false" aria-controls="faq-a2">
+            <span>Do I have to talk to strangers?</span>
+            <div class="faq-icon"><i class="fas fa-plus"></i></div>
+          </button>
+          <div class="faq-answer" id="faq-a2" role="region" aria-labelledby="faq-q2">
+            <p>Absolutely not. You participate at your own comfort level. While some experiences naturally create opportunities to meet like-minded people, there is zero pressure. Your experience is entirely your own.</p>
+          </div>
+        </div>
+        <div class="faq-item" data-aos="fade-up" data-aos-delay="150">
+          <button class="faq-question" id="faq-q3" aria-expanded="false" aria-controls="faq-a3">
+            <span>Is it safe?</span>
+            <div class="faq-icon"><i class="fas fa-plus"></i></div>
+          </button>
+          <div class="faq-answer" id="faq-a3" role="region" aria-labelledby="faq-q3">
+            <p>Yes. All experiences are hosted in public, reputable venues with clear meeting points, safety guidelines, and a host present at all times. Your safety and comfort are our top priority.</p>
+          </div>
+        </div>
+        <div class="faq-item" data-aos="fade-up" data-aos-delay="200">
+          <button class="faq-question" id="faq-q4" aria-expanded="false" aria-controls="faq-a4">
+            <span>Can I come more than once?</span>
+            <div class="faq-icon"><i class="fas fa-plus"></i></div>
+          </button>
+          <div class="faq-answer" id="faq-a4" role="region" aria-labelledby="faq-q4">
+            <p>Absolutely! Many of our participants make Solo Soul Experiences a regular part of their self-care routine. We offer loyalty rewards and packages for returning souls.</p>
+          </div>
+        </div>
+        <div class="faq-item" data-aos="fade-up" data-aos-delay="250">
+          <button class="faq-question" id="faq-q5" aria-expanded="false" aria-controls="faq-a5">
+            <span>What should I bring?</span>
+            <div class="faq-icon"><i class="fas fa-plus"></i></div>
+          </button>
+          <div class="faq-answer" id="faq-a5" role="region" aria-labelledby="faq-q5">
+            <p>Just yourself! Depending on the experience, we'll send you a preparation guide with any specific suggestions. For nature walks, comfortable shoes are recommended. For journaling sessions, we provide materials.</p>
+          </div>
+        </div>
+        <div class="faq-item" data-aos="fade-up" data-aos-delay="300">
+          <button class="faq-question" id="faq-q6" aria-expanded="false" aria-controls="faq-a6">
+            <span>What payment methods do you accept?</span>
+            <div class="faq-icon"><i class="fas fa-plus"></i></div>
+          </button>
+          <div class="faq-answer" id="faq-a6" role="region" aria-labelledby="faq-q6">
+            <p>We accept payments via PayFast, Yoco, EFT, and major credit/debit cards. All payments are processed securely. A deposit may be required to confirm your booking.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================== NEWSLETTER ======================== -->
+  <section id="newsletter" class="newsletter">
+    <div class="newsletter-bg"></div>
+    <div class="container">
+      <div class="newsletter-content" data-aos="fade-up">
+        <div class="newsletter-icon">✉️</div>
+        <h2>Join Our <em>Community</em></h2>
+        <p>Receive monthly inspiration, upcoming events, exclusive early-bird discounts and self-love prompts delivered to your inbox.</p>
+        <form class="newsletter-form" id="newsletter-form" onsubmit="handleNewsletterSubmit(event)" novalidate>
+          <div class="newsletter-input-wrap">
+            <input
+              type="email"
+              id="newsletter-email"
+              name="email"
+              placeholder="Enter your email address"
+              class="newsletter-input"
+              required
+              aria-label="Email address for newsletter"
+            />
+            <button type="submit" class="newsletter-btn" id="newsletter-submit-btn">
+              <span class="btn-text">Subscribe</span>
+              <i class="fas fa-paper-plane"></i>
+            </button>
+          </div>
+          <div class="newsletter-success" id="newsletter-success">
+            <i class="fas fa-check-circle"></i> You're in! Welcome to the Solo Soul community. ✨
+          </div>
+          <p class="newsletter-disclaimer">We respect your privacy. Unsubscribe anytime.</p>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================== CONTACT SECTION ======================== -->
+  <section id="contact" class="contact section-padding">
+    <div class="container">
+      <div class="section-header" data-aos="fade-up">
+        <div class="section-eyebrow">Get in Touch</div>
+        <h2 class="section-title">Contact <em>Us</em></h2>
+      </div>
+      <div class="contact-grid">
+        <div class="contact-info" data-aos="fade-right">
+          <div class="contact-item">
+            <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
+            <div>
+              <strong>Location</strong>
+              <span>Durban, KwaZulu-Natal, South Africa</span>
+            </div>
+          </div>
+          <div class="contact-item">
+            <div class="contact-icon"><i class="fab fa-whatsapp"></i></div>
+            <div>
+              <strong>WhatsApp</strong>
+              <a href="https://wa.me/27000000000" target="_blank" rel="noopener noreferrer">+27 (0) 00 000 0000</a>
+            </div>
+          </div>
+          <div class="contact-item">
+            <div class="contact-icon"><i class="fas fa-envelope"></i></div>
+            <div>
+              <strong>Email</strong>
+              <a href="mailto:hello@solosoulexperiences.co.za">hello@solosoulexperiences.co.za</a>
+            </div>
+          </div>
+          <div class="contact-item">
+            <div class="contact-icon"><i class="fas fa-clock"></i></div>
+            <div>
+              <strong>Response Time</strong>
+              <span>Within 24 hours</span>
+            </div>
+          </div>
+          <div class="contact-social">
+            <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="https://www.tiktok.com" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
+            <a href="https://wa.me/27000000000" target="_blank" rel="noopener noreferrer" class="social-link whatsapp" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+          </div>
+        </div>
+        <div class="contact-form-wrap" data-aos="fade-left">
+          <form class="contact-form" id="contact-form" onsubmit="handleContactSubmit(event)" novalidate>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="contact-name">Your Name</label>
+                <input type="text" id="contact-name" name="name" placeholder="e.g. Nomsa Dlamini" required />
+              </div>
+              <div class="form-group">
+                <label for="contact-email">Email Address</label>
+                <input type="email" id="contact-email" name="email" placeholder="hello@email.com" required />
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="contact-subject">Subject</label>
+              <select id="contact-subject" name="subject">
+                <option value="">Select a topic...</option>
+                <option value="booking">Booking Enquiry</option>
+                <option value="general">General Question</option>
+                <option value="partnership">Partnership Opportunity</option>
+                <option value="media">Media / Press</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="contact-message">Your Message</label>
+              <textarea id="contact-message" name="message" placeholder="Tell us how we can help..." rows="5" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary contact-submit" id="contact-submit-btn">
+              Send Message <i class="fas fa-paper-plane"></i>
+            </button>
+            <div class="contact-success" id="contact-success">
+              <i class="fas fa-check-circle"></i> Message sent! We'll be in touch within 24 hours. 💚
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================== FOOTER ======================== -->
+  <footer id="footer" class="footer">
+    <div class="footer-top">
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-brand">
+            <div class="footer-logo">
+              <span class="logo-symbol">✦</span>
+              <span>Solo Soul Experiences</span>
+            </div>
+            <p>Helping you fall in love with your own company. Curated solo experiences in Durban, South Africa.</p>
+            <div class="footer-social">
+              <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+              <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+              <a href="https://www.tiktok.com" target="_blank" rel="noopener noreferrer" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
+              <a href="https://wa.me/27000000000" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+            </div>
+          </div>
+          <div class="footer-nav">
+            <h4>Quick Links</h4>
+            <ul>
+              <li><a href="#home">Home</a></li>
+              <li><a href="#about">About</a></li>
+              <li><a href="#experiences">Experiences</a></li>
+              <li><a href="#events">Events</a></li>
+              <li><a href="#gallery">Gallery</a></li>
+              <li><a href="#blog">Blog</a></li>
+            </ul>
+          </div>
+          <div class="footer-nav">
+            <h4>Experiences</h4>
+            <ul>
+              <li><a href="#experiences">Solo Brunch Club</a></li>
+              <li><a href="#experiences">Sunset Walks</a></li>
+              <li><a href="#experiences">Sip & Paint</a></li>
+              <li><a href="#experiences">Coffee Dates</a></li>
+              <li><a href="#experiences">Nature Escapes</a></li>
+              <li><a href="#experiences">Luxury Solo Days</a></li>
+            </ul>
+          </div>
+          <div class="footer-contact">
+            <h4>Contact</h4>
+            <ul>
+              <li><i class="fas fa-map-marker-alt"></i> Durban, KwaZulu-Natal, SA</li>
+              <li><a href="mailto:hello@solosoulexperiences.co.za"><i class="fas fa-envelope"></i> hello@solosoulexperiences.co.za</a></li>
+              <li><a href="https://wa.me/27000000000" target="_blank" rel="noopener noreferrer"><i class="fab fa-whatsapp"></i> WhatsApp Us</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="container">
+        <p>© 2026 Solo Soul Experiences. All rights reserved. | <a href="#privacy">Privacy Policy</a> | <a href="#terms">Terms & Conditions</a></p>
+        <p class="footer-tagline">Fall in Love with Your Own Company. ✦</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ======================== BOOKING MODAL ======================== -->
+  <div class="modal-overlay" id="booking-modal-overlay" onclick="closeBookingModal(event)">
+    <div class="modal booking-modal" id="booking-modal" role="dialog" aria-modal="true" aria-labelledby="booking-modal-title">
+      <button class="modal-close" onclick="closeBookingModal()" aria-label="Close booking modal">✕</button>
+      <div class="modal-header">
+        <div class="modal-icon">✦</div>
+        <h3 id="booking-modal-title">Book Your Experience</h3>
+        <p id="booking-modal-subtitle">Fill in your details and we'll confirm within 24 hours via WhatsApp.</p>
+      </div>
+      <form id="booking-form" onsubmit="handleBookingSubmit(event)" novalidate>
+        <div class="form-group">
+          <label for="booking-name">Full Name</label>
+          <input type="text" id="booking-name" name="name" placeholder="Your full name" required />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="booking-email">Email</label>
+            <input type="email" id="booking-email" name="email" placeholder="your@email.com" required />
+          </div>
+          <div class="form-group">
+            <label for="booking-phone">Phone / WhatsApp</label>
+            <input type="tel" id="booking-phone" name="phone" placeholder="+27 00 000 0000" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="booking-experience">Experience</label>
+          <select id="booking-experience" name="experience" required>
+            <option value="">Choose an experience...</option>
+            <option value="Sunset Beach Walk">Sunset Beach Walk — R250</option>
+            <option value="Sip & Paint Evening">Sip &amp; Paint Evening — R450</option>
+            <option value="Solo Brunch Club">Solo Brunch Club — R350</option>
+            <option value="Botanical Gardens Walk">Botanical Gardens Walk — FREE</option>
+            <option value="Luxury Spa Solo Day">Luxury Spa Solo Day — R850</option>
+            <option value="Sunrise Coffee & Journal">Sunrise Coffee &amp; Journal — R150</option>
+            <option value="Nature Hike — Krantzkloof">Nature Hike — Krantzkloof — R300</option>
+            <option value="Solo Wine Tasting">Solo Wine Tasting — R550</option>
+            <option value="Morning Journaling Circle">Morning Journaling Circle — FREE</option>
+            <option value="Solo Sunset Picnic">Solo Sunset Picnic — R200</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="booking-date">Preferred Date</label>
+            <input type="date" id="booking-date" name="date" required />
+          </div>
+          <div class="form-group">
+            <label for="booking-guests">Number of Spots</label>
+            <!-- Rebuilt dynamically by JS based on available spots per event -->
+            <select id="booking-guests" name="guests">
+              <option value="1">1 guest (just me)</option>
+              <option value="2">2 guests</option>
+              <option value="3">3 guests</option>
+              <option value="4">4 guests</option>
+              <option value="5">5 guests</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="booking-notes">Any notes or special requirements?</label>
+          <textarea id="booking-notes" name="notes" placeholder="Dietary requirements, accessibility needs, anything else..." rows="3"></textarea>
+        </div>
+        <div class="booking-payment-note" id="booking-pay-note">
+          <i class="fas fa-shield-alt"></i>
+          <span>Secure payment via <strong>PayFast</strong> or <strong>Yoco</strong> after confirmation. No payment required now.</span>
+        </div>
+        <button type="submit" class="btn btn-primary booking-submit" id="booking-submit-btn">
+          Request Booking <i class="fas fa-arrow-right"></i>
+        </button>
+        <div class="booking-success" id="booking-success">
+          <i class="fas fa-check-circle"></i> Booking request received! We'll WhatsApp you within 24 hours to confirm. 💚
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ======================== BLOG MODAL ======================== -->
+  <div class="modal-overlay" id="blog-modal-overlay" onclick="closeBlogModal(event)">
+    <div class="modal blog-modal" id="blog-modal" role="dialog" aria-modal="true" aria-labelledby="blog-modal-title">
+      <button class="modal-close" onclick="closeBlogModal()" aria-label="Close blog modal">✕</button>
+      <div id="blog-modal-content"></div>
+    </div>
+  </div>
+
+  <!-- ======================== LIGHTBOX ======================== -->
+  <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+    <button class="lightbox-close" onclick="closeLightbox()" aria-label="Close image">✕</button>
+    <img id="lightbox-img" src="" alt="" />
+  </div>
+
+  <!-- ======================== SCROLL TO TOP ======================== -->
+  <button class="scroll-top-btn" id="scroll-top-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Scroll to top">
+    <i class="fas fa-chevron-up"></i>
+  </button>
+
+  <!-- AOS Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
