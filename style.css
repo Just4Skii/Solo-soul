@@ -26,6 +26,57 @@
   --transition:   all 0.3s ease;
 }
 
+/* Theme color overrides */
+html[data-theme="dark"] {
+  --sand:         #121e1a;
+  --beige:        #1e2f29;
+  --sage:         #8aa895;
+  --forest:       #E6F0EC;
+  --forest-dark:  #FFFFFF;
+  --forest-light: #A8B8A5;
+  --charcoal:     #E6F0EC;
+  --white:        #1a2b25;
+}
+html[data-theme="autumn"] {
+  --sand:         #F9F6F0;
+  --beige:        #F0E5D8;
+  --sage:         #E0A96D;
+  --forest:       #5C3D2E;
+  --forest-dark:  #3D251E;
+  --forest-light: #865D4C;
+  --charcoal:     #5C3D2E;
+  --white:        #FFFFFF;
+}
+html[data-theme="ocean"] {
+  --sand:         #F0F4F8;
+  --beige:        #D9E2EC;
+  --sage:         #F19066;
+  --forest:       #2D4B73;
+  --forest-dark:  #182A4A;
+  --forest-light: #486581;
+  --charcoal:     #2D4B73;
+  --white:        #FFFFFF;
+}
+
+/* Accessibility: Font Size Overrides */
+html.font-size-large {
+  font-size: 18px !important;
+}
+html.font-size-xlarge {
+  font-size: 20px !important;
+}
+
+/* Accessibility: Reduced Motion Override */
+body.reduced-motion *,
+body.reduced-motion *::before,
+body.reduced-motion *::after {
+  animation-duration: 0.001s !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001s !important;
+  scroll-behavior: auto !important;
+}
+
+
 /* ---- RESET ----------------------------------------------- */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; font-size: 16px; }
@@ -2139,3 +2190,840 @@ input, textarea, select { font-family: 'Poppins', sans-serif; }
   .event-filters { gap: 8px; }
   .filter-btn { padding: 7px 14px; font-size: 12px; }
 }
+
+/* ============================================================
+   UPGRADES: GUEST PORTAL, TICKETS & PAYFAST STYLES
+   ============================================================ */
+
+/* Navbar Portal Icon */
+.portal-nav-item i {
+  margin-right: 6px;
+  font-size: 14px;
+}
+
+/* Auth Modal (Login / Register) */
+.auth-modal {
+  width: 100%;
+  max-width: 460px;
+  padding: 40px 30px;
+}
+.auth-tabs {
+  display: flex;
+  border-bottom: 2px solid var(--beige);
+  margin-bottom: 25px;
+}
+.auth-tab {
+  flex: 1;
+  padding: 12px;
+  background: none;
+  border: none;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  color: #888;
+  cursor: pointer;
+  transition: var(--transition);
+  position: relative;
+}
+.auth-tab.active {
+  color: var(--forest);
+}
+.auth-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px; left: 0; right: 0;
+  height: 2px;
+  background: var(--forest);
+}
+.auth-form-container {
+  display: none;
+}
+.auth-form-container.active {
+  display: block;
+  animation: slideDown 0.35s ease;
+}
+.auth-error {
+  color: #e74c3c;
+  font-size: 13px;
+  margin-bottom: 15px;
+  text-align: center;
+  font-weight: 500;
+}
+.auth-submit {
+  width: 100%;
+  justify-content: center;
+  padding: 15px;
+  font-size: 15px;
+}
+
+/* Guest Portal Dashboard Modal */
+.portal-modal {
+  width: 100%;
+  max-width: 750px;
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.portal-header {
+  background: var(--forest);
+  color: var(--white);
+  padding: 24px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+.portal-user-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+.portal-avatar {
+  width: 50px; height: 50px;
+  border-radius: 50%;
+  background: var(--sage);
+  color: var(--forest-dark);
+  font-size: 20px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.portal-user-info h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  line-height: 1.2;
+}
+.portal-user-info p {
+  font-size: 12.5px;
+  opacity: 0.85;
+}
+.portal-logout-btn {
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.25);
+  color: var(--white);
+  padding: 8px 16px;
+  font-size: 12.5px;
+}
+.portal-logout-btn:hover {
+  background: var(--white);
+  color: var(--forest);
+}
+.portal-body {
+  padding: 30px;
+  background: var(--sand);
+  flex-grow: 1;
+  overflow-y: auto;
+  min-height: 380px;
+}
+.portal-tabs {
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--beige);
+  padding-bottom: 10px;
+}
+.portal-tabs h4 {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  color: var(--forest-dark);
+  display: inline-block;
+  position: relative;
+}
+.portal-tabs h4.active::after {
+  content: '';
+  position: absolute;
+  bottom: -11px; left: 0; right: 0;
+  height: 3px;
+  background: var(--sage);
+}
+
+/* Bookings list grid */
+.bookings-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+.booking-card {
+  background: var(--white);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--beige);
+  overflow: hidden;
+  transition: var(--transition);
+}
+.booking-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+.booking-card-header {
+  padding: 16px 20px;
+  background: #fdfcf7;
+  border-bottom: 1px solid var(--beige);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.booking-card-header h5 {
+  font-family: 'Playfair Display', serif;
+  font-size: 17px;
+  color: var(--charcoal);
+  font-weight: 700;
+}
+.booking-status {
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 4px 10px;
+  border-radius: 30px;
+}
+.booking-status.paid {
+  background: rgba(39,174,96,0.12);
+  color: #27ae60;
+  border: 1px solid rgba(39,174,96,0.25);
+}
+.booking-status.unpaid {
+  background: rgba(230,126,34,0.12);
+  color: #e67e22;
+  border: 1px solid rgba(230,126,34,0.25);
+}
+.booking-status.free {
+  background: rgba(41,128,185,0.12);
+  color: #2980b9;
+  border: 1px solid rgba(41,128,185,0.25);
+}
+.booking-card-body {
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+.booking-details-list {
+  font-size: 13.5px;
+  color: #555;
+}
+.booking-details-list p {
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.booking-details-list i {
+  color: var(--sage);
+  width: 14px;
+}
+.booking-actions {
+  display: flex;
+  gap: 10px;
+}
+.btn-ticket {
+  background: var(--forest);
+  color: var(--white);
+  font-size: 12px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+}
+.btn-ticket:hover {
+  background: var(--forest-dark);
+}
+.btn-cancel {
+  background: transparent;
+  color: #c0392b;
+  border: 1px solid rgba(192,57,43,0.3);
+  font-size: 12px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+  transition: var(--transition);
+}
+.btn-cancel:hover {
+  background: #c0392b;
+  color: var(--white);
+  border-color: #c0392b;
+}
+
+.portal-empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #777;
+}
+.portal-empty-state i {
+  font-size: 45px;
+  color: var(--beige);
+  margin-bottom: 15px;
+}
+.portal-empty-state h5 {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  color: var(--charcoal);
+  margin-bottom: 8px;
+}
+
+/* Digital Ticket Modal Styles */
+.ticket-modal {
+  width: 100%;
+  max-width: 450px;
+  padding: 30px 20px;
+  background: var(--sand);
+}
+.ticket-container {
+  background: var(--white);
+  border-radius: var(--radius-md);
+  border: 2px solid var(--beige);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+}
+.ticket-header {
+  background: var(--forest);
+  color: var(--white);
+  padding: 16px 20px;
+  text-align: center;
+  position: relative;
+}
+.ticket-header h4 {
+  font-family: 'Playfair Display', serif;
+  font-size: 19px;
+  letter-spacing: 1px;
+}
+.ticket-header p {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  opacity: 0.8;
+}
+.ticket-body {
+  padding: 24px;
+  position: relative;
+}
+.ticket-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px;
+  color: var(--forest-dark);
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 20px;
+}
+.ticket-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  font-size: 13px;
+  border-bottom: 1px dashed var(--beige);
+  padding-bottom: 15px;
+  margin-bottom: 15px;
+}
+.ticket-info-item span {
+  display: block;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  color: #888;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+.ticket-info-item strong {
+  color: var(--charcoal);
+}
+.ticket-venue {
+  font-size: 13px;
+  margin-bottom: 15px;
+}
+.ticket-venue span {
+  display: block;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  color: #888;
+  font-weight: 600;
+}
+.ticket-footer-msg {
+  font-size: 11.5px;
+  color: #666;
+  text-align: center;
+  font-style: italic;
+}
+.ticket-perforation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  background: var(--white);
+  padding: 0 10px;
+}
+.ticket-notch {
+  width: 16px; height: 16px;
+  background: var(--sand);
+  border-radius: 50%;
+  border: 2px solid var(--beige);
+  position: absolute;
+  top: -8px;
+}
+.ticket-notch.left {
+  left: -9px;
+  border-left: none;
+}
+.ticket-notch.right {
+  right: -9px;
+  border-right: none;
+}
+.ticket-perforation-line {
+  flex-grow: 1;
+  height: 0;
+  border-bottom: 2px dashed var(--beige);
+}
+.ticket-barcode-section {
+  background: #fafafa;
+  padding: 20px;
+  text-align: center;
+  border-top: 1px solid #f0f0f0;
+}
+.ticket-barcode {
+  width: 220px;
+  height: 50px;
+  margin: 0 auto 10px;
+  display: flex;
+  justify-content: space-between;
+}
+.barcode-line {
+  background: #222;
+  height: 100%;
+}
+.ticket-ref {
+  font-family: monospace;
+  font-size: 13px;
+  font-weight: bold;
+  color: var(--forest);
+  letter-spacing: 2px;
+}
+
+/* PayFast Checkout Simulator Modals */
+@keyframes pfSlideUp {
+  from { transform: translateY(30px) scale(0.95); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.payfast-modal {
+  width: 100%;
+  max-width: 780px;
+  padding: 0;
+  background: #fcfcfc;
+  border: none;
+  border-radius: 16px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.22);
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  animation: pfSlideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.payfast-header {
+  background: linear-gradient(135deg, #d31320, #ea1d2c); /* Premium Payfast gradient red */
+  color: var(--white);
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.payfast-lock {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.payfast-lock i {
+  color: #fff;
+  font-size: 13px;
+  animation: pulse 2s infinite ease-in-out;
+}
+.payfast-cancel-btn {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: var(--white);
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+.payfast-cancel-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.6);
+  transform: translateY(-1px);
+}
+.payfast-body {
+  display: grid;
+  grid-template-columns: 1fr 1.3fr;
+  min-height: 400px;
+}
+.payfast-order-summary {
+  background: #f7f7f7;
+  border-right: 1px solid #e1e1e1;
+  padding: 30px 20px;
+  display: flex;
+  flex-direction: column;
+}
+.payfast-merchant {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.payfast-logo {
+  width: 42px; height: 42px;
+  border-radius: 6px;
+}
+.payfast-merchant h4 {
+  font-size: 15px;
+  color: #333;
+  font-weight: 700;
+}
+.payfast-merchant p {
+  font-size: 12px;
+  color: #666;
+}
+.payfast-order-summary hr {
+  border: none;
+  border-bottom: 1px solid #e1e1e1;
+  margin: 20px 0;
+}
+.payfast-item-details h5 {
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 12px;
+  font-weight: 700;
+}
+.payfast-item-details p {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 8px;
+}
+.payfast-amount-box {
+  margin-top: auto;
+  background: #fff;
+  border: 1px solid #e1e1e1;
+  border-radius: 6px;
+  padding: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.payfast-amount-box span {
+  font-size: 12px;
+  color: #888;
+  font-weight: 600;
+}
+.payfast-amount-box strong {
+  font-size: 20px;
+  color: #333;
+}
+.payfast-payment-methods {
+  padding: 30px;
+}
+.payfast-payment-methods h5 {
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 15px;
+  font-weight: 700;
+}
+.payfast-tabs {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 25px;
+}
+.pf-tab {
+  flex: 1;
+  padding: 12px;
+  border: 1.5px solid #e2e8f0;
+  background: #fafafa;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #4a5568;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.pf-tab i {
+  margin-right: 6px;
+  font-size: 14px;
+}
+.pf-tab:hover {
+  border-color: #cbd5e1;
+  background: #f1f5f9;
+  transform: translateY(-1px);
+}
+.pf-tab.active {
+  background: rgba(234, 29, 44, 0.04) !important;
+  border-color: #ea1d2c !important;
+  color: #ea1d2c !important;
+  box-shadow: 0 4px 12px rgba(234, 29, 44, 0.08);
+}
+.pf-method-content {
+  display: none;
+}
+.pf-method-content.active {
+  display: block;
+}
+.pf-input-wrapper {
+  position: relative;
+}
+.pf-input-wrapper input {
+  padding-right: 40px;
+}
+#pf-card-icon {
+  position: absolute;
+  right: 12px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 20px;
+  color: #94a3b8;
+  transition: color 0.2s;
+}
+#payfast-card-form .form-group {
+  margin-bottom: 16px;
+}
+#payfast-card-form label {
+  font-size: 11px;
+  text-transform: uppercase;
+  color: #4a5568;
+  margin-bottom: 6px;
+  font-weight: 600;
+  display: block;
+  letter-spacing: 0.5px;
+}
+#payfast-card-form input {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14.5px;
+  outline: none;
+  background: var(--white);
+  color: var(--charcoal);
+  transition: all 0.25s ease;
+  font-family: inherit;
+}
+#payfast-card-form input::placeholder {
+  color: #a0aec0;
+}
+#payfast-card-form input:focus {
+  border-color: #ea1d2c;
+  box-shadow: 0 0 0 3.5px rgba(234, 29, 44, 0.12);
+}
+.btn-payfast {
+  width: 100%;
+  background: linear-gradient(135deg, #d31320, #ea1d2c);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 13px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(234, 29, 44, 0.25);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.btn-payfast:hover {
+  background: linear-gradient(135deg, #b20f18, #d31320);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(234, 29, 44, 0.35);
+}
+.btn-payfast:active {
+  transform: translateY(0);
+}
+
+/* EFT view banks */
+.eft-bank-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.bank-btn {
+  padding: 14px 10px;
+  border: 1px solid #e1e1e1;
+  background: #fff;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: bold;
+  color: #444;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.bank-btn:hover {
+  border-color: #ea1d2c;
+  color: #ea1d2c;
+  background: rgba(234,29,44,0.02);
+}
+
+/* Loader / 3D Secure / Success screens */
+.payfast-loading-view,
+.payfast-otp-view,
+.payfast-success-view {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 50px 30px;
+  min-height: 400px;
+}
+.pf-spinner {
+  width: 50px; height: 50px;
+  border: 4px solid #f0f0f0;
+  border-top-color: #ea1d2c;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 25px;
+}
+.payfast-loading-view h4 {
+  font-size: 17px;
+  color: #333;
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+.payfast-loading-view p {
+  font-size: 13px;
+  color: #666;
+}
+
+/* OTP Popup View styling */
+.payfast-otp-view {
+  background: #fdfdfd;
+}
+.otp-header {
+  border-bottom: 2px solid #ea1d2c;
+  width: 100%;
+  max-width: 380px;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.otp-body {
+  width: 100%;
+  max-width: 380px;
+  text-align: left;
+}
+.otp-body p {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 15px;
+  line-height: 1.5;
+}
+
+/* Payment Success View */
+.payfast-success-view {
+  background: #fff;
+}
+.pf-success-circle {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  background: #27ae60;
+  color: #fff;
+  font-size: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 10px rgba(39,174,96,0.25);
+}
+.payfast-success-view h3 {
+  font-size: 21px;
+  color: #333;
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+.payfast-success-view p {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+/* PayFast screen responsiveness */
+@media (max-width: 680px) {
+  .payfast-body {
+    grid-template-columns: 1fr;
+  }
+  .payfast-order-summary {
+    border-right: none;
+    border-bottom: 1px solid #e1e1e1;
+    padding: 20px;
+  }
+  .payfast-payment-methods {
+    padding: 20px;
+  }
+}
+
+/* Durban Ticketing Portal Grid Styling */
+.portal-card {
+  transition: all 0.3s ease !important;
+}
+.portal-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--forest) !important;
+  background: #EAE3D2 !important; /* Slightly darker sand accent */
+  box-shadow: 0 10px 25px rgba(46, 94, 78, 0.08) !important;
+}
+
+/* Interest Matching Star Badge */
+.pref-match-badge {
+  background: rgba(212, 175, 55, 0.15);
+  color: #b28500;
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  padding: 2px 6px;
+  font-size: 10px;
+  text-transform: uppercase;
+  font-weight: 700;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: 5px;
+  vertical-align: middle;
+}
+
+/* WhatsApp Channel Button Hover */
+.btn-whatsapp-join:hover {
+  background: #128C7E !important;
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(37, 211, 102, 0.4) !important;
+}
+
+/* Close Buttons Overlap Overrides */
+.auth-modal {
+  padding-top: 65px !important;
+}
+
+.portal-modal .modal-close {
+  color: var(--white) !important;
+  background: rgba(255, 255, 255, 0.15) !important;
+  top: 30px !important;
+  right: 25px !important;
+  z-index: 10;
+}
+.portal-modal .modal-close:hover {
+  background: rgba(255, 255, 255, 0.3) !important;
+  color: var(--white) !important;
+}
+.portal-header {
+  padding-right: 85px !important;
+}
+
+
+
+

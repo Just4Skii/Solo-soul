@@ -1,6 +1,94 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- ======================== LIVE AUTO-REPAIR AGENT HOOK ======================== -->
+  <script>
+    (function() {
+      function reportRuntimeError(data) {
+        // Send POST payload to server
+        fetch('/report-error', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        }).catch(err => console.error("Failed to transmit error logs to Live Agent server", err));
+
+        // Create or update HUD overlay
+        let hud = document.getElementById('live-repair-hud');
+        if (!hud) {
+          hud = document.createElement('div');
+          hud.id = 'live-repair-hud';
+          // inline styles for complete styling independence
+          hud.style.position = 'fixed';
+          hud.style.bottom = '20px';
+          hud.style.right = '20px';
+          hud.style.zIndex = '999999';
+          hud.style.background = 'rgba(46, 94, 78, 0.96)';
+          hud.style.border = '1px solid #A8B8A5';
+          hud.style.color = '#FFFFFF';
+          hud.style.padding = '20px';
+          hud.style.borderRadius = '14px';
+          hud.style.fontFamily = "'Poppins', sans-serif";
+          hud.style.fontSize = '13px';
+          hud.style.maxWidth = '360px';
+          hud.style.boxShadow = '0 10px 35px rgba(0, 0, 0, 0.25)';
+          hud.style.backdropFilter = 'blur(8px)';
+          hud.style.webkitBackdropFilter = 'blur(8px)';
+          hud.style.transition = 'all 0.3s ease';
+          hud.style.borderLeft = '4px solid #e74c3c';
+          document.body.appendChild(hud);
+        }
+
+        hud.innerHTML = `
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+            <span style="font-size:18px; display:inline-block; transform-origin:center;" class="live-agent-icon">🤖</span>
+            <strong style="font-family:'Playfair Display',serif; font-size:15px; letter-spacing:0.5px;">Live Auto-Repair Agent</strong>
+          </div>
+          <p style="margin-bottom:12px; opacity:0.9; line-height:1.4;">I've captured a browser runtime error. The diagnostic stack trace has been recorded for live repair:</p>
+          <div style="background:rgba(0,0,0,0.25); padding:10px; border-radius:6px; font-family:monospace; font-size:11px; max-height:80px; overflow-y:auto; margin-bottom:12px; word-break:break-all; line-height:1.3;">
+            <strong>${data.type === 'javascript' ? 'Syntax/Reference Error' : 'Promise Rejection'}</strong>: ${data.message}
+            ${data.lineno ? `<br/><span style="color:#A8B8A5">Line ${data.lineno}:${data.colno}</span>` : ''}
+          </div>
+          <div style="font-size:11.5px; opacity:0.85; display:flex; align-items:center; gap:8px;">
+            <i class="fas fa-circle-notch fa-spin" style="color:#A8B8A5"></i> <span>Live Agent notified. Autonomic patches incoming...</span>
+          </div>
+        `;
+
+        // Inject animation style keyframe if not present
+        if (!document.getElementById('live-hud-anim')) {
+          const style = document.createElement('style');
+          style.id = 'live-hud-anim';
+          style.textContent = `
+            @keyframes hudSlideUp {
+              from { transform: translateY(50px); opacity: 0; }
+              to { transform: translateY(0); opacity: 1; }
+            }
+            #live-repair-hud { animation: hudSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+          `;
+          document.head.appendChild(style);
+        }
+      }
+
+      window.onerror = function(message, source, lineno, colno, error) {
+        reportRuntimeError({
+          type: 'javascript',
+          message: message,
+          source: source,
+          lineno: lineno,
+          colno: colno,
+          stack: error ? error.stack : ''
+        });
+        return false;
+      };
+
+      window.onunhandledrejection = function(event) {
+        reportRuntimeError({
+          type: 'promise_rejection',
+          message: event.reason ? (event.reason.message || String(event.reason)) : 'Unhandled rejection',
+          stack: event.reason && event.reason.stack ? event.reason.stack : ''
+        });
+      };
+    })();
+  </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Solo Soul Experiences | Fall in Love with Your Own Company</title>
@@ -57,6 +145,7 @@
         <a href="#blog" class="nav-link">Blog</a>
         <a href="#founder" class="nav-link">Meet Hazel</a>
         <a href="#contact" class="nav-link">Contact</a>
+        <a href="#" id="nav-portal-btn" class="nav-link portal-nav-item" onclick="openPortal(event)"><i class="fas fa-user-circle"></i> My Portal</a>
       </nav>
 
       <a href="#booking" id="nav-book-btn" class="btn btn-primary nav-cta" onclick="openBookingModal()">Book Now</a>
@@ -79,6 +168,7 @@
       <a href="#blog" class="mobile-nav-link">Blog</a>
       <a href="#founder" class="mobile-nav-link">Meet Hazel</a>
       <a href="#contact" class="mobile-nav-link">Contact</a>
+      <a href="#" id="mobile-portal-btn" class="mobile-nav-link" onclick="openPortal(event)"><i class="fas fa-user-circle"></i> My Portal</a>
       <a href="#booking" class="btn btn-primary mobile-nav-btn" onclick="openBookingModal()">Book Now</a>
     </nav>
   </div>
@@ -409,6 +499,44 @@
         <!-- Injected by JS -->
       </div>
 
+      <!-- Explore More Durban Events CTAs -->
+      <div class="durban-portal-links-section" data-aos="fade-up" style="margin-top: 50px; text-align: center;">
+        <h5 style="font-family:'Playfair Display',serif; font-size:18px; margin-bottom:20px; color:var(--forest); letter-spacing:0.5px;">Browse More Durban Events Across South Africa's Ticketing Platforms</h5>
+        <div class="durban-portal-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; max-width: 1000px; margin: 0 auto;">
+          
+          <a href="https://www.webtickets.co.za/v2/search.aspx?search=Durban" target="_blank" rel="noopener noreferrer" class="portal-card" style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; background:#F5EFE6; border:1px solid rgba(168,184,165,0.4); border-radius:12px; text-decoration:none; color:var(--forest); box-shadow:0 4px 15px rgba(0,0,0,0.02);">
+            <span style="font-size:24px; margin-bottom:8px;">🎟️</span>
+            <strong style="font-family:'Poppins',sans-serif; font-size:13.5px; font-weight:600;">Webtickets</strong>
+            <span style="font-size:11px; opacity:0.8; margin-top:4px;">Search Durban listings <i class="fas fa-arrow-right" style="font-size:9px; margin-left:3px;"></i></span>
+          </a>
+
+          <a href="https://tickets.computicket.com/search?q=Durban" target="_blank" rel="noopener noreferrer" class="portal-card" style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; background:#F5EFE6; border:1px solid rgba(168,184,165,0.4); border-radius:12px; text-decoration:none; color:var(--forest); box-shadow:0 4px 15px rgba(0,0,0,0.02);">
+            <span style="font-size:24px; margin-bottom:8px;">🎫</span>
+            <strong style="font-family:'Poppins',sans-serif; font-size:13.5px; font-weight:600;">Computicket</strong>
+            <span style="font-size:11px; opacity:0.8; margin-top:4px;">Search Durban listings <i class="fas fa-arrow-right" style="font-size:9px; margin-left:3px;"></i></span>
+          </a>
+
+          <a href="https://www.ticketmaster.co.za/search?q=Durban" target="_blank" rel="noopener noreferrer" class="portal-card" style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; background:#F5EFE6; border:1px solid rgba(168,184,165,0.4); border-radius:12px; text-decoration:none; color:var(--forest); box-shadow:0 4px 15px rgba(0,0,0,0.02);">
+            <span style="font-size:24px; margin-bottom:8px;">🎤</span>
+            <strong style="font-family:'Poppins',sans-serif; font-size:13.5px; font-weight:600;">Ticketmaster</strong>
+            <span style="font-size:11px; opacity:0.8; margin-top:4px;">Stadiums & ICC tours <i class="fas fa-arrow-right" style="font-size:9px; margin-left:3px;"></i></span>
+          </a>
+
+          <a href="https://www.quicket.co.za/events/durban-south-africa" target="_blank" rel="noopener noreferrer" class="portal-card" style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; background:#F5EFE6; border:1px solid rgba(168,184,165,0.4); border-radius:12px; text-decoration:none; color:var(--forest); box-shadow:0 4px 15px rgba(0,0,0,0.02);">
+            <span style="font-size:24px; margin-bottom:8px;">🧘‍♀️</span>
+            <strong style="font-family:'Poppins',sans-serif; font-size:13.5px; font-weight:600;">Quicket</strong>
+            <span style="font-size:11px; opacity:0.8; margin-top:4px;">Indie & Wellness events <i class="fas fa-arrow-right" style="font-size:9px; margin-left:3px;"></i></span>
+          </a>
+
+          <a href="https://www.howler.co.za" target="_blank" rel="noopener noreferrer" class="portal-card" style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; background:#F5EFE6; border:1px solid rgba(168,184,165,0.4); border-radius:12px; text-decoration:none; color:var(--forest); box-shadow:0 4px 15px rgba(0,0,0,0.02);">
+            <span style="font-size:24px; margin-bottom:8px;">🎵</span>
+            <strong style="font-family:'Poppins',sans-serif; font-size:13.5px; font-weight:600;">Howler</strong>
+            <span style="font-size:11px; opacity:0.8; margin-top:4px;">Festivals & Parties <i class="fas fa-arrow-right" style="font-size:9px; margin-left:3px;"></i></span>
+          </a>
+
+        </div>
+      </div>
+
     </div>
   </section>
 
@@ -701,31 +829,41 @@
   <section id="newsletter" class="newsletter">
     <div class="newsletter-bg"></div>
     <div class="container">
-      <div class="newsletter-content" data-aos="fade-up">
-        <div class="newsletter-icon">✉️</div>
-        <h2>Join Our <em>Community</em></h2>
-        <p>Receive monthly inspiration, upcoming events, exclusive early-bird discounts and self-love prompts delivered to your inbox.</p>
-        <form class="newsletter-form" id="newsletter-form" onsubmit="handleNewsletterSubmit(event)" novalidate>
-          <div class="newsletter-input-wrap">
-            <input
-              type="email"
-              id="newsletter-email"
-              name="email"
-              placeholder="Enter your email address"
-              class="newsletter-input"
-              required
-              aria-label="Email address for newsletter"
-            />
-            <button type="submit" class="newsletter-btn" id="newsletter-submit-btn">
-              <span class="btn-text">Subscribe</span>
-              <i class="fas fa-paper-plane"></i>
-            </button>
+      <div class="newsletter-content" data-aos="fade-up" style="max-width: 850px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; text-align: left; align-items: center;">
+        <!-- Left Side: Copy and Button -->
+        <div>
+          <div class="newsletter-icon" style="background:#25D366; color:#FFF; display:inline-flex; align-items:center; justify-content:center; width:55px; height:55px; border-radius:50%; font-size:26px; margin-bottom:15px; box-shadow:0 6px 20px rgba(37,211,102,0.35);"><i class="fab fa-whatsapp"></i></div>
+          <h2 style="text-align: left; margin-bottom: 10px;">Join Our <em>WhatsApp Channel</em></h2>
+          <p style="margin-bottom: 20px; line-height: 1.5; font-size: 14px;">Connect with fellow solo adventurers in Durban. Receive early-bird event details, weekly self-love prompts, and community updates directly on your phone.</p>
+          
+          <a href="https://whatsapp.com/channel/0029Vb8192g5vKA50mLOdp41" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-whatsapp-join" style="background:#25D366; border:none; color:#FFF; font-size:14.5px; font-weight:600; padding:12px 30px; border-radius:50px; display:inline-flex; align-items:center; gap:10px; transition:all 0.3s ease; box-shadow:0 6px 20px rgba(37,211,102,0.25);">
+            <i class="fab fa-whatsapp" style="font-size:18px;"></i> Open WhatsApp Channel
+          </a>
+          
+          <div style="margin-top: 25px; border-top: 1px solid rgba(168, 184, 165, 0.25); padding-top: 15px;">
+            <strong style="font-size: 13px; color: var(--forest); display: block; margin-bottom: 5px;"><i class="fas fa-info-circle"></i> Private & Secure</strong>
+            <p style="font-size:11.5px; opacity:0.8; line-height:1.4; margin: 0;">
+              Your phone number remains completely confidential in a WhatsApp Channel. Only the administrators see the channel subscriber counts.
+            </p>
           </div>
-          <div class="newsletter-success" id="newsletter-success">
-            <i class="fas fa-check-circle"></i> You're in! Welcome to the Solo Soul community. ✨
+        </div>
+
+        <!-- Right Side: QR Code & Senior Instructions -->
+        <div style="background: rgba(255, 255, 255, 0.55); border: 1px solid var(--border); padding: 22px; border-radius: 16px; backdrop-filter: blur(5px); display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center;">
+          <div style="background: white; padding: 10px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); display: inline-block;">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://whatsapp.com/channel/0029Vb8192g5vKA50mLOdp41" alt="WhatsApp Channel QR Code" style="width: 150px; height: 150px; display: block;" />
           </div>
-          <p class="newsletter-disclaimer">We respect your privacy. Unsubscribe anytime.</p>
-        </form>
+          <strong style="font-size: 13px; color: var(--forest); font-weight:700;">Scan QR Code to Join</strong>
+          
+          <div style="text-align: left; background: rgba(46, 94, 78, 0.04); padding: 12px 14px; border-radius: 8px; border-left: 3px solid var(--forest); width: 100%;">
+            <strong style="font-size: 11.5px; color: var(--forest); display: block; margin-bottom: 6px;"><i class="fas fa-camera"></i> How to scan (for seniors & guests):</strong>
+            <ol style="font-size: 10.5px; opacity: 0.95; margin: 0; padding-left: 14px; line-height: 1.4; color:var(--charcoal)">
+              <li style="margin-bottom: 4px;">Open your phone's normal <strong>Camera app</strong>.</li>
+              <li style="margin-bottom: 4px;">Hold your phone up and point the camera steadily at the black-and-white square code above.</li>
+              <li>Tap the pop-up link banner that appears on your screen to open WhatsApp and join our channel!</li>
+            </ol>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -914,8 +1052,10 @@
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label for="booking-date">Preferred Date</label>
-            <input type="date" id="booking-date" name="date" required />
+            <label for="booking-date">Available Date</label>
+            <select id="booking-date" name="date" required disabled>
+              <option value="">Select an experience first...</option>
+            </select>
           </div>
           <div class="form-group">
             <label for="booking-guests">Number of Spots</label>
@@ -952,6 +1092,300 @@
     <div class="modal blog-modal" id="blog-modal" role="dialog" aria-modal="true" aria-labelledby="blog-modal-title">
       <button class="modal-close" onclick="closeBlogModal()" aria-label="Close blog modal">✕</button>
       <div id="blog-modal-content"></div>
+    </div>
+  </div>
+
+  <!-- ======================== AUTH MODAL (LOGIN/REGISTER) ======================== -->
+  <div class="modal-overlay" id="auth-modal-overlay" onclick="closeAuthModal(event)">
+    <div class="modal auth-modal" id="auth-modal" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
+      <button class="modal-close" onclick="closeAuthModal()" aria-label="Close authentication modal">✕</button>
+      
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">Log In</button>
+        <button class="auth-tab" id="tab-register" onclick="switchAuthTab('register')">Register</button>
+      </div>
+
+      <!-- Login Form -->
+      <div class="auth-form-container active" id="form-login-container">
+        <div class="modal-header">
+          <h3 id="auth-modal-title">Welcome Back</h3>
+          <p>Log in to access your solo experiences portal</p>
+        </div>
+        <form id="login-form" onsubmit="handleLoginSubmit(event)" novalidate>
+          <div class="form-group">
+            <label for="login-email">Email Address</label>
+            <input type="email" id="login-email" required placeholder="yourname@email.com" />
+          </div>
+          <div class="form-group">
+            <label for="login-password">Password</label>
+            <input type="password" id="login-password" required placeholder="••••••••" />
+          </div>
+          <div class="auth-error" id="login-error"></div>
+          <button type="submit" class="btn btn-primary auth-submit">Log In <i class="fas fa-sign-in-alt"></i></button>
+        </form>
+      </div>
+
+      <!-- Register Form -->
+      <div class="auth-form-container" id="form-register-container">
+        <div class="modal-header">
+          <h3>Create Guest Account</h3>
+          <p>Register to book, pay, and track your experiences</p>
+        </div>
+        <form id="register-form" onsubmit="handleRegisterSubmit(event)" novalidate>
+          <div class="form-group">
+            <label for="register-name">Full Name</label>
+            <input type="text" id="register-name" required placeholder="Full Name" />
+          </div>
+          <div class="form-group">
+            <label for="register-email">Email Address</label>
+            <input type="email" id="register-email" required placeholder="yourname@email.com" />
+          </div>
+          <div class="form-group">
+            <label for="register-whatsapp">WhatsApp Number</label>
+            <input type="tel" id="register-whatsapp" required placeholder="+27 82 000 0000" />
+          </div>
+          <div class="form-group">
+            <label for="register-password">Password</label>
+            <input type="password" id="register-password" required placeholder="Create password (min 6 characters)" />
+          </div>
+          <div class="auth-error" id="register-error"></div>
+          <button type="submit" class="btn btn-primary auth-submit">Register <i class="fas fa-user-plus"></i></button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================== GUEST PORTAL / DASHBOARD MODAL ======================== -->
+  <div class="modal-overlay" id="portal-modal-overlay" onclick="closePortalModal(event)">
+    <div class="modal portal-modal" id="portal-modal" role="dialog" aria-modal="true" aria-labelledby="portal-modal-title">
+      <button class="modal-close" onclick="closePortalModal()" aria-label="Close portal modal">✕</button>
+      
+      <div class="portal-header">
+        <div class="portal-user-info">
+          <div class="portal-avatar" id="portal-user-avatar">U</div>
+          <div>
+            <h3 id="portal-user-name">Guest Name</h3>
+            <p id="portal-user-meta"><i class="fab fa-whatsapp"></i> WhatsApp: <span id="portal-user-phone"></span> &nbsp;·&nbsp; <span id="portal-user-email"></span></p>
+          </div>
+        </div>
+        <button class="btn btn-secondary portal-logout-btn" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i> Log Out</button>
+      </div>
+
+      <div class="portal-body">
+        <div class="portal-tabs" style="display: flex; gap: 15px; border-bottom: 1px solid var(--border); margin-bottom: 20px;">
+          <h4 class="portal-tab active" id="tab-btn-bookings" onclick="switchPortalTab('bookings')" style="cursor: pointer; padding-bottom: 10px; border-bottom: 3px solid var(--forest); margin: 0; font-family:'Poppins',sans-serif; font-size:14px; font-weight:600;"><i class="fas fa-calendar-alt"></i> My Bookings</h4>
+          <h4 class="portal-tab" id="tab-btn-interests" onclick="switchPortalTab('interests')" style="cursor: pointer; padding-bottom: 10px; border-bottom: 3px solid transparent; margin: 0; font-family:'Poppins',sans-serif; font-size:14px; font-weight:600; opacity: 0.7;"><i class="fas fa-heart"></i> Preferences</h4>
+          <h4 class="portal-tab" id="tab-btn-settings" onclick="switchPortalTab('settings')" style="cursor: pointer; padding-bottom: 10px; border-bottom: 3px solid transparent; margin: 0; font-family:'Poppins',sans-serif; font-size:14px; font-weight:600; opacity: 0.7;"><i class="fas fa-sliders-h"></i> Settings & Style</h4>
+        </div>
+
+        <!-- Bookings Section -->
+        <div class="portal-tab-content active" id="portal-sec-bookings">
+          <div id="bookings-list-container">
+            <!-- Loader / Bookings List -->
+          </div>
+        </div>
+
+        <!-- Preferences Section -->
+        <div class="portal-tab-content" id="portal-sec-interests" style="display: none;">
+          <h5 style="font-family:'Playfair Display',serif; font-size:16px; margin-bottom:12px; color:var(--forest); font-weight:700;">Select Favorite Experience Categories</h5>
+          <p style="font-size:12.5px; opacity:0.8; margin-bottom:18px; line-height:1.4;">We will highlight events matching these interests with a special gold star on the main schedule!</p>
+          
+          <div class="preferences-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 20px;">
+            <label style="display: flex; align-items: center; gap: 10px; padding: 12px; background: var(--beige); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; font-size: 13px; color: var(--forest); font-weight: 500;">
+              <input type="checkbox" id="pref-nature" style="accent-color: var(--forest); width:16px; height:16px;">
+              <span>Nature Walks 🌿</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 10px; padding: 12px; background: var(--beige); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; font-size: 13px; color: var(--forest); font-weight: 500;">
+              <input type="checkbox" id="pref-creative" style="accent-color: var(--forest); width:16px; height:16px;">
+              <span>Creative & Painting 🎨</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 10px; padding: 12px; background: var(--beige); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; font-size: 13px; color: var(--forest); font-weight: 500;">
+              <input type="checkbox" id="pref-mindful" style="accent-color: var(--forest); width:16px; height:16px;">
+              <span>Mindfulness 🧘‍♀️</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 10px; padding: 12px; background: var(--beige); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; font-size: 13px; color: var(--forest); font-weight: 500;">
+              <input type="checkbox" id="pref-dining" style="accent-color: var(--forest); width:16px; height:16px;">
+              <span>Dining & Brunch 🍳</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 10px; padding: 12px; background: var(--beige); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; font-size: 13px; color: var(--forest); font-weight: 500;">
+              <input type="checkbox" id="pref-luxury" style="accent-color: var(--forest); width:16px; height:16px;">
+              <span>Luxury Spa Day 🧖‍♀️</span>
+            </label>
+          </div>
+          <button class="btn btn-primary" onclick="saveUserPreferences()" style="font-size:12.5px; padding:10px 20px; border-radius:50px;">Save Preferences <i class="fas fa-save" style="margin-left:5px;"></i></button>
+          <span id="prefs-save-msg" style="margin-left: 12px; font-size: 12.5px; color: var(--forest); opacity: 0.9; font-weight: 600;"></span>
+        </div>
+
+        <!-- Settings Section -->
+        <div class="portal-tab-content" id="portal-sec-settings" style="display: none;">
+          <!-- Theme Picker -->
+          <div style="margin-bottom: 25px;">
+            <h5 style="font-family:'Playfair Display',serif; font-size:16px; margin-bottom:12px; color:var(--forest); font-weight:700;">Color Theme Mode</h5>
+            <div class="theme-selector-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
+              <button onclick="changeTheme('default')" style="display:flex; align-items:center; gap:10px; padding:12px; background:#F5EFE6; border:2px solid var(--forest); border-radius:8px; cursor:pointer; font-size:13px; color:#2E5E4E; font-weight:600; text-align:left;">
+                <span style="width:18px; height:18px; border-radius:50%; background:#2E5E4E; border:1px solid #A8B8A5; display:inline-block;"></span>
+                Sage & Sand (Default)
+              </button>
+              <button onclick="changeTheme('dark')" style="display:flex; align-items:center; gap:10px; padding:12px; background:#121e1a; border:1px solid rgba(168,184,165,0.3); border-radius:8px; cursor:pointer; font-size:13px; color:#E6F0EC; font-weight:600; text-align:left;">
+                <span style="width:18px; height:18px; border-radius:50%; background:#E6F0EC; border:1px solid #8aa895; display:inline-block;"></span>
+                Forest Dark Mode
+              </button>
+              <button onclick="changeTheme('autumn')" style="display:flex; align-items:center; gap:10px; padding:12px; background:#F9F6F0; border:1px solid rgba(168,184,165,0.3); border-radius:8px; cursor:pointer; font-size:13px; color:#5C3D2E; font-weight:600; text-align:left;">
+                <span style="width:18px; height:18px; border-radius:50%; background:#5C3D2E; border:1px solid #E0A96D; display:inline-block;"></span>
+                Autumn Whisper
+              </button>
+              <button onclick="changeTheme('ocean')" style="display:flex; align-items:center; gap:10px; padding:12px; background:#F0F4F8; border:1px solid rgba(168,184,165,0.3); border-radius:8px; cursor:pointer; font-size:13px; color:#2D4B73; font-weight:600; text-align:left;">
+                <span style="width:18px; height:18px; border-radius:50%; background:#2D4B73; border:1px solid #F19066; display:inline-block;"></span>
+                Ocean Sunrise
+              </button>
+            </div>
+          </div>
+
+          <!-- Font Size Adjuster -->
+          <div style="margin-bottom: 25px;">
+            <h5 style="font-family:'Playfair Display',serif; font-size:16px; margin-bottom:12px; color:var(--forest); font-weight:700;">Accessibility: Typography Size</h5>
+            <div class="font-selector-grid" style="display: flex; gap: 12px; flex-wrap: wrap;">
+              <button class="btn btn-outline" id="font-size-standard" onclick="changeFontSize('standard')" style="flex:1; min-width:120px; padding:10px; font-size:13px; border-radius:8px; border:2px solid var(--forest); background: transparent; font-weight: 600; cursor: pointer; color:var(--forest);">Standard (16px)</button>
+              <button class="btn btn-outline" id="font-size-large" onclick="changeFontSize('large')" style="flex:1; min-width:120px; padding:10px; font-size:13px; border-radius:8px; border:1px solid var(--border); background: transparent; font-weight: 500; cursor: pointer; color:var(--forest);">Large (18px)</button>
+              <button class="btn btn-outline" id="font-size-xlarge" onclick="changeFontSize('xlarge')" style="flex:1; min-width:120px; padding:10px; font-size:13px; border-radius:8px; border:1px solid var(--border); background: transparent; font-weight: 500; cursor: pointer; color:var(--forest);">Extra Large (20px)</button>
+            </div>
+          </div>
+
+          <!-- Motion Settings -->
+          <div style="margin-bottom: 20px;">
+            <h5 style="font-family:'Playfair Display',serif; font-size:16px; margin-bottom:12px; color:var(--forest); font-weight:700;">UX Motion Preference</h5>
+            <label style="display: flex; align-items: center; gap: 10px; padding: 12px; background: var(--beige); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; font-size: 13px; color: var(--forest); font-weight: 500; max-width: 320px;">
+              <input type="checkbox" id="ux-reduce-motion" onchange="toggleReduceMotion(this.checked)" style="accent-color: var(--forest); width:16px; height:16px;">
+              <span>Reduce motion (disable animations)</span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================== DIGITAL TICKET MODAL ======================== -->
+  <div class="modal-overlay" id="ticket-modal-overlay" onclick="closeTicketModal(event)">
+    <div class="modal ticket-modal" id="ticket-modal" role="dialog" aria-modal="true" aria-labelledby="ticket-modal-title">
+      <button class="modal-close" onclick="closeTicketModal()" aria-label="Close ticket modal">✕</button>
+      <div id="ticket-modal-content"></div>
+    </div>
+  </div>
+
+  <!-- ======================== PAYFAST SIMULATOR MODAL ======================== -->
+  <div class="modal-overlay" id="payfast-modal-overlay" onclick="closePayFastModal(event)">
+    <div class="modal payfast-modal" id="payfast-modal" role="dialog" aria-modal="true" aria-labelledby="payfast-modal-title">
+      <div class="payfast-header">
+        <div class="payfast-lock"><i class="fas fa-lock"></i> SECURE PAYMENT BY <strong>PAYFAST</strong></div>
+        <button class="payfast-cancel-btn" onclick="closePayFastModal()">Cancel Payment</button>
+      </div>
+
+      <div class="payfast-body" id="payfast-main-content">
+        <!-- Merchant & Order details -->
+        <div class="payfast-order-summary">
+          <div class="payfast-merchant">
+            <img src="assets/images/logo.png" alt="Solo Soul Logo" class="payfast-logo" />
+            <div>
+              <h4>Solo Soul Experiences</h4>
+              <p>Durban, South Africa</p>
+            </div>
+          </div>
+          <hr/>
+          <div class="payfast-item-details">
+            <h5 id="pf-experience-title">Experience Name</h5>
+            <p><i class="fas fa-calendar-day"></i> Date: <strong id="pf-experience-date">---</strong></p>
+            <p><i class="fas fa-users"></i> Spots: <strong id="pf-experience-guests">1 spot</strong></p>
+          </div>
+          <div class="payfast-amount-box">
+            <span>Total Payable</span>
+            <strong id="pf-total-amount">R0.00</strong>
+          </div>
+        </div>
+
+        <!-- Payment input methods -->
+        <div class="payfast-payment-methods">
+          <h5>Select Payment Method</h5>
+          <div class="payfast-tabs">
+            <button class="pf-tab active" id="pf-tab-card" onclick="switchPayFastMethod('card')"><i class="fas fa-credit-card"></i> Card</button>
+            <button class="pf-tab" id="pf-tab-eft" onclick="switchPayFastMethod('eft')"><i class="fas fa-university"></i> Instant EFT</button>
+          </div>
+
+          <!-- Card Form View -->
+          <div class="pf-method-content active" id="pf-method-card-container">
+            <form id="payfast-card-form" onsubmit="handlePayFastCardSubmit(event)" novalidate>
+              <div class="form-group">
+                <label>Cardholder Name</label>
+                <input type="text" id="pf-card-name" required placeholder="Hazel Soul" />
+              </div>
+              <div class="form-group">
+                <label>Card Number</label>
+                <div class="pf-input-wrapper">
+                  <input type="text" id="pf-card-number" required placeholder="4000 1234 5678 9010" maxlength="19" oninput="formatCardNumber(this)" />
+                  <i class="fab fa-cc-visa" id="pf-card-icon"></i>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Expiry Date</label>
+                  <input type="text" id="pf-card-expiry" required placeholder="MM/YY" maxlength="5" oninput="formatCardExpiry(this)" />
+                </div>
+                <div class="form-group">
+                  <label>CVV / CVC</label>
+                  <input type="password" id="pf-card-cvv" required placeholder="•••" maxlength="3" oninput="this.value=this.value.replace(/\D/g,'')" />
+                </div>
+              </div>
+              <button type="submit" class="btn btn-payfast" id="pf-pay-btn"><i class="fas fa-lock"></i> Securely Pay Now</button>
+            </form>
+          </div>
+
+          <!-- EFT View -->
+          <div class="pf-method-content" id="pf-method-eft-container">
+            <p style="font-size:13px; color:#555; margin-bottom:15px;">Choose your bank to complete Instant EFT payment via secure sandbox authorization:</p>
+            <div class="eft-bank-grid">
+              <button class="bank-btn" onclick="startEFT('FNB')">FNB</button>
+              <button class="bank-btn" onclick="startEFT('Standard Bank')">Standard Bank</button>
+              <button class="bank-btn" onclick="startEFT('Absa')">Absa</button>
+              <button class="bank-btn" onclick="startEFT('Capitec')">Capitec</button>
+              <button class="bank-btn" onclick="startEFT('Nedbank')">Nedbank</button>
+              <button class="bank-btn" onclick="startEFT('TymeBank')">TymeBank</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment Processing Animation View -->
+      <div class="payfast-loading-view" id="payfast-loading-view">
+        <div class="pf-spinner"></div>
+        <h4 id="pf-loader-status">Securing checkout window...</h4>
+        <p>Do not close your browser or navigate away.</p>
+      </div>
+
+      <!-- Bank OTP Verification View -->
+      <div class="payfast-otp-view" id="payfast-otp-view">
+        <div class="otp-header">
+          <strong id="otp-bank-name">SECURE 3D SECURE OTP</strong>
+          <span style="font-size:11px;color:#666;">Verification Code Sent</span>
+        </div>
+        <div class="otp-body">
+          <p>Please enter the 6-digit OTP verification code sent to your phone/email to authorize this payment.</p>
+          <div class="form-group">
+            <input type="text" id="pf-otp-input" placeholder="123456" maxlength="6" style="text-align:center; font-size:24px; letter-spacing:4px; font-weight:700; width:100%; border:2px solid var(--beige);" />
+          </div>
+          <div class="otp-error" id="pf-otp-error" style="color:#e74c3c; font-size:13px; text-align:center; margin-bottom:10px;"></div>
+          <div class="otp-buttons">
+            <button class="btn btn-primary" onclick="verifyOTP()" style="width:100%;">Submit Verification Code</button>
+            <button class="btn btn-secondary" onclick="resendOTP()" style="width:100%; margin-top:8px;">Resend Code</button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Payment Success view -->
+      <div class="payfast-success-view" id="payfast-success-view">
+        <div class="pf-success-circle">✓</div>
+        <h3>Payment Successful!</h3>
+        <p>Order reference: <strong id="pf-success-ref">#12345</strong></p>
+        <p>Your ticket is now confirmed and visible on your dashboard portal. Redirecting you shortly...</p>
+      </div>
     </div>
   </div>
 

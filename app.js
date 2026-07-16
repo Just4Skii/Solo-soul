@@ -84,18 +84,18 @@ const soloEvents = [
 ];
 
 const cityEvents = [
-  { title: 'Disney On Ice',                 date: '24 Jul – 3 Aug 2026', venue: 'Durban ICC, Durban',         link: 'https://www.webtickets.co.za', icon: '🎭', source: 'Webtickets'    },
-  { title: "Totalsports Women's Race",      date: '2 Aug 2026',          venue: 'Suncoast Casino, Durban',    link: 'https://totalsportswomensrace.co.za', icon: '🏃‍♀️', source: 'Official Site' },
-  { title: 'Sjava in the Park',             date: '2 Aug 2026',          venue: 'Chris Saunders Park, Umhlanga', link: 'https://www.webtickets.co.za', icon: '🎵', source: 'Webtickets'  },
-  { title: 'Secret Sunrise Durban',         date: '1 Aug 2026',          venue: 'Northlands Girls High',      link: 'https://www.webtickets.co.za', icon: '🌅', source: 'Webtickets'    },
-  { title: 'Tamia LIVE in Durban',          date: '7 Aug 2026',          venue: 'Durban ICC, Durban',         link: 'https://www.webtickets.co.za', icon: '🎶', source: 'Webtickets'    },
-  { title: 'Joseph Clark – Music of Queen', date: '31 Jul – 2 Aug 2026', venue: 'Playhouse Company, Durban',  link: 'https://www.computicket.com', icon: '👑', source: 'Computicket'    },
-  { title: 'Old Mutual Music at the Lake',  date: '24 Sep 2026',         venue: 'Durban Botanic Gardens',     link: 'https://www.webtickets.co.za', icon: '🎸', source: 'Webtickets'    },
-  { title: 'Bafunny Bafunny Comedy Fest',   date: '19 Sep 2026',         venue: 'Suncoast Casino, Durban',    link: 'https://www.computicket.com', icon: '😂', source: 'Computicket'    },
-  { title: 'Hollywoodbets Durban 10km',     date: '30 Aug 2026',         venue: 'Kingsmead, Durban',          link: 'https://www.runningcalendar.co.za', icon: '🏅', source: 'Running Calendar' },
+  { title: 'Disney On Ice',                 date: '24 Jul – 3 Aug 2026', venue: 'Durban ICC, Durban',         link: 'https://www.webtickets.co.za/v2/search.aspx?search=Disney+On+Ice', icon: '🎭', source: 'Webtickets'    },
+  { title: "Totalsports Women's Race",      date: '2 Aug 2026',          venue: 'Suncoast Casino, Durban',    link: 'https://www.totalsportswomensrace.co.za/durban-event/', icon: '🏃‍♀️', source: 'Official Site' },
+  { title: 'Sjava in the Park',             date: '2 Aug 2026',          venue: 'Chris Saunders Park, Umhlanga', link: 'https://www.webtickets.co.za/v2/search.aspx?search=Sjava+in+the+Park', icon: '🎵', source: 'Webtickets'  },
+  { title: 'Secret Sunrise Durban',         date: '1 Aug 2026',          venue: 'Northlands Girls High',      link: 'https://www.webtickets.co.za/v2/search.aspx?search=Secret+Sunrise+Durban', icon: '🌅', source: 'Webtickets'    },
+  { title: 'Tamia LIVE in Durban',          date: '7 Aug 2026',          venue: 'Durban ICC, Durban',         link: 'https://www.webtickets.co.za/v2/search.aspx?search=Tamia+Durban', icon: '🎶', source: 'Webtickets'    },
+  { title: 'Joseph Clark – Music of Queen', date: '31 Jul – 2 Aug 2026', venue: 'Playhouse Company, Durban',  link: 'https://tickets.computicket.com/search?q=Joseph+Clark+Queen', icon: '👑', source: 'Computicket'    },
+  { title: 'Old Mutual Music at the Lake',  date: '24 Sep 2026',         venue: 'Durban Botanic Gardens',     link: 'https://www.webtickets.co.za/v2/search.aspx?search=Music+at+the+Lake+Durban', icon: '🎸', source: 'Webtickets'    },
+  { title: 'Bafunny Bafunny Comedy Fest',   date: '19 Sep 2026',         venue: 'Suncoast Casino, Durban',    link: 'https://tickets.computicket.com/search?q=Bafunny+Bafunny', icon: '😂', source: 'Computicket'    },
+  { title: 'Hollywoodbets Durban 10km',     date: '30 Aug 2026',         venue: 'Kingsmead, Durban',          link: 'https://www.runningcalendar.co.za/event/hollywoodbets-durban-10km/', icon: '🏅', source: 'Running Calendar' },
   { title: 'Harbour Boat Cruise',           date: 'Every weekend',       venue: "Wilson's Wharf, Durban",     link: 'https://www.wilsonswharf.co.za', icon: '⛵', source: 'Wilson\'s Wharf' },
   { title: 'Durban Botanic Gardens',        date: 'Open daily',          venue: 'Berea, Durban',              link: 'https://www.durbanbotanicgardens.org.za', icon: '🌿', source: 'Free Entry'  },
-  { title: 'Hilton Arts Festival 2026',     date: '7–9 Aug 2026',        venue: 'Hilton College, PMB',        link: 'https://www.computicket.com', icon: '🎨', source: 'Computicket'    },
+  { title: 'Hilton Arts Festival 2026',     date: '7–9 Aug 2026',        venue: 'Hilton College, PMB',        link: 'https://tickets.computicket.com/search?q=Hilton+Arts+Festival', icon: '🎨', source: 'Computicket'    },
 ];
 
 // ---- DOM READY --------------------------------------------
@@ -113,6 +113,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initScrollToTop();
   initParallax();
   initStatCounters();
+  updateNavbarLinks();
+  initUserSettings();
 });
 
 // ---- PRELOADER --------------------------------------------
@@ -245,6 +247,13 @@ function initEventsTable() {
   const tbody = document.getElementById('events-tbody');
   if (!tbody) return;
 
+  // Clear existing items in table first
+  tbody.innerHTML = '';
+
+  // Get current user preferences
+  const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+  const prefs = (currentUser && currentUser.preferences) ? currentUser.preferences : [];
+
   soloEvents.forEach(evt => {
     const spotsClass = evt.spotsLeft <= 3 ? 'spots-low' : evt.spotsLeft <= 6 ? 'spots-mid' : 'spots-ok';
     const spotsText  = evt.isFree
@@ -258,6 +267,12 @@ function initEventsTable() {
     const btnLabel = evt.spotsLeft <= 0 ? 'Sold Out' : (evt.isFree ? 'Reserve Spot' : 'Book Now');
     const btnDisabled = evt.spotsLeft <= 0 ? 'disabled style="opacity:0.4;cursor:not-allowed"' : '';
 
+    // Interest Match Badge
+    let matchBadge = '';
+    if (prefs.includes(evt.category)) {
+      matchBadge = `<span class="pref-match-badge" title="Interest Match"><i class="fas fa-star"></i> Match</span>`;
+    }
+
     const tr = document.createElement('tr');
     tr.dataset.category = evt.category;
     tr.dataset.spotsLeft = evt.spotsLeft;
@@ -268,6 +283,7 @@ function initEventsTable() {
       <td>
         <span class="event-name">${evt.exp}</span>
         <span class="event-cat-badge">${evt.category}</span>
+        ${matchBadge}
       </td>
       <td><i class="fas fa-map-marker-alt" style="color:var(--sage);margin-right:6px;font-size:12px;"></i>${evt.location}</td>
       <td>${evt.duration}</td>
@@ -479,93 +495,191 @@ document.addEventListener('keydown', e => {
   }
 });
 
+// ---- BOOKING FORM STATE DYNAMIC INITIALIZER (RING-FENCING DATES & GUESTS) -----------------
+function updateBookingFormState(experienceName) {
+  const dateSelect = document.getElementById('booking-date');
+  const guestsSelect = document.getElementById('booking-guests');
+  const payNote = document.getElementById('booking-pay-note');
+  const title = document.getElementById('booking-modal-title');
+  const subtitle = document.getElementById('booking-modal-subtitle');
+  const submitBtn = document.getElementById('booking-submit-btn');
+
+  if (!experienceName) {
+    if (dateSelect) {
+      dateSelect.innerHTML = '<option value="">Select an experience first...</option>';
+      dateSelect.disabled = true;
+    }
+    return;
+  }
+
+  // Find scheduled instances of this experience in soloEvents
+  const matchingEvents = soloEvents.filter(e => {
+    const firstWord = e.exp.toLowerCase().split(' ')[0];
+    const expWord = experienceName.toLowerCase().split(' ')[0];
+    return e.exp.toLowerCase().includes(expWord) || experienceName.toLowerCase().includes(firstWord);
+  });
+  
+  if (matchingEvents.length === 0) {
+    if (dateSelect) {
+      dateSelect.innerHTML = '<option value="">No scheduled dates available</option>';
+      dateSelect.disabled = true;
+    }
+    return;
+  }
+
+  // Populate available scheduled dates
+  if (dateSelect) {
+    dateSelect.innerHTML = '<option value="">Choose a date...</option>';
+    matchingEvents.forEach(evt => {
+      const opt = document.createElement('option');
+      opt.value = evt.date;
+      opt.textContent = `${evt.date} (${evt.isFree ? 'FREE' : evt.price})`;
+      dateSelect.appendChild(opt);
+    });
+    dateSelect.disabled = false;
+    // Auto-select the first option if there's only one date
+    if (matchingEvents.length === 1) {
+      dateSelect.selectedIndex = 1;
+    }
+  }
+
+  // Define guests cap and pricing updates based on chosen date
+  const updateGuestsAndPricing = () => {
+    const selectedDate = dateSelect.value;
+    const activeEvent = matchingEvents.find(e => e.date === selectedDate) || matchingEvents[0];
+    if (!activeEvent) return;
+
+    const free = activeEvent.isFree;
+    const maxSpots = activeEvent.spotsLeft;
+
+    // Update headings and buttons
+    if (title) title.textContent = free ? 'Reserve Your Free Spot' : 'Book Your Experience';
+    if (subtitle) subtitle.textContent = free 
+      ? "Secure your place — it's completely free. We'll confirm via WhatsApp."
+      : "Fill in your details and we'll confirm within 24 hours via WhatsApp.";
+    if (payNote) payNote.style.display = free ? 'none' : 'flex';
+    if (submitBtn) submitBtn.innerHTML = free 
+      ? 'Reserve Free Spot <i class="fas fa-check"></i>' 
+      : 'Pay & Book <i class="fas fa-credit-card"></i>';
+
+    // Rebuild guests dropdown dynamically capped at available spots
+    if (guestsSelect) {
+      guestsSelect.innerHTML = '';
+      if (maxSpots <= 0) {
+        const opt = document.createElement('option');
+        opt.value = "";
+        opt.textContent = "Sold Out";
+        guestsSelect.appendChild(opt);
+        return;
+      }
+      const cap = Math.min(maxSpots, 10);
+      for (let i = 1; i <= cap; i++) {
+        const opt = document.createElement('option');
+        opt.value = String(i);
+        opt.textContent = i === 1 ? '1 guest (just me)' : `${i} guests`;
+        guestsSelect.appendChild(opt);
+      }
+      if (maxSpots <= 5) {
+        const note = document.createElement('option');
+        note.disabled = true;
+        note.textContent = `── only ${maxSpots} left ──`;
+        guestsSelect.appendChild(note);
+      }
+    }
+  };
+
+  if (dateSelect) {
+    dateSelect.onchange = updateGuestsAndPricing;
+    // Trigger immediately if auto-selected
+    if (dateSelect.value) {
+      updateGuestsAndPricing();
+    }
+  }
+}
+
+// Export to window
+window.updateBookingFormState = updateBookingFormState;
+
 // ---- BOOKING MODAL ----------------------------------------
 window.openBookingModal = function(experienceName, spotsLeft, isFree) {
   const overlay      = document.getElementById('booking-modal-overlay');
   const selectEl     = document.getElementById('booking-experience');
-  const dateInput    = document.getElementById('booking-date');
-  const guestsEl     = document.getElementById('booking-guests');
-  const titleEl      = document.getElementById('booking-modal-title');
-  const subtitleEl   = document.getElementById('booking-modal-subtitle');
-  const payNoteEl    = document.getElementById('booking-pay-note');
+  const dateSelect   = document.getElementById('booking-date');
   const submitBtn    = document.getElementById('booking-submit-btn');
   if (!overlay) return;
 
-  const free     = !!isFree;
-  const maxSpots = (typeof spotsLeft === 'number' && spotsLeft > 0) ? spotsLeft : 10;
+  // Clean form state
+  document.getElementById('booking-form')?.reset();
+  document.getElementById('booking-success')?.classList.remove('show');
+  if (submitBtn) { submitBtn.style.display = ''; submitBtn.disabled = false; }
 
-  // Update title & subtitle
-  if (titleEl)    titleEl.textContent    = free ? 'Reserve Your Free Spot' : 'Book Your Experience';
-  if (subtitleEl) subtitleEl.textContent = free
-    ? "Secure your place — it's completely free. We'll confirm via WhatsApp."
-    : "Fill in your details and we'll confirm within 24 hours via WhatsApp.";
-
-  // Show/hide payment note
-  if (payNoteEl) payNoteEl.style.display = free ? 'none' : 'flex';
-
-  // Update submit button label
-  if (submitBtn) submitBtn.innerHTML = free
-    ? 'Reserve Free Spot <i class="fas fa-check"></i>'
-    : 'Request Booking <i class="fas fa-arrow-right"></i>';
-
-  // Rebuild guests dropdown — capped at available spots (max 10 shown)
-  if (guestsEl) {
-    guestsEl.innerHTML = '';
-    const cap = Math.min(maxSpots, 10);
-    for (let i = 1; i <= cap; i++) {
-      const opt = document.createElement('option');
-      opt.value = String(i);
-      opt.textContent = i === 1 ? '1 guest (just me)' : `${i} guests`;
-      guestsEl.appendChild(opt);
-    }
-    if (maxSpots <= 5) {
-      const note = document.createElement('option');
-      note.disabled = true;
-      note.textContent = `── only ${maxSpots} spot${maxSpots > 1 ? 's' : ''} available ──`;
-      guestsEl.appendChild(note);
-    }
-  }
-
-  // Set min date to today
-  if (dateInput) {
-    const today = new Date();
-    const yyyy  = today.getFullYear();
-    const mm    = String(today.getMonth() + 1).padStart(2, '0');
-    const dd    = String(today.getDate()).padStart(2, '0');
-    dateInput.min = `${yyyy}-${mm}-${dd}`;
+  // Check if user is logged in to pre-fill info
+  const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+  if (currentUser) {
+    const nameInput = document.getElementById('booking-name');
+    const emailInput = document.getElementById('booking-email');
+    const phoneInput = document.getElementById('booking-phone');
+    if (nameInput) { nameInput.value = currentUser.name; nameInput.readOnly = true; }
+    if (emailInput) { emailInput.value = currentUser.email; emailInput.readOnly = true; }
+    if (phoneInput) { phoneInput.value = currentUser.phone; phoneInput.readOnly = true; }
+  } else {
+    // Reset readOnly if not logged in
+    const nameInput = document.getElementById('booking-name');
+    const emailInput = document.getElementById('booking-email');
+    const phoneInput = document.getElementById('booking-phone');
+    if (nameInput) { nameInput.value = ''; nameInput.readOnly = false; }
+    if (emailInput) { emailInput.value = ''; emailInput.readOnly = false; }
+    if (phoneInput) { phoneInput.value = ''; phoneInput.readOnly = false; }
   }
 
   // Pre-select experience if provided
   if (experienceName && selectEl) {
     const clean = experienceName.replace(/&amp;/g, '&').replace(/&#39;/g, "'");
     const opts  = Array.from(selectEl.options);
-    // Exact match first
     let match = opts.find(o => o.value === clean);
-    // Then partial match on first 10 chars
     if (!match) match = opts.find(o => o.value && clean.toLowerCase().startsWith(o.value.toLowerCase().slice(0, 10)));
-    // Fallback: first-word match
     if (!match) {
       const word = clean.toLowerCase().split(' ')[0];
       match = opts.find(o => o.value && o.value.toLowerCase().includes(word));
     }
-    if (match) selectEl.value = match.value;
+    if (match) {
+      selectEl.value = match.value;
+    }
   }
+
+  // Initialize booking form dates and guest selection based on selection
+  updateBookingFormState(selectEl.value);
+
+  // If opening a specific scheduled date, lock the option
+  if (experienceName && dateSelect) {
+    const matchedEvent = soloEvents.find(e => e.exp === experienceName);
+    if (matchedEvent) {
+      dateSelect.value = matchedEvent.date;
+      // Trigger update manually
+      dateSelect.onchange();
+    }
+  }
+
+  // Bind change listener on experience selection
+  selectEl.onchange = (e) => {
+    updateBookingFormState(e.target.value);
+  };
 
   overlay.classList.add('active');
   document.body.style.overflow = 'hidden';
 };
 
-window.closeBookingModal = function(event) {
-  // When called directly (from ✕ button), close unconditionally.
-  // When called from the overlay onclick, only close if the overlay itself was clicked.
+function closeBookingModal(event) {
   if (event && event.target !== document.getElementById('booking-modal-overlay')) return;
   document.getElementById('booking-modal-overlay')?.classList.remove('active');
   document.body.style.overflow = '';
-  // Reset success state so next open is clean
   document.getElementById('booking-success')?.classList.remove('show');
   const btn = document.getElementById('booking-submit-btn');
   if (btn) { btn.disabled = false; btn.style.display = ''; btn.innerHTML = 'Request Booking <i class="fas fa-arrow-right"></i>'; }
-};
+}
+
+// Export to window
+window.closeBookingModal = closeBookingModal;
 
 window.handleBookingSubmit = function(e) {
   e.preventDefault();
@@ -574,7 +688,16 @@ window.handleBookingSubmit = function(e) {
   const btn     = document.getElementById('booking-submit-btn');
   if (!form) return;
 
-  // Simple validation
+  // Enforce Guest Portal Account Registration/Login
+  const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+  if (!currentUser) {
+    alert("Please log in or register a guest account to complete your booking.");
+    closeBookingModal();
+    openPortal(); // Opens portal auth modal
+    return;
+  }
+
+  // Form Validation
   const required = form.querySelectorAll('[required]');
   let valid = true;
   required.forEach(field => {
@@ -586,23 +709,95 @@ window.handleBookingSubmit = function(e) {
   });
   if (!valid) return;
 
-  // Show loading state
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending…';
-  btn.disabled = true;
+  const experience = document.getElementById('booking-experience').value;
+  const date = document.getElementById('booking-date').value;
+  const guests = parseInt(document.getElementById('booking-guests').value, 10);
+  const notes = document.getElementById('booking-notes').value;
 
-  setTimeout(() => {
-    success?.classList.add('show');
-    btn.style.display = 'none';
+  if (!date) {
+    alert("Please select an available scheduled date.");
+    return;
+  }
+
+  // Find matching scheduled event
+  const activeEvent = soloEvents.find(e => e.exp === experience && e.date === date);
+  if (!activeEvent) {
+    alert("The selected experience is not scheduled for this date.");
+    return;
+  }
+
+  // Spots Verification
+  if (activeEvent.spotsLeft < guests) {
+    alert(`Sorry, only ${activeEvent.spotsLeft} spots are left for this experience.`);
+    return;
+  }
+
+  const free = activeEvent.isFree;
+  
+  if (free) {
+    // Process free reservation immediately
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Reserving...';
+    btn.disabled = true;
+
     setTimeout(() => {
-      form.reset();
-      success?.classList.remove('show');
-      btn.style.display = '';
-      btn.innerHTML = 'Request Booking <i class="fas fa-arrow-right"></i>';
-      btn.disabled = false;
-      document.getElementById('booking-modal-overlay')?.classList.remove('active');
-      document.body.style.overflow = '';
-    }, 3500);
-  }, 1000);
+      const bookingId = 'SS-' + Math.floor(100000 + Math.random() * 900000);
+      const newBooking = {
+        id: bookingId,
+        userEmail: currentUser.email,
+        experience: experience,
+        date: date,
+        guests: guests,
+        total: 0,
+        price: 'FREE',
+        location: activeEvent.location,
+        status: 'Free',
+        notes: notes,
+        createdAt: new Date().toISOString()
+      };
+
+      // Add to persistent bookings list
+      const bookings = JSON.parse(localStorage.getItem('bookings') || '[]');
+      bookings.push(newBooking);
+      localStorage.setItem('bookings', JSON.stringify(bookings));
+
+      // Decrement spots
+      activeEvent.spotsLeft -= guests;
+      // Refresh event tables
+      initEventsTable();
+
+      success?.classList.add('show');
+      btn.style.display = 'none';
+
+      setTimeout(() => {
+        form.reset();
+        success?.classList.remove('show');
+        btn.style.display = '';
+        btn.disabled = false;
+        closeBookingModal();
+        openPortal(); // Load dashboard to see ticket
+      }, 1800);
+    }, 1000);
+  } else {
+    // Paid booking: Open PayFast Direct Checkout
+    const pricePerGuest = parseInt(activeEvent.price.replace('R', ''), 10);
+    const totalAmount = pricePerGuest * guests;
+
+    // Cache checkout details
+    window.tempBooking = {
+      userEmail: currentUser.email,
+      experience: experience,
+      date: date,
+      guests: guests,
+      total: totalAmount,
+      price: activeEvent.price,
+      location: activeEvent.location,
+      notes: notes,
+      eventRef: activeEvent
+    };
+
+    closeBookingModal();
+    openPayFastModal(experience, date, guests, totalAmount);
+  }
 };
 
 // ---- BLOG MODAL -------------------------------------------
@@ -683,3 +878,701 @@ window.handleContactSubmit = function(e) {
     setTimeout(() => success?.classList.remove('show'), 5000);
   }, 1200);
 };
+
+/* ============================================================
+   UPGRADES: GUEST PORTAL, AUTHS, PAYFAST & TICKETS INTERACTION
+   ============================================================ */
+
+// ---- NAVIGATION PORTAL CONTROLLERS -------------------------
+function openPortal(event) {
+  if (event) event.preventDefault();
+  
+  // Close mobile navigation drawer if open
+  document.getElementById('mobile-menu')?.classList.remove('active');
+  document.getElementById('mobile-overlay')?.classList.remove('active');
+  document.getElementById('hamburger')?.classList.remove('active');
+
+  const currentUser = localStorage.getItem('currentUser');
+  if (!currentUser) {
+    // Show Authentication Modal (Login / Register)
+    const overlay = document.getElementById('auth-modal-overlay');
+    if (overlay) {
+      overlay.classList.add('active');
+      document.body.style.overflow = 'hidden';
+      // Reset errors and fields
+      document.getElementById('login-form')?.reset();
+      document.getElementById('register-form')?.reset();
+      document.getElementById('login-error').textContent = '';
+      document.getElementById('register-error').textContent = '';
+      switchAuthTab('login');
+    }
+  } else {
+    // Show Dashboard Modal
+    const overlay = document.getElementById('portal-modal-overlay');
+    if (overlay) {
+      overlay.classList.add('active');
+      document.body.style.overflow = 'hidden';
+      loadPortalDashboard();
+    }
+  }
+}
+
+function closeAuthModal(event) {
+  if (event && event.target !== document.getElementById('auth-modal-overlay')) return;
+  document.getElementById('auth-modal-overlay')?.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+function closePortalModal(event) {
+  if (event && event.target !== document.getElementById('portal-modal-overlay')) return;
+  document.getElementById('portal-modal-overlay')?.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+function switchAuthTab(tab) {
+  const tabLogin = document.getElementById('tab-login');
+  const tabRegister = document.getElementById('tab-register');
+  const formLogin = document.getElementById('form-login-container');
+  const formRegister = document.getElementById('form-register-container');
+
+  if (tab === 'login') {
+    tabLogin?.classList.add('active');
+    tabRegister?.classList.remove('active');
+    formLogin?.classList.add('active');
+    formRegister?.classList.remove('active');
+  } else {
+    tabLogin?.classList.remove('active');
+    tabRegister?.classList.add('active');
+    formLogin?.classList.remove('active');
+    formRegister?.classList.add('active');
+  }
+}
+
+// Export to window
+window.openPortal = openPortal;
+window.closeAuthModal = closeAuthModal;
+window.closePortalModal = closePortalModal;
+window.switchAuthTab = switchAuthTab;
+
+// ---- AUTHENTICATION HANDLERS --------------------------------
+function handleRegisterSubmit(e) {
+  e.preventDefault();
+  const name = document.getElementById('register-name').value.trim();
+  const email = document.getElementById('register-email').value.trim().toLowerCase();
+  const whatsapp = document.getElementById('register-whatsapp').value.trim();
+  const password = document.getElementById('register-password').value;
+  const errorEl = document.getElementById('register-error');
+
+  if (!name || !email || !whatsapp || !password) {
+    errorEl.textContent = "Please fill in all registration fields.";
+    return;
+  }
+
+  if (password.length < 6) {
+    errorEl.textContent = "Password must be at least 6 characters.";
+    return;
+  }
+
+  const users = JSON.parse(localStorage.getItem('users') || '[]');
+  const userExists = users.some(u => u.email === email);
+  if (userExists) {
+    errorEl.textContent = "Email address already registered.";
+    return;
+  }
+
+  // Create and save account
+  const newUser = { name, email, phone: whatsapp, password };
+  users.push(newUser);
+  localStorage.setItem('users', JSON.stringify(users));
+
+  // Log in immediately
+  localStorage.setItem('currentUser', JSON.stringify({ name, email, phone: whatsapp }));
+  updateNavbarLinks();
+  closeAuthModal();
+  openPortal(); // Opens dashboard immediately
+}
+
+function handleLoginSubmit(e) {
+  e.preventDefault();
+  const email = document.getElementById('login-email').value.trim().toLowerCase();
+  const password = document.getElementById('login-password').value;
+  const errorEl = document.getElementById('login-error');
+
+  if (!email || !password) {
+    errorEl.textContent = "Please enter email and password.";
+    return;
+  }
+
+  const users = JSON.parse(localStorage.getItem('users') || '[]');
+  const user = users.find(u => u.email === email && u.password === password);
+  if (!user) {
+    errorEl.textContent = "Invalid email or password.";
+    return;
+  }
+
+  // Log in session
+  localStorage.setItem('currentUser', JSON.stringify({ name: user.name, email: user.email, phone: user.phone }));
+  updateNavbarLinks();
+  closeAuthModal();
+  openPortal(); // Opens dashboard immediately
+}
+
+function handleLogout() {
+  localStorage.removeItem('currentUser');
+  updateNavbarLinks();
+  closePortalModal();
+}
+
+function updateNavbarLinks() {
+  const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+  const desktopBtn = document.getElementById('nav-portal-btn');
+  const mobileBtn = document.getElementById('mobile-portal-btn');
+
+  if (currentUser) {
+    const firstName = currentUser.name.split(' ')[0];
+    const loggedInText = `<i class="fas fa-user-check"></i> Hi, ${firstName} ✦`;
+    if (desktopBtn) desktopBtn.innerHTML = loggedInText;
+    if (mobileBtn) mobileBtn.innerHTML = loggedInText;
+  } else {
+    const loggedOutText = `<i class="fas fa-user-circle"></i> My Portal`;
+    if (desktopBtn) desktopBtn.innerHTML = loggedOutText;
+    if (mobileBtn) mobileBtn.innerHTML = loggedOutText;
+  }
+}
+
+// Export to window
+window.handleRegisterSubmit = handleRegisterSubmit;
+window.handleLoginSubmit = handleLoginSubmit;
+window.handleLogout = handleLogout;
+window.updateNavbarLinks = updateNavbarLinks;
+
+// ---- GUEST DASHBOARD CONTROLLERS ----------------------------
+function loadPortalDashboard() {
+  const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+  if (!currentUser) return;
+
+  // Set Profile details
+  document.getElementById('portal-user-name').textContent = currentUser.name;
+  document.getElementById('portal-user-phone').textContent = currentUser.phone;
+  document.getElementById('portal-user-email').textContent = currentUser.email;
+  document.getElementById('portal-user-avatar').textContent = currentUser.name.charAt(0).toUpperCase();
+
+  // Load preferences to UI checkboxes
+  const users = JSON.parse(localStorage.getItem('users') || '[]');
+  const user = users.find(u => u.email === currentUser.email);
+  const prefs = (user && user.preferences) ? user.preferences : [];
+
+  document.getElementById('pref-nature').checked = prefs.includes('nature');
+  document.getElementById('pref-creative').checked = prefs.includes('creative');
+  document.getElementById('pref-mindful').checked = prefs.includes('mindful');
+  document.getElementById('pref-dining').checked = prefs.includes('dining');
+  document.getElementById('pref-luxury').checked = prefs.includes('luxury');
+
+  // Populate booking cards
+  const container = document.getElementById('bookings-list-container');
+  if (!container) return;
+
+  const bookings = JSON.parse(localStorage.getItem('bookings') || '[]');
+  const userBookings = bookings.filter(b => b.userEmail === currentUser.email);
+
+  if (userBookings.length === 0) {
+    container.innerHTML = `
+      <div class="portal-empty-state">
+        <i class="fas fa-calendar-times"></i>
+        <h5>No booked experiences yet</h5>
+        <p>Your journey begins with taking the first step. Explore our upcoming Durban solo events and book an experience today!</p>
+        <a href="#experiences" class="btn btn-secondary" onclick="closePortalModal()" style="margin-top:10px; padding:10px 20px; font-size:13px;">View Experiences</a>
+      </div>
+    `;
+    return;
+  }
+
+  // Sort bookings (latest first)
+  userBookings.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+  let html = '<div class="bookings-grid">';
+  userBookings.forEach(b => {
+    let statusClass = 'unpaid';
+    if (b.status === 'Paid') statusClass = 'paid';
+    else if (b.status === 'Free') statusClass = 'free';
+
+    html += `
+      <div class="booking-card">
+        <div class="booking-card-header">
+          <h5>${b.experience}</h5>
+          <span class="booking-status ${statusClass}">${b.status}</span>
+        </div>
+        <div class="booking-card-body">
+          <div class="booking-details-list">
+            <p><i class="fas fa-calendar-day"></i> Date: <strong>${b.date}</strong></p>
+            <p><i class="fas fa-map-marker-alt"></i> Location: <span>${b.location}</span></p>
+            <p><i class="fas fa-users"></i> Spots: <strong>${b.guests} guest${b.guests > 1 ? 's' : ''}</strong></p>
+            <p><i class="fas fa-coins"></i> Total Paid: <strong>${b.total === 0 ? 'FREE' : 'R' + b.total}</strong></p>
+          </div>
+          <div class="booking-actions">
+            <button class="btn-ticket" onclick="openTicket('${b.id}')"><i class="fas fa-ticket-alt"></i> View Ticket</button>
+            <button class="btn-cancel" onclick="cancelBooking('${b.id}')"><i class="fas fa-times-circle"></i> Cancel</button>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+// ---- DIGITAL TICKET CONTROLLERS -----------------------------
+function openTicket(bookingId) {
+  const bookings = JSON.parse(localStorage.getItem('bookings') || '[]');
+  const booking = bookings.find(b => b.id === bookingId);
+  if (!booking) return;
+
+  const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+  const content = document.getElementById('ticket-modal-content');
+  if (!content) return;
+
+  // Generate simulated barcode lines
+  let barcodeHtml = '';
+  for(let i=0; i<32; i++) {
+    const thickness = Math.floor(Math.random() * 4) + 1;
+    barcodeHtml += `<span class="barcode-line" style="width: ${thickness}px;"></span>`;
+  }
+
+  content.innerHTML = `
+    <div class="ticket-container">
+      <div class="ticket-header">
+        <h4>SOLO SOUL EXPERIENCES</h4>
+        <p>Guest Admission Ticket</p>
+      </div>
+      <div class="ticket-body">
+        <h3 class="ticket-title">${booking.experience}</h3>
+        <div class="ticket-info-grid">
+          <div class="ticket-info-item">
+            <span>Attendee</span>
+            <strong>${currentUser ? currentUser.name : 'Guest'}</strong>
+          </div>
+          <div class="ticket-info-item">
+            <span>Booking ID</span>
+            <strong>${booking.id}</strong>
+          </div>
+          <div class="ticket-info-item">
+            <span>Date</span>
+            <strong>${booking.date}</strong>
+          </div>
+          <div class="ticket-info-item">
+            <span>Spots Reserved</span>
+            <strong>${booking.guests}</strong>
+          </div>
+        </div>
+        <div class="ticket-venue">
+          <span>Location & Directions</span>
+          <strong>${booking.location}</strong>
+        </div>
+        <p class="ticket-footer-msg">Please present this secure digital barcode on arrival. Wear comfortable clothes, bring your journal, and look forward to connecting with your own company. 💚</p>
+      </div>
+      <div class="ticket-perforation">
+        <span class="ticket-notch left"></span>
+        <span class="ticket-perforation-line"></span>
+        <span class="ticket-notch right"></span>
+      </div>
+      <div class="ticket-barcode-section">
+        <div class="ticket-barcode">
+          ${barcodeHtml}
+        </div>
+        <div class="ticket-ref">REF-${booking.id}</div>
+      </div>
+    </div>
+  `;
+
+  // Open ticket modal
+  const overlay = document.getElementById('ticket-modal-overlay');
+  if (overlay) {
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+function closeTicketModal(event) {
+  if (event && event.target !== document.getElementById('ticket-modal-overlay')) return;
+  document.getElementById('ticket-modal-overlay')?.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+function cancelBooking(bookingId) {
+  const bookings = JSON.parse(localStorage.getItem('bookings') || '[]');
+  const bookingIndex = bookings.findIndex(b => b.id === bookingId);
+  if (bookingIndex === -1) return;
+
+  const booking = bookings[bookingIndex];
+  const confirmCancel = confirm(`Are you sure you want to cancel your spot for "${booking.experience}" on ${booking.date}?`);
+  if (!confirmCancel) return;
+
+  // Find corresponding event to restore spots
+  const targetEvent = soloEvents.find(e => {
+    const firstWord = e.exp.toLowerCase().split(' ')[0];
+    const bookWord = booking.experience.toLowerCase().split(' ')[0];
+    return (e.exp.toLowerCase().includes(bookWord) || booking.experience.toLowerCase().includes(firstWord)) && e.date === booking.date;
+  });
+
+  if (targetEvent) {
+    targetEvent.spotsLeft += booking.guests;
+  }
+
+  // Remove booking and update localStorage
+  bookings.splice(bookingIndex, 1);
+  localStorage.setItem('bookings', JSON.stringify(bookings));
+
+  // Refresh tables and reload
+  initEventsTable();
+  loadPortalDashboard();
+  alert("Your booking has been cancelled successfully. Any payment holds will be fully refunded.");
+}
+
+// Export to window
+window.loadPortalDashboard = loadPortalDashboard;
+window.openTicket = openTicket;
+window.closeTicketModal = closeTicketModal;
+window.cancelBooking = cancelBooking;
+
+// ---- PAYFAST SIMULATOR GATEWAY CONTROLLERS -------------------
+function openPayFastModal(experience, date, guests, totalAmount) {
+  const overlay = document.getElementById('payfast-modal-overlay');
+  if (!overlay) return;
+
+  // Set fields
+  document.getElementById('pf-experience-title').textContent = experience;
+  document.getElementById('pf-experience-date').textContent = date;
+  document.getElementById('pf-experience-guests').textContent = `${guests} spot${guests > 1 ? 's' : ''}`;
+  document.getElementById('pf-total-amount').textContent = `R${totalAmount}.00`;
+  
+  // Clear inputs & views
+  document.getElementById('payfast-card-form')?.reset();
+  document.getElementById('pf-otp-input').value = '';
+  document.getElementById('pf-otp-error').textContent = '';
+
+  // Reset checkout views
+  document.getElementById('payfast-main-content').style.display = 'grid';
+  document.getElementById('payfast-loading-view').style.display = 'none';
+  document.getElementById('payfast-otp-view').style.display = 'none';
+  document.getElementById('payfast-success-view').style.display = 'none';
+
+  switchPayFastMethod('card');
+
+  overlay.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closePayFastModal(event) {
+  // Prevent closing overlay by accident while payment is in progress
+  const loading = document.getElementById('payfast-loading-view').style.display === 'flex';
+  const otp = document.getElementById('payfast-otp-view').style.display === 'flex';
+  if ((loading || otp) && event) return; // ignore background clicks during transaction
+
+  if (event && event.target !== document.getElementById('payfast-modal-overlay')) return;
+  
+  document.getElementById('payfast-modal-overlay')?.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+// Export to window
+window.openPayFastModal = openPayFastModal;
+window.closePayFastModal = closePayFastModal;
+
+function switchPayFastMethod(method) {
+  const tabCard = document.getElementById('pf-tab-card');
+  const tabEFT = document.getElementById('pf-tab-eft');
+  const contCard = document.getElementById('pf-method-card-container');
+  const contEFT = document.getElementById('pf-method-eft-container');
+
+  if (method === 'card') {
+    tabCard?.classList.add('active');
+    tabEFT?.classList.remove('active');
+    contCard?.classList.add('active');
+    contEFT?.classList.remove('active');
+  } else {
+    tabCard?.classList.remove('active');
+    tabEFT?.classList.add('active');
+    contCard?.classList.remove('active');
+    contEFT?.classList.add('active');
+  }
+}
+
+function formatCardNumber(input) {
+  let v = input.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+  let matches = v.match(/\d{4,16}/g);
+  let match = matches && matches[0] || '';
+  let parts = [];
+  for (let i=0, len=match.length; i<len; i+=4) {
+    parts.push(match.substring(i, i+4));
+  }
+  if (parts.length > 0) {
+    input.value = parts.join(' ');
+  } else {
+    input.value = v;
+  }
+}
+
+function formatCardExpiry(input) {
+  let v = input.value.replace(/\D/g, '');
+  if (v.length >= 2) {
+    input.value = v.substring(0,2) + '/' + v.substring(2,4);
+  } else {
+    input.value = v;
+  }
+}
+
+function handlePayFastCardSubmit(e) {
+  e.preventDefault();
+  const number = document.getElementById('pf-card-number').value.replace(/\s/g, '');
+  const expiry = document.getElementById('pf-card-expiry').value;
+  const cvv = document.getElementById('pf-card-cvv').value;
+
+  if (number.length !== 16 || expiry.length !== 5 || cvv.length !== 3) {
+    alert("Please enter a valid credit card details.");
+    return;
+  }
+
+  // Go to verification loading screen
+  document.getElementById('payfast-main-content').style.display = 'none';
+  const loading = document.getElementById('payfast-loading-view');
+  loading.style.display = 'flex';
+  document.getElementById('pf-loader-status').textContent = "Securing transaction tunnel...";
+
+  setTimeout(() => {
+    document.getElementById('pf-loader-status').textContent = "Contacting issuing bank...";
+    setTimeout(() => {
+      // Transition to OTP verification
+      loading.style.display = 'none';
+      document.getElementById('payfast-otp-view').style.display = 'flex';
+    }, 1200);
+  }, 1000);
+}
+
+function startEFT(bankName) {
+  document.getElementById('payfast-main-content').style.display = 'none';
+  const loading = document.getElementById('payfast-loading-view');
+  loading.style.display = 'flex';
+  document.getElementById('pf-loader-status').textContent = `Securing tunnel with ${bankName} portal...`;
+
+  setTimeout(() => {
+    document.getElementById('pf-loader-status').textContent = "Waiting for bank multi-factor approval...";
+    setTimeout(() => {
+      loading.style.display = 'none';
+      document.getElementById('otp-bank-name').textContent = `${bankName.toUpperCase()} MULTI-FACTOR SECURE`;
+      document.getElementById('payfast-otp-view').style.display = 'flex';
+    }, 1200);
+  }, 1000);
+}
+
+function verifyOTP() {
+  const otpInput = document.getElementById('pf-otp-input').value.trim();
+  const errorEl = document.getElementById('pf-otp-error');
+  if (otpInput.length < 4) {
+    errorEl.textContent = "Please enter the valid OTP code.";
+    return;
+  }
+
+  // Success flow
+  errorEl.textContent = '';
+  document.getElementById('payfast-otp-view').style.display = 'none';
+  const loading = document.getElementById('payfast-loading-view');
+  loading.style.display = 'flex';
+  document.getElementById('pf-loader-status').textContent = "Authorizing credit transfer...";
+
+  setTimeout(() => {
+    loading.style.display = 'none';
+    const success = document.getElementById('payfast-success-view');
+    success.style.display = 'flex';
+    
+    const bookingRef = 'SS-' + Math.floor(100000 + Math.random() * 900000);
+    document.getElementById('pf-success-ref').textContent = bookingRef;
+
+    // Commit booking transaction
+    const bookingData = window.tempBooking;
+    if (bookingData) {
+      const bookings = JSON.parse(localStorage.getItem('bookings') || '[]');
+      const newBooking = {
+        id: bookingRef,
+        userEmail: bookingData.userEmail,
+        experience: bookingData.experience,
+        date: bookingData.date,
+        guests: bookingData.guests,
+        total: bookingData.total,
+        price: bookingData.price,
+        location: bookingData.location,
+        status: 'Paid',
+        notes: bookingData.notes,
+        createdAt: new Date().toISOString()
+      };
+      bookings.push(newBooking);
+      localStorage.setItem('bookings', JSON.stringify(bookings));
+
+      // Decrement spots left reactively
+      if (bookingData.eventRef) {
+        bookingData.eventRef.spotsLeft -= bookingData.guests;
+      }
+      initEventsTable(); // Refresh slots count in table
+    }
+
+    setTimeout(() => {
+      closePayFastModal();
+      openPortal(); // Return directly to portal dashboard to display ticket!
+    }, 2800);
+  }, 1500);
+}
+
+function resendOTP() {
+  alert("A new verification code has been dispatched to your registered profile details.");
+}
+
+// Export to window
+window.switchPayFastMethod = switchPayFastMethod;
+window.formatCardNumber = formatCardNumber;
+window.formatCardExpiry = formatCardExpiry;
+window.handlePayFastCardSubmit = handlePayFastCardSubmit;
+window.startEFT = startEFT;
+window.verifyOTP = verifyOTP;
+window.resendOTP = resendOTP;
+
+// ---- GUEST SETTINGS & ACCESSIBILITY CONTROLLERS ------------
+function switchPortalTab(tabName) {
+  // Hide all sections
+  document.querySelectorAll('.portal-tab-content').forEach(el => el.style.display = 'none');
+  document.querySelectorAll('.portal-tab').forEach(el => {
+    el.classList.remove('active');
+    el.style.borderBottom = '3px solid transparent';
+    el.style.opacity = '0.7';
+  });
+
+  // Show active section
+  const activeSec = document.getElementById(`portal-sec-${tabName}`);
+  if (activeSec) activeSec.style.display = 'block';
+
+  // Highlight tab button
+  const activeBtn = document.getElementById(`tab-btn-${tabName}`);
+  if (activeBtn) {
+    activeBtn.classList.add('active');
+    activeBtn.style.borderBottom = '3px solid var(--forest)';
+    activeBtn.style.opacity = '1';
+  }
+
+  // If bookings tab is opened, reload dashboard booking listing
+  if (tabName === 'bookings') {
+    loadPortalDashboard();
+  }
+}
+
+function saveUserPreferences() {
+  const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+  if (!currentUser) return;
+
+  const prefs = [];
+  if (document.getElementById('pref-nature').checked) prefs.push('nature');
+  if (document.getElementById('pref-creative').checked) prefs.push('creative');
+  if (document.getElementById('pref-mindful').checked) prefs.push('mindful');
+  if (document.getElementById('pref-dining').checked) prefs.push('dining');
+  if (document.getElementById('pref-luxury').checked) prefs.push('luxury');
+
+  // Save to currentUser session
+  currentUser.preferences = prefs;
+  localStorage.setItem('currentUser', JSON.stringify(currentUser));
+
+  // Save to accounts list
+  const users = JSON.parse(localStorage.getItem('users') || '[]');
+  const userIndex = users.findIndex(u => u.email === currentUser.email);
+  if (userIndex !== -1) {
+    users[userIndex].preferences = prefs;
+    localStorage.setItem('users', JSON.stringify(users));
+  }
+
+  // Redraw schedule to update matches badges reactively
+  initEventsTable();
+
+  // Show status message
+  const msgEl = document.getElementById('prefs-save-msg');
+  if (msgEl) {
+    msgEl.textContent = 'Preferences saved successfully! ✨';
+    setTimeout(() => { msgEl.textContent = ''; }, 3000);
+  }
+}
+
+function changeTheme(themeName) {
+  if (themeName === 'default') {
+    document.documentElement.removeAttribute('data-theme');
+  } else {
+    document.documentElement.setAttribute('data-theme', themeName);
+  }
+  localStorage.setItem('user-theme', themeName);
+
+  // Update visual selection borders in portal
+  const selectorGrid = document.querySelector('.theme-selector-grid');
+  if (selectorGrid) {
+    selectorGrid.querySelectorAll('button').forEach(btn => {
+      btn.style.border = '1px solid rgba(168,184,165,0.3)';
+    });
+  }
+  // Target clicked button (cross-platform parent finding)
+  const clickedBtn = event ? event.currentTarget : null;
+  if (clickedBtn) {
+    clickedBtn.style.border = '2px solid var(--forest)';
+  }
+}
+
+function changeFontSize(sizeName) {
+  document.documentElement.classList.remove('font-size-large', 'font-size-xlarge');
+  if (sizeName === 'large') {
+    document.documentElement.classList.add('font-size-large');
+  } else if (sizeName === 'xlarge') {
+    document.documentElement.classList.add('font-size-xlarge');
+  }
+  localStorage.setItem('user-font-size', sizeName);
+
+  // Update button layouts
+  document.querySelectorAll('.font-selector-grid button').forEach(btn => {
+    btn.style.border = '1px solid var(--border)';
+  });
+  const activeBtn = document.getElementById(`font-size-${sizeName}`);
+  if (activeBtn) {
+    activeBtn.style.border = '2px solid var(--forest)';
+  }
+}
+
+function toggleReduceMotion(shouldReduce) {
+  if (shouldReduce) {
+    document.body.classList.add('reduced-motion');
+  } else {
+    document.body.classList.remove('reduced-motion');
+  }
+  localStorage.setItem('user-reduce-motion', shouldReduce ? 'true' : 'false');
+}
+
+function initUserSettings() {
+  // 1. Load theme preference
+  const savedTheme = localStorage.getItem('user-theme') || 'default';
+  if (savedTheme !== 'default') {
+    document.documentElement.setAttribute('data-theme', savedTheme);
+  }
+
+  // 2. Load font size accessibility
+  const savedFontSize = localStorage.getItem('user-font-size') || 'standard';
+  if (savedFontSize !== 'standard') {
+    document.documentElement.classList.add(`font-size-${savedFontSize}`);
+  }
+
+  // 3. Load reduced motion accessibility
+  const savedMotion = localStorage.getItem('user-reduce-motion') === 'true';
+  if (savedMotion) {
+    document.body.classList.add('reduced-motion');
+    const cb = document.getElementById('ux-reduce-motion');
+    if (cb) cb.checked = true;
+  }
+}
+
+// Export functions to window
+window.switchPortalTab = switchPortalTab;
+window.saveUserPreferences = saveUserPreferences;
+window.changeTheme = changeTheme;
+window.changeFontSize = changeFontSize;
+window.toggleReduceMotion = toggleReduceMotion;
+window.initUserSettings = initUserSettings;
+
