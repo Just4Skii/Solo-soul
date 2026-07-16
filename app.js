@@ -115,6 +115,24 @@ document.addEventListener('DOMContentLoaded', () => {
   initStatCounters();
   updateNavbarLinks();
   initUserSettings();
+
+  // Character limits on textareas
+  const bookingNotes = document.getElementById('booking-notes');
+  if (bookingNotes) {
+    bookingNotes.addEventListener('input', function() {
+      if (this.value.length > 500) {
+        this.value = this.value.substring(0, 500);
+      }
+    });
+  }
+  const contactMsg = document.getElementById('contact-message');
+  if (contactMsg) {
+    contactMsg.addEventListener('input', function() {
+      if (this.value.length > 1000) {
+        this.value = this.value.substring(0, 1000);
+      }
+    });
+  }
 });
 
 // ---- PRELOADER --------------------------------------------
@@ -682,6 +700,25 @@ function closeBookingModal(event) {
 // Export to window
 window.closeBookingModal = closeBookingModal;
 
+// ---- VALIDATION UTILITIES ------------------------------------
+function validateEmail(email) {
+  if (!email) return false;
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function validateSAPhone(phone) {
+  if (!phone) return false;
+  const clean = phone.replace(/[^\d+]/g, '');
+  return /^(\+27|0)[0-9]{9}$/.test(clean);
+}
+
+function normalizeSAPhone(phone) {
+  const clean = phone.replace(/[^\d+]/g, '');
+  if (clean.startsWith('0')) return '+27' + clean.substring(1);
+  if (clean.startsWith('27') && !clean.startsWith('+27')) return '+' + clean;
+  return clean;
+}
+
 window.handleBookingSubmit = function(e) {
   e.preventDefault();
   const form    = document.getElementById('booking-form');
@@ -737,13 +774,14 @@ window.handleBookingSubmit = function(e) {
   
   if (free) {
     // Process free reservation immediately
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Reserving...';
+    // Generate booking reference before processing
+    const bookingRef = 'SS-' + Date.now().toString(36).toUpperCase().slice(-4) + Math.floor(1000 + Math.random() * 9000);
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing Reservation...';
     btn.disabled = true;
 
     setTimeout(() => {
-      const bookingId = 'SS-' + Math.floor(100000 + Math.random() * 900000);
       const newBooking = {
-        id: bookingId,
+        id: bookingRef,
         userEmail: currentUser.email,
         experience: experience,
         date: date,
@@ -751,7 +789,7 @@ window.handleBookingSubmit = function(e) {
         total: 0,
         price: 'FREE',
         location: activeEvent.location,
-        status: 'Free',
+        status: 'Booked',
         notes: notes,
         createdAt: new Date().toISOString()
       };
@@ -766,17 +804,25 @@ window.handleBookingSubmit = function(e) {
       // Refresh event tables
       initEventsTable();
 
+      // Show success with reference
+      const successMsg = document.getElementById('booking-success');
+      if (successMsg) {
+        successMsg.innerHTML = `<i class="fas fa-check-circle"></i> Reserved! Ref: <strong>${bookingRef}</strong>`;
+      }
       success?.classList.add('show');
-      btn.style.display = 'none';
+      btn.innerHTML = '<i class="fas fa-check-circle"></i> Reservation Confirmed!';
+      btn.disabled = true;
 
       setTimeout(() => {
         form.reset();
         success?.classList.remove('show');
+        btn.innerHTML = '<i class="fas fa-check-circle"></i> Reserved!';
         btn.style.display = '';
         btn.disabled = false;
-        closeBookingModal();
-        openPortal(); // Load dashboard to see ticket
-      }, 1800);
+        // Don't auto-close modal — let user read reference
+        // closeBookingModal();
+        // openPortal();
+      }, 8000); // Extended: 8 seconds (was 1.8s)
     }, 1000);
   } else {
     // Paid booking: Open PayFast Direct Checkout
@@ -868,6 +914,26 @@ window.handleContactSubmit = function(e) {
   });
   if (!valid) return;
 
+  // Enhanced email validation
+  const emailInput = document.getElementById('contact-email');
+  if (emailInput && !validateEmail(emailInput.value.trim())) {
+    emailInput.style.borderColor = '#e74c3c';
+    emailInput.focus();
+    const errorDiv = document.getElementById('contact-error');
+    if (errorDiv) errorDiv.textContent = 'Please enter a valid email address (e.g. name@domain.com)';
+    return;
+  }
+
+  // SA phone validation
+  const phoneInput = document.getElementById('contact-phone');
+  if (phoneInput && phoneInput.value.trim() && !validateSAPhone(phoneInput.value.trim())) {
+    phoneInput.style.borderColor = '#e74c3c';
+    phoneInput.focus();
+    const errorDiv = document.getElementById('contact-error');
+    if (errorDiv) errorDiv.textContent = 'Please enter a valid SA number: +27821234567 or 0736192693';
+    return;
+  }
+
   btn.textContent = 'Sending…';
   btn.disabled = true;
 
@@ -955,8 +1021,10 @@ window.closeAuthModal = closeAuthModal;
 window.closePortalModal = closePortalModal;
 window.switchAuthTab = switchAuthTab;
 
-// ---- AUTHENTICATION HANDLERS --------------------------------
-function handleRegisterSubmit(e) {
+// ---- ENHANCED AUTHENTICATION HANDLERS -----------------------
+
+// Register with Supabase Auth (SECURITY FIX #1)
+async function handleRegisterSubmit(e) {
   e.preventDefault();
   const name = document.getElementById('register-name').value.trim();
   const email = document.getElementById('register-email').value.trim().toLowerCase();
@@ -964,36 +1032,69 @@ function handleRegisterSubmit(e) {
   const password = document.getElementById('register-password').value;
   const errorEl = document.getElementById('register-error');
 
+  // Input validation
   if (!name || !email || !whatsapp || !password) {
     errorEl.textContent = "Please fill in all registration fields.";
     return;
   }
 
-  if (password.length < 6) {
-    errorEl.textContent = "Password must be at least 6 characters.";
+  if (password.length < 8) {
+    errorEl.textContent = "Password must be at least 8 characters for security.";
     return;
   }
 
-  const users = JSON.parse(localStorage.getItem('users') || '[]');
-  const userExists = users.some(u => u.email === email);
-  if (userExists) {
-    errorEl.textContent = "Email address already registered.";
+  // South African phone validation
+  const cleanPhone = whatsapp.replace(/[^\d+]/g, '');
+  const validSAFormat = /^(\+27|0)[0-9]{9}$/.test(cleanPhone);
+  if (!validSAFormat) {
+    errorEl.textContent = 'Enter valid South African number: +27821234567 or 0821234567';
     return;
   }
 
-  // Create and save account
-  const newUser = { name, email, phone: whatsapp, password };
-  users.push(newUser);
-  localStorage.setItem('users', JSON.stringify(users));
+  try {
+    // Use Supabase Auth instead of localStorage (SECURITY FIX)
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email: email,
+      password: password,
+      options: {
+        data: {
+          name: name,
+          phone: cleanPhone,
+          preferred_categories: []
+        }
+      }
+    });
 
-  // Log in immediately
-  localStorage.setItem('currentUser', JSON.stringify({ name, email, phone: whatsapp }));
-  updateNavbarLinks();
-  closeAuthModal();
-  openPortal(); // Opens dashboard immediately
+    if (authError) {
+      console.error('Auth Error:', authError);
+      errorEl.textContent = authError.message || 'Registration failed';
+      return;
+    }
+
+    if (!authData?.session) {
+      errorEl.textContent = 'Registration failed. Please try again.';
+      return;
+    }
+
+    updateNavbarLinks();
+    closeAuthModal();
+
+    // Open dashboard
+    const currentUser = {
+      name: authData.session.user.user_metadata.name || name,
+      email: authData.session.user.email || email,
+      phone: authData.session.user.user_metadata.phone || cleanPhone
+    };
+    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    openPortal();
+
+  } catch (err) {
+    console.error('Network error:', err);
+    errorEl.textContent = 'Network error. Check connection.';
+  }
 }
 
-function handleLoginSubmit(e) {
+async function handleLoginSubmit(e) {
   e.preventDefault();
   const email = document.getElementById('login-email').value.trim().toLowerCase();
   const password = document.getElementById('login-password').value;
@@ -1004,21 +1105,44 @@ function handleLoginSubmit(e) {
     return;
   }
 
-  const users = JSON.parse(localStorage.getItem('users') || '[]');
-  const user = users.find(u => u.email === email && u.password === password);
-  if (!user) {
-    errorEl.textContent = "Invalid email or password.";
-    return;
-  }
+  try {
+    // Use Supabase Auth for secure login (SECURITY FIX)
+    const { error: authError } = await supabase.auth.signInWithPassword({
+      email: email,
+      password: password
+    });
 
-  // Log in session
-  localStorage.setItem('currentUser', JSON.stringify({ name: user.name, email: user.email, phone: user.phone }));
-  updateNavbarLinks();
-  closeAuthModal();
-  openPortal(); // Opens dashboard immediately
+    if (authError) {
+      console.error('Login error:', authError);
+      errorEl.textContent = "Invalid email or password.";
+      return;
+    }
+
+    updateNavbarLinks();
+    closeAuthModal();
+
+    // Get user profile after login
+    const { data: { session } } = await supabase.auth.getSession();
+    const currentUser = {
+      name: session.user.user_metadata.name || 'Guest',
+      email: session.user.email,
+      phone: session.user.user_metadata.phone || ''
+    };
+    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    openPortal(); // Opens dashboard immediately
+
+  } catch (err) {
+    console.error('Network error:', err);
+    errorEl.textContent = 'Network error during login.';
+  }
 }
 
-function handleLogout() {
+async function handleLogout() {
+  try {
+    await supabase.auth.signOut();
+  } catch (err) {
+    console.error('Logout error:', err);
+  }
   localStorage.removeItem('currentUser');
   updateNavbarLinks();
   closePortalModal();
