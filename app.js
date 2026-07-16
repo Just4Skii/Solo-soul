@@ -196,7 +196,8 @@ function initSmoothScroll() {
       const target = document.querySelector(href);
       if (!target) return;
       e.preventDefault();
-      const offset = 80;
+      // Mobile-friendly offset: larger on mobile for better header clearance
+      const offset = window.innerWidth <= 768 ? 60 : 80;
       const top = target.getBoundingClientRect().top + window.scrollY - offset;
       window.scrollTo({ top, behavior: 'smooth' });
     });
