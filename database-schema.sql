@@ -135,3 +135,54 @@ create policy "bookings_own_only" on public.bookings
 -- Reservations: Users can manage own reservations
 create policy "reservations_own_only" on public.booking_reservations
   for all using (auth.uid() = user_id);
+
+-- ============================================================
+-- ADMIN SYSTEM
+-- ============================================================
+
+-- Admin users table (separate from regular users for better security)
+create table if not exists public.admin_users (
+  id uuid primary key default uuid_generate_v4(),
+  email text unique not null,
+  password_hash text not null,
+  name text not null,
+  role text not null default 'admin' check (role in ('admin', 'superadmin')),
+  created_at timestamp with time zone default timezone('utc'::text, now()),
+  last_login timestamp with time zone
+);
+
+-- Enable RLS on admin_users
+alter table public.admin_users enable row level security;
+
+-- Only allow select from admin_users if you're an admin (prevents enumeration)
+create policy "admin_users_self_only" on public.admin_users
+  for select using (auth.uid() = id);
+
+-- ============================================================
+-- TICKET VERIFICATION SYSTEM (Gemini-powered)
+-- ============================================================
+
+-- Ticket verifications (cached from Gemini checks)
+create table if not exists public.ticket_verifications (
+  id uuid primary key default uuid_generate_v4(),
+  event_title text not null,
+  source_url text not null,
+  status text not null check (status in ('verified', 'dead', 'redirected')),
+  suggested_url text,
+  checked_at timestamp with time zone default timezone('utc'::text, now())
+);
+
+-- Index for quick lookups
+create index if not exists idx_ticket_verifications_title on public.ticket_verifications(event_title);
+create index if not exists idx_ticket_verifications_checked on public.ticket_verifications(checked_at);
+
+-- ============================================================
+-- EVENT IMAGES & ENHANCEMENTS
+-- ============================================================
+
+-- Add new columns to events table (if not already present)
+-- Image stored in Supabase Storage bucket 'event-images'
+alter table public.events add column if not exists image_url text;
+alter table public.events add column if not exists description text;
+alter table public.events add column if not exists is_featured boolean default false;
+alter table public.events add column if not exists updated_by uuid references public.admin_users(id);

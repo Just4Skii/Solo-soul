@@ -98,8 +98,118 @@ const cityEvents = [
   { title: 'Hilton Arts Festival 2026',     date: '7–9 Aug 2026',        venue: 'Hilton College, PMB',        link: 'https://tickets.computicket.com/search?q=Hilton+Arts+Festival', icon: '🎨', source: 'Computicket'    },
 ];
 
+// ---- DATABASE EVENT LOADER ---------------------------------
+// Replace static soloEvents with DB-backed data when available
+let dbEventsLoaded = false;
+
+async function loadEventsFromDB() {
+  try {
+    if (typeof SupabaseService !== 'undefined' && SupabaseService.fetchEvents) {
+      const dbEvents = await SupabaseService.fetchEvents();
+      if (dbEvents && dbEvents.length > 0) {
+        // Map DB events to soloEvents format
+        const mapped = dbEvents.map(e => ({
+          date: new Date(e.date).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' }),
+          exp: e.event_name,
+          location: e.location,
+          duration: e.duration || 'TBD',
+          price: e.is_free ? 'FREE' : (e.price || 'FREE'),
+          spots: e.spots_total || 10,
+          category: e.category || 'mindful',
+          spotsLeft: e.spots_left || e.spots_total || 10,
+          isFree: e.is_free || false,
+          id: e.id,
+          image_url: e.image_url || null,
+          description: e.description || null,
+          is_featured: e.is_featured || false,
+        }));
+        // Merge with existing hardcoded events (DB events override same-date+name ones)
+        const existingKeys = new Set(soloEvents.map(e => e.date + '::' + e.exp));
+        const merged = [...mapped, ...soloEvents.filter(e => !existingKeys.has(e.date + '::' + e.exp))];
+        soloEvents.length = 0;
+        soloEvents.push(...merged);
+        dbEventsLoaded = true;
+        console.log('✅ Events loaded from database');
+        return;
+      }
+    }
+    console.log('ℹ️ Using hardcoded events (DB unavailable)');
+  } catch (err) {
+    console.warn('⚠️ DB events failed, using hardcoded:', err.message);
+  }
+}
+
+// ---- TICKET VERIFICATION CACHE -----------------------------
+// Cache verified status from Gemini-backed API
+let ticketVerifications = {};
+let verificationCacheTime = 0;
+const CACHE_TTL = 12 * 60 * 60 * 1000; // 12 hours
+
+async function loadTicketVerifications() {
+  try {
+    // Try localStorage cache first
+    const cached = localStorage.getItem('ticketVerifications');
+    const cacheTime = parseInt(localStorage.getItem('ticketVerificationTime') || '0');
+    if (cached && cacheTime && (Date.now() - cacheTime < CACHE_TTL)) {
+      ticketVerifications = JSON.parse(cached);
+      console.log('✅ Using cached ticket verifications');
+      return;
+    }
+
+    // Fetch fresh verification data from API
+    const resp = await fetch('/api/tickets/verify');
+    const data = await resp.json();
+    if (data.results) {
+      data.results.forEach(r => {
+        ticketVerifications[r.title] = r;
+      });
+      // Cache
+      localStorage.setItem('ticketVerifications', JSON.stringify(ticketVerifications));
+      localStorage.setItem('ticketVerificationTime', Date.now().toString());
+      verificationCacheTime = Date.now();
+      console.log('✅ Ticket verifications loaded from API');
+    }
+  } catch (err) {
+    console.warn('⚠️ Ticket verification fetch failed:', err.message);
+    // Use cached data if API fails
+    if (localStorage.getItem('ticketVerifications')) {
+      ticketVerifications = JSON.parse(localStorage.getItem('ticketVerifications'));
+    }
+  }
+}
+
+// Get verification status for a city event
+function getTicketStatus(title) {
+  const v = ticketVerifications[title];
+  if (!v) return { badge: '', text: 'Check tickets', link: null };
+  if (v.status === 'dead') {
+    return {
+      badge: '<span class="verify-badge dead" title="' + (v.notes || 'Link may be dead') + '">⚠️ Verify</span>',
+      text: 'Find Tickets',
+      link: v.effectiveUrl || null,
+    };
+  }
+  if (v.status === 'redirected') {
+    return {
+      badge: '<span class="verify-badge redirected" title="Link has moved">🔀 Updated</span>',
+      text: 'Get Tickets',
+      link: v.effectiveUrl || v.originalUrl,
+    };
+  }
+  return {
+    badge: '<span class="verify-badge verified" title="Link verified">✅ Verified</span>',
+    text: 'Get Tickets',
+    link: v.effectiveUrl || v.originalUrl,
+  };
+}
+
 // ---- DOM READY --------------------------------------------
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  // Load events from Supabase (fall back to hardcoded soloEvents)
+  await loadEventsFromDB();
+  // Load cached ticket verification status
+  await loadTicketVerifications();
+
   initPreloader();
   initAOS();
   initNavbar();
@@ -336,17 +446,18 @@ function initCityEvents() {
   if (!grid) return;
 
   cityEvents.forEach(ev => {
+    const v = getTicketStatus(ev.title);
     const card = document.createElement('div');
     card.className = 'city-event-card';
     card.innerHTML = `
       <div class="city-event-icon">${ev.icon}</div>
-      <h5>${ev.title}</h5>
+      <h5>${ev.title} ${v.badge}</h5>
       <div class="ced"><i class="fas fa-calendar" style="margin-right:6px;"></i>${ev.date}</div>
       <div class="cev"><i class="fas fa-map-marker-alt" style="margin-right:6px;"></i>${ev.venue}</div>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;">
         <span style="font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,0.35);">${ev.source}</span>
-        <a href="${ev.link}" target="_blank" rel="noopener noreferrer" class="city-event-link">
-          Tickets <i class="fas fa-external-link-alt" style="font-size:10px;"></i>
+        <a href="${v.link || ev.link}" target="_blank" rel="noopener noreferrer" class="city-event-link">
+          ${v.text} <i class="fas fa-external-link-alt" style="font-size:10px;"></i>
         </a>
       </div>
     `;

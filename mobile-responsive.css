@@ -252,3 +252,47 @@ textarea:focus {
     margin-bottom: 20px;
   }
 }
+
+/* ============================================ */
+/* 6. Ticket Verification Badges               */
+/* ============================================ */
+
+.verify-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  margin-left: 6px;
+  vertical-align: middle;
+  letter-spacing: 0.3px;
+}
+
+.verify-badge.verified {
+  background: rgba(22, 163, 74, 0.15);
+  color: #16a34a;
+}
+
+.verify-badge.dead {
+  background: rgba(220, 38, 38, 0.15);
+  color: #dc2626;
+  animation: pulse-warning 2s infinite;
+}
+
+.verify-badge.redirected {
+  background: rgba(245, 158, 11, 0.15);
+  color: #d97706;
+}
+
+@keyframes pulse-warning {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+/* City event card enhancements */
+.city-event-card h5 {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}

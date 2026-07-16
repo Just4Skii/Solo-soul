@@ -1,6 +1,13 @@
 {
   "outputDirectory": ".",
   "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/$1" },
     { "source": "/(.*)", "destination": "/index.html" }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/verify-listings",
+      "schedule": "0 */12 * * *"
+    }
   ]
 }

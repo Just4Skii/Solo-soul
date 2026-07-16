@@ -1,6 +1,6 @@
 {
   "name": "solo-soul-experiences",
-  "version": "1.0.0",
+  "version": "2.2.0",
   "private": true,
   "scripts": {
     "dev": "vercel dev",
@@ -8,6 +8,9 @@
     "deploy": "vercel --prod"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2"
+    "@google/generative-ai": "^0.21.0",
+    "@supabase/supabase-js": "^2",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2"
   }
 }
