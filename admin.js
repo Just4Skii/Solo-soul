@@ -241,12 +241,13 @@ function esc(value) {
 
 async function loadOperations() {
   try {
-    const [refunds, support, payments, settlements, emails] = await Promise.all([
+    const [refunds, support, payments, settlements, emails, audit] = await Promise.all([
       api('POST', API.bookings, { action: 'refunds' }),
       api('POST', API.bookings, { action: 'support' }),
       api('POST', API.bookings, { action: 'payments' }),
       api('POST', API.bookings, { action: 'settlements' }),
       api('POST', API.bookings, { action: 'emails' }),
+      api('POST', API.bookings, { action: 'settlementAudit' }),
     ]);
 
     $('refunds-tbody').innerHTML = (refunds.refunds || []).length ? refunds.refunds.map(r => `<tr>
@@ -279,6 +280,8 @@ async function loadOperations() {
     </tr>`).join('') : '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text-muted)">No settlements yet.</td></tr>';
 
     $('emails-tbody').innerHTML = (emails.emails || []).length ? emails.emails.map(e => `<tr><td>${esc(e.template)}</td><td>${esc(e.recipient)}</td><td><span class="status-badge ${esc(e.status)}">${esc(e.status)}</span></td><td style="max-width:260px">${esc(e.error || '-')}</td><td>${e.created_at ? formatDate(e.created_at) : '-'}</td></tr>`).join('') : '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text-muted)">No email attempts yet.</td></tr>';
+    const auditBox = $('settlement-audit');
+    if (auditBox) auditBox.innerHTML = (audit.audit || []).length ? audit.audit.map(x => `<div class="recent-item"><span><strong>${esc(x.action)}</strong> · ${esc(x.provider || '')} ${x.reference ? '· ' + esc(x.reference) : ''}</span><span>${x.previous_status || '—'} → ${x.new_status || '—'} · R${Number(x.amount || 0).toFixed(2)} · ${esc(x.actor_email || x.actor_id || 'system')}</span></div>`).join('') : '<p style="color:var(--text-muted);font-size:13px">No settlement audit entries yet.</p>';
     $('reconcile-btn').onclick = runReconcile;
     $('ops-refresh').onclick = loadOperations;
   } catch (e) { toast('Failed to load operations', 'error'); }
@@ -330,7 +333,9 @@ window.adminSupportReply = async function(id, status) {
 };
 
 window.markSettled = async function(id) {
-  const res = await api('POST', API.bookings, { action: 'settle', id });
+  const reason = prompt('Approval note for this settlement (required):');
+  if (!reason) return;
+  const res = await api('POST', API.bookings, { action: 'settle', id, reason });
   if (res.error) return toast(res.error, 'error');
   toast('Settlement marked paid', 'success');
   loadOperations();

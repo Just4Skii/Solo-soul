@@ -20,6 +20,7 @@ async function confirmBooking(res, data) {
 
   const { data: booking, error } = await supabase.from('bookings').select('*').eq('booking_ref', reference).single();
   if (error || !booking) return json(res, 200, { received: true });
+  if (booking.status === 'Refunded') return json(res, 200, { received: true, ignored: 'refunded' });
   if (booking.status === 'Paid') {
     const { data: existing } = await supabase.from('payments').select('id').eq('provider_reference', reference).maybeSingle();
     if (!existing) {
@@ -37,7 +38,7 @@ async function confirmBooking(res, data) {
     status: 'Paid',
     payment_intent_id: String(data.id || ''),
     ticket_code: ticket,
-  }).eq('id', booking.id).eq('status', 'Pending');
+  }).eq('id', booking.id).in('status', ['Pending', 'Cancelled']);
   if (updateError) return json(res, 500, { error: 'Failed to confirm booking' });
 
   const fee = Math.round(Number(booking.total) * (FEE_PERCENT / 100) * 100) / 100;

@@ -97,6 +97,8 @@ export default async function handler(req, res) {
         if (decision === 'reject') {
           const { data, error } = await supabase.from('refunds').update({ status: 'rejected', admin_note: note || null, updated_at: new Date().toISOString() }).eq('id', id).select().single();
           if (error) throw error;
+          const { data: settlement } = await supabase.from('settlements').select('*').eq('booking_id', refund.booking_id).maybeSingle();
+          await supabase.from('settlement_audit').insert({ settlement_id: settlement?.id || null, booking_id: refund.booking_id, action: 'refund_rejected', previous_status: 'requested', new_status: 'rejected', amount: refund.amount, provider: settlement?.provider_name || 'Solo Soul Experiences', reference: settlement?.reference || null, actor_id: admin.id, actor_email: admin.email, reason: note || 'Refund rejected' });
           return res.json({ refund: data });
         }
         const { data: payment } = refund.payment_id
@@ -145,6 +147,12 @@ export default async function handler(req, res) {
         return res.json({ ticket: data });
       }
 
+      case 'settlementAudit': {
+        const { data, error } = await supabase.from('settlement_audit').select('*').order('created_at', { ascending: false }).limit(200);
+        if (error) throw error;
+        return res.json({ audit: data || [] });
+      }
+
       case 'settlements': {
         const { data, error } = await supabase.from('settlements').select('*').order('created_at', { ascending: false }).limit(200);
         if (error) throw error;
@@ -153,8 +161,15 @@ export default async function handler(req, res) {
 
       case 'settle': {
         const { id } = body;
+        const { data: before } = await supabase.from('settlements').select('*').eq('id', id).single();
+        if (!before) return res.status(404).json({ error: 'Settlement not found' });
         const { data, error } = await supabase.from('settlements').update({ status: 'paid', paid_at: new Date().toISOString() }).eq('id', id).select().single();
         if (error) throw error;
+        await supabase.from('settlement_audit').insert({
+          settlement_id: id, booking_id: before.booking_id, action: 'marked_paid', previous_status: before.status, new_status: 'paid',
+          amount: before.provider_amount, provider: before.provider_name, reference: before.reference,
+          actor_id: admin.id, actor_email: admin.email, reason: body.reason || 'Settlement approved and marked paid', metadata: { gross: before.gross, platform_fee: before.platform_fee },
+        });
         return res.json({ settlement: data });
       }
 
@@ -181,35 +196,6 @@ export default async function handler(req, res) {
           summary: { paystackTransactions: remote.length, internalPayments: (payments || []).length, missingInternal: missingInternal.length, missingProvider: missingProvider.length },
           missingInternal, missingProvider,
         });
-      }
-
-      case 'migrateAudit': {
-        if (!process.env.SETUP_TOKEN || req.headers['x-setup-token'] !== process.env.SETUP_TOKEN) return res.status(403).json({ error: 'Forbidden' });
-        const cs = process.env.POSTGRES_URL_NON_POOLING || process.env.DATABASE_URL || process.env.POSTGRES_URL;
-        if (!cs) return res.status(500).json({ error: 'No Postgres connection string' });
-        const u = new URL(cs); u.searchParams.delete('sslmode'); u.searchParams.delete('ssl');
-        const c = new pg.Client({ connectionString: u.toString(), ssl: { rejectUnauthorized: false }, connectionTimeoutMillis: 15000 });
-        await c.connect();
-        await c.query(`create table if not exists public.settlement_audit (
-          id uuid primary key default gen_random_uuid(),
-          settlement_id uuid,
-          booking_id uuid,
-          action text not null,
-          previous_status text,
-          new_status text,
-          amount numeric,
-          provider text,
-          reference text,
-          actor_id text,
-          actor_email text,
-          reason text,
-          metadata jsonb,
-          created_at timestamptz default now()
-        );
-        alter table public.settlement_audit enable row level security;
-        create index if not exists settlement_audit_settlement_idx on public.settlement_audit(settlement_id);`);
-        await c.end();
-        return res.json({ ok: true });
       }
 
       default:
