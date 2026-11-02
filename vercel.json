@@ -4,10 +4,6 @@
     {
       "source": "/api/(.*)",
       "destination": "/api/$1"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
     }
   ],
   "crons": [
@@ -43,7 +39,7 @@
       ]
     },
     {
-      "source": "/admin.html",
+      "source": "/admin",
       "headers": [
         {
           "key": "X-Robots-Tag",
@@ -51,5 +47,7 @@
         }
       ]
     }
-  ]
+  ],
+  "cleanUrls": true,
+  "trailingSlash": false
 }
