@@ -5,6 +5,7 @@ const params = new URLSearchParams(window.location.search);
 const initialTicket = params.get('ticket') || params.get('ref') || '';
 const initialEvent = params.get('event') || '';
 const initialExperience = params.get('experience') || '';
+const initialBook = params.get('book') || '';
 
 function App() {
   const [supabase, setSupabase] = useState(null);
@@ -18,6 +19,7 @@ function App() {
   const [thread, setThread] = useState(null);
   const [ticket, setTicket] = useState(null);
   const [eventDetail, setEventDetail] = useState(null);
+  const [bookExperience, setBookExperience] = useState(null);
   const [ticketEmail, setTicketEmail] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -34,6 +36,7 @@ function App() {
       if (initialTicket) loadTicket(client, data.session, '');
       if (initialEvent) loadExternalEvent(initialEvent);
       if (initialExperience) loadExperience(initialExperience);
+      if (initialBook) loadBookingExperience(initialBook);
     })();
   }, []);
 
@@ -59,6 +62,13 @@ function App() {
       const found = (data.events || []).find(e => e.id === id);
       if (!found) throw new Error('Event not found');
       setEventDetail({ type: 'external', ...found });
+    } catch (e) { setError(e.message); }
+  }
+
+  async function loadBookingExperience(id) {
+    try {
+      const data = await api('experience', { id });
+      setBookExperience(data.experience);
     } catch (e) { setError(e.message); }
   }
 
@@ -167,6 +177,8 @@ function App() {
   }
 
   if (ticket) return <Shell><Ticket booking={ticket} /></Shell>;
+
+  if (bookExperience) return <Shell><BookingView experience={bookExperience} session={session} /></Shell>;
 
   if (eventDetail) return <Shell><EventDetail event={eventDetail} /></Shell>;
 
@@ -369,7 +381,7 @@ function EventDetail({ event }) {
         <p>{(external ? event.description : event.description) || 'An intimate Solo Soul experience in Durban. Full details and joining instructions are shared after booking.'}</p>
         <div className="portal-actions">
           {external && event.url && <a className="portal-btn" href={event.url} target="_blank" rel="noreferrer">Tickets ↗</a>}
-          {!external && <a className="portal-btn" href="/experiences.html">Book this experience</a>}
+          {!external && <a className="portal-btn" href={'/portal/?book=' + event.id}>Book this experience</a>}
           <a className="portal-btn ghost" href="/events">Back to events</a>
         </div>
         <div className="portal-share">
@@ -384,15 +396,85 @@ function EventDetail({ event }) {
   );
 }
 
+
+function BookingView({ experience, session }) {
+  const [message, setMessage] = useState('');
+  const [done, setDone] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  async function submit(e) {
+    e.preventDefault(); setMessage(''); setLoading(true);
+    const form = new FormData(e.target);
+    const payload = {
+      eventId: experience.id,
+      name: form.get('name'),
+      email: form.get('email'),
+      phone: form.get('phone'),
+      guests: Number(form.get('guests')),
+      notes: form.get('notes'),
+    };
+    const headers = { 'Content-Type': 'application/json' };
+    if (session) headers.Authorization = 'Bearer ' + session.access_token;
+    try {
+      if (experience.is_free) {
+        const res = await fetch('/api/app', { method: 'POST', headers, body: JSON.stringify({ action: 'create-free', ...payload }) });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Booking failed');
+        setDone(data.booking);
+      } else {
+        const res = await fetch('/api/paystack/initialize', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        const data = await res.json();
+        if (!res.ok || !data.authorization_url) throw new Error(data.error || 'Payment could not start');
+        window.location.href = data.authorization_url;
+      }
+    } catch (err) { setMessage(err.message); }
+    setLoading(false);
+  }
+
+  if (done) return (
+    <div className="portal-card portal-narrow">
+      <h1>You're booked</h1>
+      <p>{done.event_name} · {done.event_date} · {done.event_location}</p>
+      <p>Reference <strong>{done.booking_ref}</strong></p>
+      <div className="portal-actions"><a className="portal-btn" href={'/portal/?ticket=' + done.booking_ref}>View ticket</a><a className="portal-btn ghost" href="/portal/">My bookings</a></div>
+    </div>
+  );
+
+  return (
+    <div className="portal-booking">
+      <div className="portal-card">
+        <span className="portal-badge">{experience.category}</span>
+        <h1>{experience.event_name}</h1>
+        <p>{experience.date} · {experience.location}</p>
+        <p>{experience.description || 'A small-group Solo Soul experience in Durban.'}</p>
+        <strong className="portal-total">{experience.is_free ? 'FREE' : experience.price}</strong>
+      </div>
+      <form className="portal-card" onSubmit={submit}>
+        <h2>Book your place</h2>
+        <label>Full name<input name="name" required defaultValue={session?.user?.user_metadata?.full_name || ''} /></label>
+        <label>Email<input name="email" type="email" required defaultValue={session?.user?.email || ''} /></label>
+        <label>Phone / WhatsApp<input name="phone" required /></label>
+        <label>Guests<select name="guests" defaultValue="1">{[1,2,3,4].map(n => <option key={n} value={n}>{n} guest{n > 1 ? 's' : ''}</option>)}</select></label>
+        <label>Notes<textarea name="notes" rows="3" placeholder="Dietary, access or anything else…" /></label>
+        <button className="portal-btn" disabled={loading}>{loading ? 'Please wait…' : (experience.is_free ? 'Reserve my place' : 'Pay & book')}</button>
+        {message && <p className="portal-error">{message}</p>}
+        <p style={{ fontSize: 12 }}>By booking you accept the <a href="/terms">terms</a> and <a href="/privacy">privacy policy</a>.</p>
+      </form>
+    </div>
+  );
+}
+
 function Shell({ children, user, onSignOut }) {
   return (
     <div className="portal-shell">
       <header className="portal-header">
         <a href="/" className="portal-brand"><img src="/assets/images/logo.png" alt="" /> Solo Soul</a>
-        <nav><a href="/">Home</a><a href="/experiences.html">Experiences</a><a href="/help.html">Help</a></nav>
+        <nav><a href="/about">About</a><a href="/experiences">Experiences</a><a href="/events">Events</a><a href="/gallery">Gallery</a><a href="/journal">Journal</a><a href="/contact">Contact</a></nav>
+        <a className="portal-header-cta" href="/experiences">Book Now</a>
         {user && <div className="portal-user"><span>{user.email}</span><button onClick={onSignOut}>Sign out</button></div>}
       </header>
       <main className="portal-main">{children}</main>
+      <footer className="portal-footer"><div><strong>Solo Soul Experiences</strong><span>Durban, KwaZulu-Natal</span></div><div><a href="/about">About</a><a href="/help">Help</a><a href="/contact">Contact</a></div><div><a href="mailto:SSoulZAR@outlook.com">SSoulZAR@outlook.com</a><span>© {new Date().getFullYear()} Solo Soul</span></div></footer>
     </div>
   );
 }
