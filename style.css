@@ -3382,3 +3382,15 @@ html, body { max-width: 100%; overflow-x: hidden; }
 
 /* Keep the demo notice full width inside the checkout grid */
 .payfast-body > div[style*="FFF4E5"] { grid-column: 1 / -1; margin: 18px 24px 0; }
+
+
+/* Advanced event filters */
+.event-smart-filters{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:18px 0 26px;padding:14px;background:#fff;border:1px solid rgba(46,94,78,.12);border-radius:14px}
+.event-smart-filters input,.event-smart-filters select{font:inherit;font-size:13px;padding:10px 12px;border:1px solid rgba(46,94,78,.2);border-radius:9px;background:#fff;color:#2E5E4E;min-width:0}
+.event-smart-filters input{flex:1 1 220px}
+.event-smart-filters select{flex:0 1 150px}
+.event-count{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#5f6b64;margin-left:auto;white-space:nowrap}
+@media(max-width:640px){.event-smart-filters{padding:12px}.event-smart-filters select{flex:1 1 45%}.event-count{width:100%;margin-left:0}}
+
+/* Anchor offset for the fixed navigation */
+section[id], div[id="events"] { scroll-margin-top: 92px; }

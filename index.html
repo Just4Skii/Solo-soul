@@ -30,8 +30,8 @@
   <!-- AOS Animation Library -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" />
 
-  <link rel="stylesheet" href="style.css?v=20261102h" />
-  <link rel="stylesheet" href="mobile-responsive.css?v=20261102h" />
+  <link rel="stylesheet" href="style.css?v=20261102live3" />
+  <link rel="stylesheet" href="mobile-responsive.css?v=20261102live3" />
   <link rel="preload" as="image" href="assets/images/hero_ocean_sunrise.webp" fetchpriority="high" />
 </head>
 <body>
@@ -121,29 +121,13 @@
           <i class="fas fa-compass"></i> Explore Events
         </a>
       </div>
-      <div class="hero-stats">
-        <div class="hero-stat">
-          <div class="stat-row">
-            <span class="stat-num" data-target="12">0</span>
-          </div>
-          <span class="stat-label">Curated experiences</span>
-        </div>
+      <div class="hero-stats" hidden>
+        <div class="hero-stat"><div class="stat-row"><span class="stat-num">0</span></div><span class="stat-label">Live listings</span></div>
         <div class="hero-stat-divider"></div>
-        <div class="hero-stat">
-          <div class="stat-row">
-            <span class="stat-num" data-target="8">0</span>
-          </div>
-          <span class="stat-label">Partner venues</span>
-        </div>
+        <div class="hero-stat"><div class="stat-row"><span class="stat-num">0</span></div><span class="stat-label">Venues</span></div>
         <div class="hero-stat-divider"></div>
-        <div class="hero-stat">
-          <div class="stat-row">
-            <span class="stat-num" data-target="5">0</span>
-          </div>
-          <span class="stat-label">Experience styles</span>
-        </div>
+        <div class="hero-stat"><div class="stat-row"><span class="stat-num">0</span></div><span class="stat-label">Sources</span></div>
       </div>
-    </div>
 
     <a href="#about" class="hero-scroll" aria-label="Scroll to about section">
       <span class="scroll-label">Scroll to explore</span>
@@ -365,17 +349,44 @@
       <div class="section-header" data-aos="fade-up">
         <div class="section-eyebrow">What's On</div>
         <h2 class="section-title">Upcoming <em>Experiences</em></h2>
-        <p class="section-subtitle">Our carefully curated calendar of solo soul events in Durban. Reserve your spot before they fill up.</p>
+        <p class="section-subtitle">Live listings from Durban’s event calendars, alongside our own hosted experiences. Tickets open on the original source.</p>
       </div>
 
       <!-- Filter Tabs -->
       <div class="event-filters" data-aos="fade-up">
-        <button class="filter-btn active" data-filter="all" id="filter-all">All Events</button>
-        <button class="filter-btn" data-filter="dining" id="filter-dining">Dining</button>
-        <button class="filter-btn" data-filter="nature" id="filter-nature">Nature</button>
-        <button class="filter-btn" data-filter="creative" id="filter-creative">Creative</button>
-        <button class="filter-btn" data-filter="luxury" id="filter-luxury">Luxury</button>
-        <button class="filter-btn" data-filter="mindful" id="filter-mindful">Mindful</button>
+        <button class="filter-btn active" data-filter="all" id="filter-all">All</button>
+        <button class="filter-btn" data-filter="wellness">Wellness</button>
+        <button class="filter-btn" data-filter="creative">Creative</button>
+        <button class="filter-btn" data-filter="food">Food &amp; Drink</button>
+        <button class="filter-btn" data-filter="outdoors">Outdoors</button>
+        <button class="filter-btn" data-filter="music">Music</button>
+        <button class="filter-btn" data-filter="social">Social</button>
+        <button class="filter-btn" data-filter="markets">Markets</button>
+        <button class="filter-btn" data-filter="fitness">Fitness</button>
+        <button class="filter-btn" data-filter="learning">Learning</button>
+        <button class="filter-btn" data-filter="luxury">Luxury</button>
+      </div>
+
+      <div class="event-smart-filters" data-aos="fade-up">
+        <input type="search" id="event-search" placeholder="Search events or venues..." aria-label="Search events" />
+        <select id="event-source" aria-label="Filter by source">
+          <option value="all">All sources</option>
+          <option>Eventbrite</option><option>Quicket</option><option>Webtickets</option>
+          <option>Ticketmaster</option><option>Facebook</option><option>Solo Soul</option>
+        </select>
+        <select id="event-area" aria-label="Filter by area">
+          <option value="all">All areas</option>
+          <option>Durban</option><option>Umhlanga</option><option>Kloof</option><option>Westville</option>
+          <option>Hillcrest</option><option>Pinetown</option><option>Berea</option><option>Ballito</option>
+        </select>
+        <select id="event-price" aria-label="Filter by price">
+          <option value="all">Any price</option><option value="free">Free</option><option value="paid">Paid</option>
+        </select>
+        <select id="event-date" aria-label="Filter by date">
+          <option value="all">Any date</option><option value="week">This week</option>
+          <option value="month">This month</option><option value="quarter" selected>Next 3 months</option>
+        </select>
+        <span class="event-count" id="event-count"></span>
       </div>
 
       <div class="events-table-wrap" data-aos="fade-up">
@@ -953,16 +964,6 @@
           <label for="booking-experience">Experience</label>
           <select id="booking-experience" name="experience" required>
             <option value="">Choose an experience...</option>
-            <option value="Sunset Beach Walk">Sunset Beach Walk — R250</option>
-            <option value="Sip & Paint Evening">Sip &amp; Paint Evening — R450</option>
-            <option value="Solo Brunch Club">Solo Brunch Club — R350</option>
-            <option value="Botanical Gardens Walk">Botanical Gardens Walk — FREE</option>
-            <option value="Luxury Spa Solo Day">Luxury Spa Solo Day — R850</option>
-            <option value="Sunrise Coffee & Journal">Sunrise Coffee &amp; Journal — R150</option>
-            <option value="Nature Hike — Krantzkloof">Nature Hike — Krantzkloof — R300</option>
-            <option value="Solo Wine Tasting">Solo Wine Tasting — R550</option>
-            <option value="Morning Journaling Circle">Morning Journaling Circle — FREE</option>
-            <option value="Solo Sunset Picnic">Solo Sunset Picnic — R200</option>
           </select>
         </div>
         <div class="form-row">
@@ -1318,9 +1319,9 @@
 
   <!-- Supabase Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase.js?v=20261102h"></script>
+  <script src="supabase.js?v=20261102live3"></script>
   <!-- AOS Library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
-  <script src="app.js?v=20261102h"></script>
+  <script src="app.js?v=20261102live3"></script>
 </body>
 </html>

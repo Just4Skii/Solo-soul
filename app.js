@@ -70,18 +70,8 @@ const blogContent = {
 };
 
 // ---- EVENTS DATA ------------------------------------------
-const soloEvents = [
-  { date: '14 Nov 2026', exp: 'Sunset Beach Walk',        location: 'Durban Beachfront, Golden Mile', duration: '1–2 hrs',  price: 'R250',  spots: 8,  category: 'nature',   spotsLeft: 3,  isFree: false },
-  { date: '28 Nov 2026', exp: 'Sip & Paint Evening',      location: 'Art Studio, Umhlanga',          duration: '3 hrs',    price: 'R450',  spots: 12, category: 'creative', spotsLeft: 5,  isFree: false },
-  { date: '5 Dec 2026',  exp: 'Solo Brunch Club',         location: 'Workshop 17, Waterfall',        duration: '2–3 hrs',  price: 'R350',  spots: 10, category: 'dining',   spotsLeft: 7,  isFree: false },
-  { date: '12 Dec 2026', exp: 'Botanical Gardens Walk',   location: 'Durban Botanic Gardens, Berea', duration: '2 hrs',    price: 'FREE',  spots: 20, category: 'nature',   spotsLeft: 14, isFree: true  },
-  { date: '19 Dec 2026', exp: 'Luxury Spa Solo Day',      location: 'Oyster Box Hotel, Umhlanga',    duration: 'Full day', price: 'R850',  spots: 6,  category: 'luxury',   spotsLeft: 2,  isFree: false },
-  { date: '9 Jan 2027',  exp: 'Sunrise Coffee & Journal', location: 'Café 1999, Morningside',        duration: '1.5 hrs',  price: 'R150',  spots: 20, category: 'mindful',  spotsLeft: 15, isFree: false },
-  { date: '23 Jan 2027', exp: 'Nature Hike — Krantzkloof',location: 'Krantzkloof Nature Reserve',    duration: '4 hrs',    price: 'R300',  spots: 12, category: 'nature',   spotsLeft: 4,  isFree: false },
-  { date: '6 Feb 2027',  exp: 'Solo Wine Tasting',        location: 'Chateau Gateaux, Hillcrest',    duration: '2.5 hrs',  price: 'R550',  spots: 8,  category: 'luxury',   spotsLeft: 6,  isFree: false },
-  { date: '20 Feb 2027', exp: 'Morning Journaling Circle',location: 'Gateway Terrace, Umhlanga',     duration: '2 hrs',    price: 'FREE',  spots: 30, category: 'mindful',  spotsLeft: 22, isFree: true  },
-  { date: '6 Mar 2027',  exp: 'Solo Sunset Picnic',       location: 'Umhlanga Lighthouse Reserve',   duration: '2 hrs',    price: 'R200',  spots: 15, category: 'nature',   spotsLeft: 10, isFree: false },
-];
+const soloEvents = [];
+let externalEvents = [];
 
 const cityEvents = [
   { title: 'Durban Botanic Gardens',        date: 'Open daily',      venue: 'Berea, Durban',            link: 'https://www.durbanbotanicgardens.org.za', icon: '🌿', source: 'Official site' },
@@ -232,16 +222,23 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Hydrate data in the background, with a hard cap so a bad endpoint cannot stall UX.
+  // Hydrate real events in the background; never block the page on the API.
   const timeout = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-  Promise.race([loadEventsFromDB(), timeout(2500)])
-    .catch(err => console.warn('Event sync unavailable, using bundled experiences.', err?.message || err))
-    .finally(() => {
-      initEventsTable();
-      initEventFilters();
-      initCityEvents();
-      loadTicketVerifications().catch(() => {});
-    });
+  const sync = loadEventsFromDB();
+  const live = loadExternalEvents();
+  const refresh = () => {
+    populateBookingExperiences();
+    updateHeroStats();
+    initEventsTable();
+  };
+  sync.then(refresh).catch(() => {});
+  live.then(refresh).catch(() => {});
+  Promise.race([Promise.all([sync, live]), timeout(6000)]).finally(() => {
+    refresh();
+    initEventFilters();
+    initCityEvents();
+    loadTicketVerifications().catch(() => {});
+  });
 });
 
 // ---- PRELOADER --------------------------------------------
@@ -346,6 +343,7 @@ function initStatCounters() {
     counted = true;
     statNums.forEach(el => {
       const target = parseInt(el.dataset.target, 10);
+      if (!Number.isFinite(target)) return;
       const duration = 2200;
       const start = performance.now();
 
@@ -370,6 +368,70 @@ function initStatCounters() {
   if (heroSection) observer.observe(heroSection);
 }
 
+// ---- REAL DATA RENDERING -----------------------------------
+function escapeHtml(value) {
+  return String(value == null ? '' : value).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+async function loadExternalEvents() {
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 9000);
+    const res = await fetch('/api/events', { signal: controller.signal, headers: { Accept: 'application/json' } });
+    clearTimeout(timer);
+    if (!res.ok) return;
+    const data = await res.json();
+    externalEvents = (data.events || []).map(e => ({
+      date: e.dateLabel,
+      start: e.start,
+      area: e.area || 'Durban',
+      exp: e.title,
+      location: e.venue,
+      duration: '',
+      price: e.price,
+      spots: 0,
+      spotsLeft: 0,
+      isFree: /free/i.test(e.price || ''),
+      category: e.category || 'social',
+      external: true,
+      url: e.url,
+      source: e.source,
+    }));
+  } catch {
+    externalEvents = [];
+  }
+}
+
+function populateBookingExperiences() {
+  const select = document.getElementById('booking-experience');
+  if (!select) return;
+  const names = [...new Set(soloEvents.map(e => e.exp).filter(Boolean))];
+  select.innerHTML = '<option value="">' + (names.length ? 'Choose an experience...' : 'No experiences scheduled yet') + '</option>' +
+    names.map(name => {
+      const evt = soloEvents.find(e => e.exp === name);
+      return '<option value="' + name.replace(/"/g, '&quot;') + '">' + name + ' — ' + (evt.isFree ? 'FREE' : evt.price) + '</option>';
+    }).join('');
+  select.disabled = names.length === 0;
+}
+
+function updateHeroStats() {
+  const wrap = document.querySelector('.hero-stats');
+  if (!wrap) return;
+  const all = [...soloEvents, ...externalEvents];
+  if (!all.length) { wrap.hidden = true; return; }
+  wrap.hidden = false;
+  const values = [
+    all.length,
+    new Set(all.map(e => e.location).filter(Boolean)).size,
+    new Set(all.map(e => e.external ? e.source : 'Solo Soul')).size,
+  ];
+  wrap.querySelectorAll('.stat-num').forEach((el, i) => {
+    if (values[i] === undefined) return;
+    el.dataset.target = values[i];
+    el.textContent = values[i];
+  });
+}
+
 // ---- EVENTS TABLE -----------------------------------------
 function initEventsTable() {
   const tbody = document.getElementById('events-tbody');
@@ -382,7 +444,26 @@ function initEventsTable() {
   const currentUser = JSON.parse(localStorage.getItem('currentUser'));
   const prefs = (currentUser && currentUser.preferences) ? currentUser.preferences : [];
 
-  soloEvents.forEach(evt => {
+  const allEvents = [...soloEvents, ...externalEvents];
+  allEvents.forEach(evt => {
+    if (evt.external) {
+      const tr = document.createElement('tr');
+      tr.dataset.category = evt.category || 'social';
+      tr.dataset.source = evt.source || '';
+      tr.dataset.area = evt.area || 'Durban';
+      tr.dataset.free = evt.isFree ? '1' : '0';
+      tr.dataset.date = evt.start || '';
+      tr.dataset.search = (evt.exp + ' ' + evt.location).toLowerCase();
+      tr.dataset.spotsLeft = 0;
+      tr.innerHTML = '<td><strong>' + escapeHtml(evt.date) + '</strong></td>' +
+        '<td><span class="event-name">' + escapeHtml(evt.exp) + '</span> <span class="event-cat-badge">' + escapeHtml(evt.source) + '</span></td>' +
+        '<td><i class="fas fa-map-marker-alt" style="color:var(--sage);margin-right:6px;font-size:12px;"></i>' + escapeHtml(evt.location) + '</td>' +
+        '<td>—</td><td><span class="event-price">' + escapeHtml(evt.price) + '</span></td>' +
+        '<td><span class="spots-pill spots-ok">Live listing</span></td>' +
+        '<td>' + (evt.url ? '<a class="book-event-btn" href="' + escapeHtml(evt.url) + '" target="_blank" rel="noopener noreferrer">Tickets ↗</a>' : '—') + '</td>';
+      tbody.appendChild(tr);
+      return;
+    }
     const spotsClass = evt.spotsLeft <= 3 ? 'spots-low' : evt.spotsLeft <= 6 ? 'spots-mid' : 'spots-ok';
     const spotsText  = evt.isFree
       ? `<span class="spots-pill spots-ok">${evt.spotsLeft} free spots</span>`
@@ -403,6 +484,11 @@ function initEventsTable() {
 
     const tr = document.createElement('tr');
     tr.dataset.category = evt.category;
+    tr.dataset.source = 'Solo Soul';
+    tr.dataset.area = (evt.location || '').match(/durban|umhlanga|kloof|westville|hillcrest|pinetown|berea|ballito/i)?.[0] || 'Durban';
+    tr.dataset.free = evt.isFree ? '1' : '0';
+    tr.dataset.date = (() => { const d = new Date(evt.date); return Number.isNaN(d.getTime()) ? '' : d.toISOString(); })();
+    tr.dataset.search = (evt.exp + ' ' + evt.location).toLowerCase();
     tr.dataset.spotsLeft = evt.spotsLeft;
     tr.dataset.expName   = evt.exp;
     tr.dataset.isFree    = evt.isFree ? '1' : '0';
@@ -421,22 +507,73 @@ function initEventsTable() {
     `;
     tbody.appendChild(tr);
   });
+
+  if (!allEvents.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px 20px;color:#5f6b64;">' +
+      '<strong style="display:block;font-family:\'Playfair Display\',serif;font-size:22px;color:#2E5E4E;margin-bottom:8px;">New experiences are being finalised</strong>' +
+      'Dates are published once confirmed. Join the newsletter or <a href="#contact" style="color:#2E5E4E;text-decoration:underline;">get in touch</a> to hear first.' +
+      '</td></tr>';
+  }
+  applyEventFilters();
 }
 
 // ---- EVENT FILTERS ----------------------------------------
+const CATEGORY_ALIAS = { dining: 'food', nature: 'outdoors', mindful: 'wellness', city: 'social' };
+
+function applyEventFilters() {
+  const active = document.querySelector('.filter-btn.active')?.dataset.filter || 'all';
+  const source = document.getElementById('event-source')?.value || 'all';
+  const area = (document.getElementById('event-area')?.value || 'all').toLowerCase();
+  const price = document.getElementById('event-price')?.value || 'all';
+  const when = document.getElementById('event-date')?.value || 'all';
+  const term = (document.getElementById('event-search')?.value || '').trim().toLowerCase();
+  const now = Date.now();
+  const limit = when === 'week' ? now + 7 * 864e5 : when === 'month' ? now + 31 * 864e5 : when === 'quarter' ? now + 92 * 864e5 : 0;
+
+  let visible = 0;
+  document.querySelectorAll('#events-tbody tr[data-search]').forEach(row => {
+    const category = CATEGORY_ALIAS[row.dataset.category] || row.dataset.category;
+    const okCategory = active === 'all' || category === active;
+    const okSource = source === 'all' || row.dataset.source === source;
+    const okArea = area === 'all' || (row.dataset.area || '').toLowerCase().includes(area);
+    const okPrice = price === 'all' || (price === 'free' ? row.dataset.free === '1' : row.dataset.free !== '1');
+    const ts = row.dataset.date ? new Date(row.dataset.date).getTime() : 0;
+    const okDate = when === 'all' || (ts && ts >= now - 864e5 && ts <= limit);
+    const okSearch = !term || (row.dataset.search || '').includes(term);
+    const show = okCategory && okSource && okArea && okPrice && okDate && okSearch;
+    row.classList.toggle('hidden', !show);
+    if (show) visible++;
+  });
+
+  const counter = document.getElementById('event-count');
+  if (counter) counter.textContent = visible ? visible + ' events' : '';
+
+  let empty = document.getElementById('event-no-match');
+  if (!visible) {
+    if (!empty) {
+      empty = document.createElement('tr');
+      empty.id = 'event-no-match';
+      empty.innerHTML = '<td colspan="7" style="text-align:center;padding:30px;color:#5f6b64;">No events match those filters. Try another category, area or source.</td>';
+      document.getElementById('events-tbody')?.appendChild(empty);
+    }
+  } else if (empty) {
+    empty.remove();
+  }
+}
+
 function initEventFilters() {
   const filterBtns = document.querySelectorAll('.filter-btn');
   filterBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       filterBtns.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      const filter = btn.dataset.filter;
-      document.querySelectorAll('#events-tbody tr').forEach(row => {
-        const match = filter === 'all' || row.dataset.category === filter;
-        row.classList.toggle('hidden', !match);
-      });
+      applyEventFilters();
     });
   });
+  ['event-source', 'event-area', 'event-price', 'event-date'].forEach(id => {
+    document.getElementById(id)?.addEventListener('change', applyEventFilters);
+  });
+  document.getElementById('event-search')?.addEventListener('input', applyEventFilters);
 }
 
 // ---- CITY EVENTS ------------------------------------------
@@ -733,6 +870,10 @@ window.openBookingModal = function(experienceName, spotsLeft, isFree) {
   const dateSelect   = document.getElementById('booking-date');
   const submitBtn    = document.getElementById('booking-submit-btn');
   if (!overlay) return;
+  if (!soloEvents.length) {
+    alert('New experiences are being finalised. Please check back shortly or join the newsletter for the announcement.');
+    return;
+  }
 
   // Clean form state
   document.getElementById('booking-form')?.reset();

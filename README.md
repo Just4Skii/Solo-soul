@@ -42,6 +42,20 @@ Never commit `.env`; it is gitignored and blocked by `.vercelignore`.
 
 Provisioning endpoints stay disabled unless `SETUP_TOKEN` is set, and creation is refused once an admin exists.
 
+## Live events
+
+The events table is sourced live from public event listings:
+
+- Eventbrite (Durban categories: community, art, food & drink, networking, music, outdoors, wellness)
+- Quicket
+- Webtickets (Durban and Umhlanga searches)
+- Ticketmaster (set `TICKETMASTER_API_KEY`)
+- Facebook Pages (set `FACEBOOK_ACCESS_TOKEN` and `FACEBOOK_PAGE_IDS`)
+
+`/api/events` normalises the listings, filters to Durban/KZN, removes duplicates and returns source links. There is no seeded event data; only real listings are shown. Failed sources are reported in `sources` rather than replaced with fake rows.
+
+Filters cover category, source, area, price, date window and free-text search.
+
 ## Current limitations
 
 - **Checkout is a clearly labelled demo** until `PAYFAST_*` credentials are configured. No card is charged. The webhook is production-ready and verifies signatures, merchant ID and amount.
