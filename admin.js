@@ -7,7 +7,7 @@ const API = {
   events: '/api/admin/events',
   bookings: '/api/admin/bookings',
   stats: '/api/admin/stats',
-  revenue: '/api/admin/revenue',
+  revenue: '/api/admin/stats',
   upload: '/api/admin/upload',
   tickets: '/api/tickets',
 };
@@ -198,7 +198,7 @@ function renderChart(monthly) {
 
 async function loadRevenue() {
   try {
-    const res = await api('POST', API.revenue, {});
+    const res = await api('POST', API.revenue, { action: 'revenue' });
     if (res.error) { toast(res.error, 'error'); return; }
     const { totals, perEvent, monthly, assumptions } = res;
     const money = n => 'R' + Number(n || 0).toLocaleString('en-ZA', { minimumFractionDigits: 0, maximumFractionDigits: 0 });

@@ -35,10 +35,10 @@ Never commit `.env`; it is gitignored and blocked by `.vercelignore`.
 ## Provisioning
 
 1. Deploy once, set env vars.
-2. Call `POST /api/setup/init-db` with header `x-setup-token: $SETUP_TOKEN`.
-3. Call `POST /api/setup/create-admin` once with the same header and an admin password of 12+ characters.
+2. Run `database-schema.sql` in the Supabase SQL Editor (the setup endpoints are excluded from the Hobby deployment).
+3. Create the first admin directly in `admin_users` with a bcrypt hash, or use `scripts/api/setup/create-admin.js` from a Pro deployment.
 4. Sign in at `/admin.html`.
-5. Point the PayFast ITN URL at `/api/payfast-webhook` (signature, merchant and amount are verified).
+5. PayFast ITN lives in `scripts/api/payfast-webhook.js`; restore it under `api/` on a Pro plan if you enable PayFast.
 
 Provisioning endpoints stay disabled unless `SETUP_TOKEN` is set, and creation is refused once an admin exists.
 
