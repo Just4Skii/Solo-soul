@@ -561,7 +561,7 @@ function renderEventCards(list) {
     const category = (evt.category || 'social');
     const source = external ? evt.source : 'Solo Soul';
     const area = evt.area || (evt.location || '').match(/durban|umhlanga|kloof|westville|hillcrest|pinetown|berea|ballito/i)?.[0] || 'Durban';
-    const details = external ? '/whats-on/' + encodeURIComponent(evt.slug || evt.id) : '/portal/?experience=' + encodeURIComponent(evt.id);
+    const details = external ? '/portal/?event=' + encodeURIComponent(evt.slug || evt.id) : '/portal/?experience=' + encodeURIComponent(evt.id);
     const ticket = external && evt.url ? '<a class="event-ticket" href="' + escapeHtml(evt.url) + '" target="_blank" rel="noopener noreferrer">Tickets ↗</a>' : '';
     return '<article class="event-card" data-event data-category="' + escapeHtml(category) + '" data-source="' + escapeHtml(source) + '" data-area="' + escapeHtml(area) + '" data-free="' + (evt.isFree ? '1' : '0') + '" data-date="' + escapeHtml(external ? evt.start : (Number.isNaN(date.getTime()) ? '' : date.toISOString())) + '" data-search="' + escapeHtml((title + ' ' + (evt.location || '')).toLowerCase()) + '">' +
       '<div class="event-date"><strong>' + day + '</strong><span>' + month + '</span></div>' +

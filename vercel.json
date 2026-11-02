@@ -2,10 +2,6 @@
   "outputDirectory": ".",
   "rewrites": [
     {
-      "source": "/whats-on/:slug",
-      "destination": "/portal/index.html?event=:slug"
-    },
-    {
       "source": "/e/:id",
       "destination": "/api/app?share=:id"
     },
