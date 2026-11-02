@@ -393,7 +393,7 @@ function EventDetail({ event }) {
               <div><span>Venue</span><strong>{venue}</strong></div>
               <div><span>Price</span><strong>{price}</strong></div>
             </div>
-            <p className="portal-event-description">{event.description || 'A small-group Solo Soul experience in Durban. Full joining details are shared after booking.'}</p>
+            <p className="portal-event-description">{event.description || (external ? `Listed by ${event.source}. Check the organiser’s page for the full line-up, inclusions and accessibility details.` : 'A small-group Solo Soul experience in Durban. Full joining details are shared after booking.')}</p>
           </div>
           <div className="portal-share">
             <span>Share this</span>
