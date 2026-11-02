@@ -96,12 +96,35 @@ function locationText(event) {
 }
 
 function priceText(event) {
-  const offers = Array.isArray(event.offers) ? event.offers[0] : event.offers;
-  if (!offers) return 'See listing';
-  if (offers.price === 0 || offers.price === '0') return 'FREE';
-  if (offers.price != null) return `${offers.priceCurrency === 'ZAR' ? 'R' : ''}${offers.price}`;
-  if (offers.lowPrice != null) return `From ${offers.priceCurrency === 'ZAR' ? 'R' : ''}${offers.lowPrice}`;
+  const offers = (Array.isArray(event.offers) ? event.offers : [event.offers]).filter(Boolean);
+  if (!offers.length) return 'See listing';
+
+  const prices = offers
+    .map(offer => (offer.price != null ? Number(offer.price) : null))
+    .filter(value => Number.isFinite(value));
+  if (prices.length) {
+    const positive = prices.filter(value => value > 0);
+    if (!positive.length) return 'FREE';
+    const min = Math.min(...positive);
+    const max = Math.max(...positive);
+    const currency = offers.find(offer => offer.priceCurrency)?.priceCurrency;
+    const prefix = currency === 'ZAR' || !currency ? 'R' : '';
+    return min === max ? `${prefix}${min}` : `From ${prefix}${min}`;
+  }
+
+  const low = offers.find(offer => offer.lowPrice != null);
+  if (low) {
+    const prefix = low.priceCurrency === 'ZAR' || !low.priceCurrency ? 'R' : '';
+    return `From ${prefix}${low.lowPrice}`;
+  }
   return 'See listing';
+}
+
+function imageUrl(value) {
+  const raw = Array.isArray(value) ? value[0] : (typeof value === 'string' ? value : value?.url);
+  if (!raw) return '';
+  if (String(raw).startsWith('//')) return `https:${raw}`;
+  return String(raw);
 }
 
 function normalise(event, source, categoryHint) {
@@ -110,8 +133,15 @@ function normalise(event, source, categoryHint) {
   const end = event.endDate ? new Date(event.endDate) : null;
   const venue = locationText(event);
   if (!AREA.test(venue) || OUTSIDE.test(venue)) return null;
-  const title = String(event.name).trim();
+  const title = String(event.name).replace(/\s+/g, ' ').trim();
   if (!title) return null;
+  const detectedPrice = priceText(event);
+  // Quicket list pages sometimes expose a zero-price offer while the event
+  // detail page has paid tiers. Do not advertise a false "FREE" unless the
+  // listing itself says it is free.
+  const price = source === 'Quicket' && detectedPrice === 'FREE' && !/free/i.test(`${title} ${event.description || ''}`)
+    ? 'See listing'
+    : detectedPrice;
   return {
     id: `ext-${source}-${Buffer.from((event.url || title) + start.toISOString()).toString('base64url').slice(0, 18)}`,
     title,
@@ -119,9 +149,9 @@ function normalise(event, source, categoryHint) {
     dateLabel: start.toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Africa/Johannesburg' }),
     venue,
     area: (venue.match(AREA) || ['Durban'])[0].replace(/^kzn$/i, 'Durban'),
-    price: priceText(event),
+    price,
     url: event.url || '',
-    image: typeof event.image === 'string' ? event.image : event.image?.url || '',
+    image: imageUrl(event.image),
     category: classify(title, event.description || '', categoryHint || 'social', venue),
     source,
     external: true,
@@ -200,6 +230,10 @@ async function fetchWebtickets() {
         if (!title || /membership|season pass|gift card|voucher|permit|reservation|parking/i.test(title)) continue;
         const place = (venue ? venue[1] : '').replace(/&amp;/g, '&').trim() || 'Durban';
         if (!AREA.test(place)) continue;
+        const imagePath = card.match(/<img\s+src="([^"]+)"/i)?.[1] || '';
+        const image = imagePath
+          ? (imagePath.startsWith('http') ? imagePath : imagePath.startsWith('//') ? `https:${imagePath}` : `https://www.webtickets.co.za/v2/${imagePath.replace(/^\/+/, '')}`)
+          : '';
         events.push({
           id: `ext-webtickets-${link[1].match(/\d+/)[0]}`,
           title,
@@ -209,7 +243,7 @@ async function fetchWebtickets() {
           area: (place.match(AREA) || ['Durban'])[0],
           price: 'See listing',
           url: `https://www.webtickets.co.za/v2/${link[1]}`,
-          image: '',
+          image,
           category: classify(title, '', 'social', place),
           source: 'Webtickets',
           external: true,
@@ -307,15 +341,26 @@ export default async function handler(req, res) {
   ]);
 
   const since = Date.now() - 6 * 60 * 60 * 1000;
-  const seen = new Set();
+  const seen = new Map();
   const events = [];
   for (const source of sources) {
     for (const event of source.events || []) {
       const start = new Date(event.start).getTime();
       if (!start || start < since || start > Date.now() + MAX_FUTURE_MS) continue;
       const key = `${event.title.toLowerCase()}|${event.start.slice(0, 10)}`;
-      if (seen.has(key)) continue;
-      seen.add(key);
+      if (seen.has(key)) {
+        // The same listing can appear on several provider pages with different
+        // price detail (Quicket sometimes exposes a zero-price card before the
+        // real ticket price). Keep the more informative price/image.
+        const existing = events[seen.get(key)];
+        if ((existing.price === 'FREE' || existing.price === 'See listing') &&
+            event.price && event.price !== 'FREE' && event.price !== 'See listing') {
+          existing.price = event.price;
+        }
+        if (!existing.image && event.image) existing.image = event.image;
+        continue;
+      }
+      seen.set(key, events.length);
       events.push(event);
     }
   }
