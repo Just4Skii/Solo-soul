@@ -3504,3 +3504,18 @@ body { background: var(--sand); color: var(--ink); }
 .filter-btn.active { background: #C9503C; border-color: #C9503C; }
 .event-filters .filter-btn { color: rgba(255,255,255,.78); }
 .testimonials .section-eyebrow { color: var(--coral-ink); }
+
+
+/* Mobile: keep event chips on one swipeable row */
+@media (max-width: 768px) {
+  .event-filters {
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 8px;
+    scrollbar-width: none;
+  }
+  .event-filters::-webkit-scrollbar { display: none; }
+  .event-filters .filter-btn { flex: 0 0 auto; }
+}
