@@ -112,7 +112,10 @@ export default async function handler(req, res) {
   const connectionString = process.env.POSTGRES_URL_NON_POOLING || process.env.DATABASE_URL || process.env.POSTGRES_URL;
   if (!connectionString) return res.status(500).json({ error: 'No Postgres connection string' });
 
-  const client = new pg.Client({ connectionString, ssl: { rejectUnauthorized: false }, connectionTimeoutMillis: 15000 });
+  const parsed = new URL(connectionString);
+  parsed.searchParams.delete('sslmode');
+  parsed.searchParams.delete('ssl');
+  const client = new pg.Client({ connectionString: parsed.toString(), ssl: { rejectUnauthorized: false }, connectionTimeoutMillis: 15000 });
   try {
     await client.connect();
     await client.query(SQL);
