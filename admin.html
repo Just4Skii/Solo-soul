@@ -61,6 +61,9 @@
         <a href="#" class="nav-item" data-section="bookings">
           <i class="fas fa-ticket-alt"></i> Bookings
         </a>
+        <a href="#" class="nav-item" data-section="revenue">
+          <i class="fas fa-coins"></i> Revenue
+        </a>
         <a href="#" class="nav-item" data-section="settings">
           <i class="fas fa-cog"></i> Settings
         </a>
@@ -227,6 +230,40 @@
               <tbody id="bookings-tbody"></tbody>
             </table>
           </div>
+        </div>
+      </section>
+
+      <!-- ═══ REVENUE ═══ -->
+      <section id="section-revenue" class="section">
+        <div class="section-header">
+          <h2><i class="fas fa-coins"></i> Revenue</h2>
+          <span id="revenue-updated" class="last-updated"></span>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-icon" style="background:#e6f4f1;"><i class="fas fa-sack-dollar" style="color:#0B3C49;"></i></div><div><span class="stat-value" id="rev-gross">R0</span><span class="stat-label">Gross revenue</span></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:#fdece7;"><i class="fas fa-percent" style="color:#C9503C;"></i></div><div><span class="stat-value" id="rev-fees">R0</span><span class="stat-label">Est. fees</span></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:#fff3e0;"><i class="fas fa-wallet" style="color:#a66b00;"></i></div><div><span class="stat-value" id="rev-net">R0</span><span class="stat-label">Estimated net</span></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:#e8f5e9;"><i class="fas fa-users" style="color:#2e7d32;"></i></div><div><span class="stat-value" id="rev-seats">0</span><span class="stat-label">Seats sold</span></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:#e3f2fd;"><i class="fas fa-chart-simple" style="color:#1565c0;"></i></div><div><span class="stat-value" id="rev-occupancy">0%</span><span class="stat-label">Occupancy</span></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:#f3e8ff;"><i class="fas fa-receipt" style="color:#6b21a8;"></i></div><div><span class="stat-value" id="rev-aov">R0</span><span class="stat-label">Avg order</span></div></div>
+        </div>
+        <div class="card">
+          <h3><i class="fas fa-calendar-check"></i> Revenue by experience</h3>
+          <div class="table-wrapper">
+            <table class="admin-table" id="revenue-table">
+              <thead><tr><th>Experience</th><th>Date</th><th>Price</th><th>Seats</th><th>Occupancy</th><th>Bookings</th><th>Gross</th><th>Fees</th><th>Net</th></tr></thead>
+              <tbody id="revenue-tbody"></tbody>
+            </table>
+          </div>
+          <p class="revenue-note" id="revenue-assumptions"></p>
+        </div>
+        <div class="card">
+          <h3><i class="fas fa-chart-line"></i> Monthly</h3>
+          <div id="revenue-monthly" class="recent-list"></div>
+        </div>
+        <div class="card">
+          <h3><i class="fas fa-hourglass-half"></i> Pipeline</h3>
+          <div id="revenue-pipeline" class="recent-list"></div>
         </div>
       </section>
 

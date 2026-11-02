@@ -16,6 +16,8 @@ export default function handler(req, res) {
     supabaseAnonKey: process.env.SUPABASE_ANON_KEY || '',
     payfastEnabled: Boolean(process.env.PAYFAST_MERCHANT_ID && process.env.PAYFAST_MERCHANT_KEY),
     payfastSandbox: process.env.PAYFAST_SANDBOX !== 'false',
+    paystackPublicKey: process.env.PAYSTACK_PUBLIC_KEY || '',
+    paystackEnabled: Boolean(process.env.PAYSTACK_SECRET_KEY && process.env.PAYSTACK_PUBLIC_KEY),
     environment: process.env.VERCEL_ENV || 'development',
   });
 }

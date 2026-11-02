@@ -56,6 +56,20 @@ The events table is sourced live from public event listings:
 
 Filters cover category, source, area, price, date window and free-text search.
 
+## Payments and revenue
+
+Paystack is the default card checkout when `PAYSTACK_SECRET_KEY` and `PAYSTACK_PUBLIC_KEY` are set:
+
+- `/api/paystack/initialize` creates a Pending booking, derives the amount from the event row and returns Paystack's authorization URL.
+- `/api/paystack/webhook` verifies `x-paystack-signature` (HMAC SHA-512), then checks currency, amount and reference before marking the booking Paid.
+- The browser falls back to the labelled demo checkout only if Paystack is not configured or cannot start.
+
+Admin → **Revenue** shows gross, estimated fees, net, seats sold, occupancy, average order value, per-experience revenue and pending/refunded pipeline. Fees default to 2.9% + R1 per paid booking and can be changed with `PAYSTACK_FEE_PERCENT` / `PAYSTACK_FEE_FIXED`.
+
+## Facebook events
+
+Set `FACEBOOK_ACCESS_TOKEN` (a Page access token) and `FACEBOOK_PAGE_IDS` (comma-separated). Create a Meta app with the Pages API, request `pages_show_list` and `pages_read_engagement`, generate a user token in Graph API Explorer, exchange it for a long-lived token, then read `/me/accounts` and copy the Page token. Production use needs App Review for those permissions. Groups are not supported without group-admin installation and `groups_access_member_info`.
+
 ## Current limitations
 
 - **Checkout is a clearly labelled demo** until `PAYFAST_*` credentials are configured. No card is charged. The webhook is production-ready and verifies signatures, merchant ID and amount.

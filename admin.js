@@ -7,6 +7,7 @@ const API = {
   events: '/api/admin/events',
   bookings: '/api/admin/bookings',
   stats: '/api/admin/stats',
+  revenue: '/api/admin/revenue',
   upload: '/api/admin/upload',
   tickets: '/api/tickets',
 };
@@ -132,6 +133,7 @@ function initNavigation() {
           case 'dashboard': loadDashboard(); break;
           case 'events': loadEvents(); break;
           case 'bookings': loadBookings(); break;
+          case 'revenue': loadRevenue(); break;
         }
       }
     });
@@ -192,6 +194,44 @@ function renderChart(monthly) {
       <span class="bar-label">${m.month}</span>
     </div>`;
   }).join('');
+}
+
+async function loadRevenue() {
+  try {
+    const res = await api('POST', API.revenue, {});
+    if (res.error) { toast(res.error, 'error'); return; }
+    const { totals, perEvent, monthly, assumptions } = res;
+    const money = n => 'R' + Number(n || 0).toLocaleString('en-ZA', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+
+    $('rev-gross').textContent = money(totals.gross);
+    $('rev-fees').textContent = money(totals.fees);
+    $('rev-net').textContent = money(totals.net);
+    $('rev-seats').textContent = totals.seatsSold || 0;
+    $('rev-occupancy').textContent = (totals.occupancy || 0) + '%';
+    $('rev-aov').textContent = money(totals.averageOrderValue);
+    $('revenue-updated').textContent = 'Updated: ' + new Date().toLocaleTimeString();
+    $('revenue-assumptions').textContent =
+      'Estimates use ' + assumptions.feePercent + '% + R' + assumptions.feeFixed +
+      ' per paid booking. Revenue counts Paid bookings only; Free bookings count toward seats. Pending and refunded values are shown separately.';
+
+    const tbody = $('revenue-tbody');
+    tbody.innerHTML = perEvent?.length ? perEvent.map(e =>
+      '<tr><td><strong>' + e.name + '</strong></td><td>' + formatDate(e.date) + '</td><td>' + (e.price || '-') +
+      '</td><td>' + e.seatsSold + '/' + e.spotsTotal + '</td><td>' + e.occupancy + '%</td><td>' + e.bookings +
+      '</td><td>' + money(e.gross) + '</td><td>' + money(e.fees) + '</td><td><strong>' + money(e.net) + '</strong></td></tr>'
+    ).join('') : '<tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:26px;">No events yet — add an experience to start tracking revenue.</td></tr>';
+
+    $('revenue-monthly').innerHTML = monthly?.length ? monthly.map(m =>
+      '<div class="recent-item"><span><strong>' + m.month + '</strong> — ' + m.bookings + ' paid bookings</span><span>' + money(m.gross) + ' gross / ' + money(m.net) + ' net</span></div>'
+    ).join('') : '<p style="color:var(--text-muted);font-size:13px;">No paid bookings yet.</p>';
+
+    $('revenue-pipeline').innerHTML =
+      '<div class="recent-item"><span>Pending bookings</span><span>' + totals.pendingBookings + ' · ' + money(totals.pendingValue) + '</span></div>' +
+      '<div class="recent-item"><span>Refunded</span><span>' + totals.refundedBookings + ' · ' + money(totals.refundedValue) + '</span></div>' +
+      '<div class="recent-item"><span>Free bookings</span><span>' + totals.freeBookings + ' · ' + totals.seatsFree + ' seats</span></div>';
+  } catch (err) {
+    toast('Failed to load revenue', 'error');
+  }
 }
 
 // ══════════════════════════════════════════════════════════

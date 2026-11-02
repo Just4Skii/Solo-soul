@@ -204,6 +204,18 @@ document.addEventListener('DOMContentLoaded', () => {
   updateNavbarLinks();
   initUserSettings();
 
+  // Payment return notice
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('payment') === 'success') {
+    const ref = params.get('ref');
+    const banner = document.createElement('div');
+    banner.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);z-index:99999;background:#0B3C49;color:#fff;padding:14px 22px;border-radius:12px;font-size:14px;box-shadow:0 12px 34px rgba(0,0,0,.25);max-width:90vw;text-align:center;';
+    banner.innerHTML = 'Payment received' + (ref ? ' — ref <strong>' + ref + '</strong>' : '') + '. Your booking will show as paid once Paystack confirms it.';
+    document.body.appendChild(banner);
+    setTimeout(() => banner.remove(), 9000);
+    history.replaceState({}, '', window.location.pathname);
+  }
+
   // Character limits on textareas
   const bookingNotes = document.getElementById('booking-notes');
   if (bookingNotes) {
@@ -1087,6 +1099,37 @@ window.handleBookingSubmit = function(e) {
       notes: notes,
       eventRef: activeEvent
     };
+
+    const config = window.SOLO_CONFIG || {};
+    if (config.paystackEnabled && activeEvent.id) {
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Opening secure checkout...';
+      fetch('/api/paystack/initialize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          eventId: activeEvent.id,
+          name: document.getElementById('booking-name').value.trim(),
+          email: guestEmail,
+          phone: document.getElementById('booking-phone').value.trim(),
+          guests,
+          notes
+        })
+      })
+        .then(async res => {
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok || !data.authorization_url) throw new Error(data.error || 'Checkout unavailable');
+          window.location.href = data.authorization_url;
+        })
+        .catch(err => {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fas fa-lock"></i> Pay & Book';
+          alert('Secure checkout could not start: ' + err.message + '. Opening the demo checkout instead.');
+          closeBookingModal();
+          openPayFastModal(experience, date, guests, totalAmount);
+        });
+      return;
+    }
 
     closeBookingModal();
     openPayFastModal(experience, date, guests, totalAmount);
