@@ -204,7 +204,7 @@ export default async function handler(req, res) {
         const u = new URL(cs); u.searchParams.delete('sslmode'); u.searchParams.delete('ssl');
         const c = new pg.Client({ connectionString: u.toString(), ssl: { rejectUnauthorized: false }, connectionTimeoutMillis: 15000 });
         await c.connect();
-        await c.query(`create or replace function public.deny_audit_mutation() returns trigger as $ begin raise exception 'settlement_audit is append-only'; end; $ language plpgsql;
+        await c.query(`create or replace function public.deny_audit_mutation() returns trigger language plpgsql as 'begin raise exception ''settlement_audit is append-only''; end;';
         drop trigger if exists settlement_audit_immutable on public.settlement_audit;
         create trigger settlement_audit_immutable before update or delete on public.settlement_audit for each row execute function public.deny_audit_mutation();`);
         await c.end();
