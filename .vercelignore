@@ -1,0 +1,11 @@
+.env
+.env.*
+!.env.example
+.git/
+app.js.fixed
+app-enhanced.js
+apply-phase1-security-fix.js
+apply_fixes.py
+test_suite.html
+scripts/
+*.log

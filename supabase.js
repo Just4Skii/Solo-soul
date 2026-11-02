@@ -5,45 +5,62 @@
 // Supabase client initialization
 // Uses window.supabase from CDN (loaded in HTML) or creates fallback
 
-const CONFIG = {
-  SUPABASE_URL: 'https://iinvfedcrkibnftzbrlz.supabase.co',
-  SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlpbnZmZWRjcmtpYm5mdHpicmx6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyMTI2NTIsImV4cCI6MjA5OTc4ODY1Mn0.dehmtRjK-eXWgIVB9DxVmwU_gfpdzY6BSfP-zU5FUes'
-};
-
-// Initialize Supabase client
+// Runtime configuration comes from the server so no keys are baked into the bundle.
+// Falls back to local-only mode when the API is unavailable.
 let supabaseClient = null;
+let configPromise = null;
 
-function initSupabase() {
-  if (typeof supabase !== 'undefined') {
-    supabaseClient = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
-  } else {
-    console.warn('Supabase library not loaded. Booking features will use localStorage fallback.');
-  }
+async function getRuntimeConfig() {
+  if (window.SOLO_CONFIG) return window.SOLO_CONFIG;
+  if (configPromise) return configPromise;
+
+  configPromise = (async () => {
+    try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 2500);
+      const res = await fetch('/api/public-config', { signal: controller.signal, headers: { Accept: 'application/json' } });
+      clearTimeout(timer);
+      if (!res.ok) return {};
+      return await res.json();
+    } catch {
+      return {};
+    }
+  })();
+
+  return configPromise;
 }
 
-// Run immediately
-initSupabase();
+async function ensureSupabase() {
+  if (supabaseClient) return supabaseClient;
+  const cfg = await getRuntimeConfig();
+  window.SOLO_CONFIG = cfg;
+  if (cfg.supabaseUrl && cfg.supabaseAnonKey && typeof supabase !== 'undefined') {
+    supabaseClient = supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+  }
+  return supabaseClient;
+}
+
+ensureSupabase();
 
 // ============================================================
 // DATABASE OPERATIONS - Events
 // ============================================================
 async function fetchEvents() {
-  if (!supabaseClient) return getLocalEvents();
+  const client = await ensureSupabase();
+  if (!client) return getLocalEvents();
 
   try {
-    const { data, error } = await supabaseClient
+    const { data, error } = await client
       .from('events')
       .select('*')
       .eq('active', true)
       .order('date', { ascending: true });
 
     if (error) {
-      console.error('Error fetching events:', error);
       return getLocalEvents();
     }
     return data || [];
-  } catch (err) {
-    console.error('Fetch events error:', err);
+  } catch {
     return getLocalEvents();
   }
 }

@@ -11,7 +11,7 @@ const blogContent = {
     catClass: "",
     readTime: "5 min read",
     date: "July 2026",
-    image: "assets/images/experience_coffee_journal_1783927404043.png",
+    image: "assets/images/experience_coffee_journal_1783927404043.webp",
     content: `
       <p>There's a radical, quietly revolutionary act that millions of people are discovering: taking themselves on a date. Not as a last resort, not because no one was available — but as a deliberate, joyful declaration of self-worth. Dating yourself is the practice of spending intentional, pleasurable time in your own company, just as you would with someone you deeply love.</p>
       <blockquote>"The most important relationship you will ever have is the one you have with yourself. Everything else flows from that."</blockquote>
@@ -26,7 +26,7 @@ const blogContent = {
     catClass: "adventure",
     readTime: "4 min read",
     date: "June 2026",
-    image: "assets/images/experience_nature_hike_1783927415406.png",
+    image: "assets/images/experience_nature_hike_1783927415406.webp",
     content: `
       <p>There is no faster path to self-confidence than navigating the world alone. Solo travel — whether it's a day hike in a new nature reserve or a weekend trip to a coastal town — forces you into a beautiful kind of growth that no classroom, self-help book, or advice from a friend can replicate. It is learning by becoming.</p>
       <blockquote>"Every solo adventure is a small act of self-trust. And self-trust, once built, cannot easily be taken away."</blockquote>
@@ -43,7 +43,7 @@ const blogContent = {
     catClass: "mindful",
     readTime: "3 min read",
     date: "June 2026",
-    image: "assets/images/gallery_cafe_1783927503191.png",
+    image: "assets/images/gallery_cafe_1783927503191.webp",
     content: `
       <p>Most of us were never taught how to be alone. From childhood, we were arranged into classrooms, families, friendship groups, and social structures. Aloneness was associated with punishment (sit in the corner), rejection (no one picked you), or failure (staying home on a Friday night). No wonder it feels so uncomfortable at first.</p>
       <blockquote>"Solitude is not absence — it is presence. Your own full, undivided presence with yourself."</blockquote>
@@ -58,7 +58,7 @@ const blogContent = {
     catClass: "healing",
     readTime: "6 min read",
     date: "May 2026",
-    image: "assets/images/experience_nature_hike_1783927415406.png",
+    image: "assets/images/experience_nature_hike_1783927415406.webp",
     content: `
       <p>There is a reason human beings have always retreated to nature in times of grief, confusion, and longing. Long before therapy, meditation apps, and self-help culture, there were forests, oceans, mountains, and rivers. And they worked. They still do. The science now confirms what our ancestors understood intuitively: nature heals.</p>
       <blockquote>"The earth does not ask you to be okay. It simply holds you while you find your way back to yourself."</blockquote>
@@ -71,31 +71,25 @@ const blogContent = {
 
 // ---- EVENTS DATA ------------------------------------------
 const soloEvents = [
-  { date: '28 Jul 2026', exp: 'Sunset Beach Walk',        location: 'Durban Beachfront, Golden Mile', duration: '1–2 hrs',  price: 'R250',  spots: 8,  category: 'nature',   spotsLeft: 3,  isFree: false },
-  { date: '3 Aug 2026',  exp: 'Sip & Paint Evening',      location: 'Art Studio, Umhlanga',          duration: '3 hrs',    price: 'R450',  spots: 12, category: 'creative', spotsLeft: 5,  isFree: false },
-  { date: '10 Aug 2026', exp: 'Solo Brunch Club',         location: 'Workshop 17, Waterfall',        duration: '2–3 hrs',  price: 'R350',  spots: 10, category: 'dining',   spotsLeft: 7,  isFree: false },
-  { date: '17 Aug 2026', exp: 'Botanical Gardens Walk',   location: 'Durban Botanic Gardens, Berea', duration: '2 hrs',    price: 'FREE',  spots: 20, category: 'nature',   spotsLeft: 14, isFree: true  },
-  { date: '24 Aug 2026', exp: 'Luxury Spa Solo Day',      location: 'Oyster Box Hotel, Umhlanga',    duration: 'Full day', price: 'R850',  spots: 6,  category: 'luxury',   spotsLeft: 2,  isFree: false },
-  { date: '7 Sep 2026',  exp: 'Sunrise Coffee & Journal', location: 'Café 1999, Morningside',        duration: '1.5 hrs',  price: 'R150',  spots: 20, category: 'mindful',  spotsLeft: 15, isFree: false },
-  { date: '14 Sep 2026', exp: 'Nature Hike — Krantzkloof',location: 'Krantzkloof Nature Reserve',    duration: '4 hrs',    price: 'R300',  spots: 12, category: 'nature',   spotsLeft: 4,  isFree: false },
-  { date: '21 Sep 2026', exp: 'Solo Wine Tasting',        location: 'Chateau Gateaux, Hillcrest',    duration: '2.5 hrs',  price: 'R550',  spots: 8,  category: 'luxury',   spotsLeft: 6,  isFree: false },
-  { date: '28 Sep 2026', exp: 'Morning Journaling Circle',location: 'Gateway Terrace, Umhlanga',     duration: '2 hrs',    price: 'FREE',  spots: 30, category: 'mindful',  spotsLeft: 22, isFree: true  },
-  { date: '5 Oct 2026',  exp: 'Solo Sunset Picnic',       location: 'Umhlanga Lighthouse Reserve',   duration: '2 hrs',    price: 'R200',  spots: 15, category: 'nature',   spotsLeft: 10, isFree: false },
+  { date: '14 Nov 2026', exp: 'Sunset Beach Walk',        location: 'Durban Beachfront, Golden Mile', duration: '1–2 hrs',  price: 'R250',  spots: 8,  category: 'nature',   spotsLeft: 3,  isFree: false },
+  { date: '28 Nov 2026', exp: 'Sip & Paint Evening',      location: 'Art Studio, Umhlanga',          duration: '3 hrs',    price: 'R450',  spots: 12, category: 'creative', spotsLeft: 5,  isFree: false },
+  { date: '5 Dec 2026',  exp: 'Solo Brunch Club',         location: 'Workshop 17, Waterfall',        duration: '2–3 hrs',  price: 'R350',  spots: 10, category: 'dining',   spotsLeft: 7,  isFree: false },
+  { date: '12 Dec 2026', exp: 'Botanical Gardens Walk',   location: 'Durban Botanic Gardens, Berea', duration: '2 hrs',    price: 'FREE',  spots: 20, category: 'nature',   spotsLeft: 14, isFree: true  },
+  { date: '19 Dec 2026', exp: 'Luxury Spa Solo Day',      location: 'Oyster Box Hotel, Umhlanga',    duration: 'Full day', price: 'R850',  spots: 6,  category: 'luxury',   spotsLeft: 2,  isFree: false },
+  { date: '9 Jan 2027',  exp: 'Sunrise Coffee & Journal', location: 'Café 1999, Morningside',        duration: '1.5 hrs',  price: 'R150',  spots: 20, category: 'mindful',  spotsLeft: 15, isFree: false },
+  { date: '23 Jan 2027', exp: 'Nature Hike — Krantzkloof',location: 'Krantzkloof Nature Reserve',    duration: '4 hrs',    price: 'R300',  spots: 12, category: 'nature',   spotsLeft: 4,  isFree: false },
+  { date: '6 Feb 2027',  exp: 'Solo Wine Tasting',        location: 'Chateau Gateaux, Hillcrest',    duration: '2.5 hrs',  price: 'R550',  spots: 8,  category: 'luxury',   spotsLeft: 6,  isFree: false },
+  { date: '20 Feb 2027', exp: 'Morning Journaling Circle',location: 'Gateway Terrace, Umhlanga',     duration: '2 hrs',    price: 'FREE',  spots: 30, category: 'mindful',  spotsLeft: 22, isFree: true  },
+  { date: '6 Mar 2027',  exp: 'Solo Sunset Picnic',       location: 'Umhlanga Lighthouse Reserve',   duration: '2 hrs',    price: 'R200',  spots: 15, category: 'nature',   spotsLeft: 10, isFree: false },
 ];
 
 const cityEvents = [
-  { title: 'Disney On Ice',                 date: '24 Jul – 3 Aug 2026', venue: 'Durban ICC, Durban',         link: 'https://www.webtickets.co.za/v2/search.aspx?search=Disney+On+Ice', icon: '🎭', source: 'Webtickets'    },
-  { title: "Totalsports Women's Race",      date: '2 Aug 2026',          venue: 'Suncoast Casino, Durban',    link: 'https://www.totalsportswomensrace.co.za/durban-event/', icon: '🏃‍♀️', source: 'Official Site' },
-  { title: 'Sjava in the Park',             date: '2 Aug 2026',          venue: 'Chris Saunders Park, Umhlanga', link: 'https://www.webtickets.co.za/v2/search.aspx?search=Sjava+in+the+Park', icon: '🎵', source: 'Webtickets'  },
-  { title: 'Secret Sunrise Durban',         date: '1 Aug 2026',          venue: 'Northlands Girls High',      link: 'https://www.webtickets.co.za/v2/search.aspx?search=Secret+Sunrise+Durban', icon: '🌅', source: 'Webtickets'    },
-  { title: 'Tamia LIVE in Durban',          date: '7 Aug 2026',          venue: 'Durban ICC, Durban',         link: 'https://www.webtickets.co.za/v2/search.aspx?search=Tamia+Durban', icon: '🎶', source: 'Webtickets'    },
-  { title: 'Joseph Clark – Music of Queen', date: '31 Jul – 2 Aug 2026', venue: 'Playhouse Company, Durban',  link: 'https://tickets.computicket.com/search?q=Joseph+Clark+Queen', icon: '👑', source: 'Computicket'    },
-  { title: 'Old Mutual Music at the Lake',  date: '24 Sep 2026',         venue: 'Durban Botanic Gardens',     link: 'https://www.webtickets.co.za/v2/search.aspx?search=Music+at+the+Lake+Durban', icon: '🎸', source: 'Webtickets'    },
-  { title: 'Bafunny Bafunny Comedy Fest',   date: '19 Sep 2026',         venue: 'Suncoast Casino, Durban',    link: 'https://tickets.computicket.com/search?q=Bafunny+Bafunny', icon: '😂', source: 'Computicket'    },
-  { title: 'Hollywoodbets Durban 10km',     date: '30 Aug 2026',         venue: 'Kingsmead, Durban',          link: 'https://www.runningcalendar.co.za/event/hollywoodbets-durban-10km/', icon: '🏅', source: 'Running Calendar' },
-  { title: 'Harbour Boat Cruise',           date: 'Every weekend',       venue: "Wilson's Wharf, Durban",     link: 'https://www.wilsonswharf.co.za', icon: '⛵', source: 'Wilson\'s Wharf' },
-  { title: 'Durban Botanic Gardens',        date: 'Open daily',          venue: 'Berea, Durban',              link: 'https://www.durbanbotanicgardens.org.za', icon: '🌿', source: 'Free Entry'  },
-  { title: 'Hilton Arts Festival 2026',     date: '7–9 Aug 2026',        venue: 'Hilton College, PMB',        link: 'https://tickets.computicket.com/search?q=Hilton+Arts+Festival', icon: '🎨', source: 'Computicket'    },
+  { title: 'Durban Botanic Gardens',        date: 'Open daily',      venue: 'Berea, Durban',            link: 'https://www.durbanbotanicgardens.org.za', icon: '🌿', source: 'Official site' },
+  { title: 'Golden Mile Beachfront',        date: 'Open daily',      venue: 'Durban Beachfront',        link: 'https://www.durban.gov.za', icon: '🌊', source: 'eThekwini Municipality' },
+  { title: 'Wilson\'s Wharf',              date: 'Open daily',      venue: 'Point, Durban',            link: 'https://www.wilsonswharf.co.za', icon: '⛵', source: 'Official site' },
+  { title: 'uShaka Marine World',           date: 'Open daily',      venue: 'Point, Durban',            link: 'https://www.ushakamarineworld.co.za', icon: '🐠', source: 'Official site' },
+  { title: 'Krantzkloof Nature Reserve',    date: 'Open daily',      venue: 'Kloof, KwaZulu-Natal',     link: 'https://www.kznwildlife.com', icon: '🥾', source: 'KZN Wildlife' },
+  { title: 'Durban ICC events',             date: 'See calendar',    venue: 'Durban ICC',               link: 'https://www.icc.co.za', icon: '🎭', source: 'Official site' },
 ];
 
 // ---- DATABASE EVENT LOADER ---------------------------------
@@ -106,7 +100,8 @@ async function loadEventsFromDB() {
   try {
     if (typeof SupabaseService !== 'undefined' && SupabaseService.fetchEvents) {
       const dbEvents = await SupabaseService.fetchEvents();
-      if (dbEvents && dbEvents.length > 0) {
+      const isDatabasePayload = Array.isArray(dbEvents) && dbEvents.length > 0 && dbEvents.every(e => e && e.event_name);
+      if (isDatabasePayload) {
         // Map DB events to soloEvents format
         const mapped = dbEvents.map(e => ({
           date: new Date(e.date).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' }),
@@ -204,20 +199,13 @@ function getTicketStatus(title) {
 }
 
 // ---- DOM READY --------------------------------------------
-document.addEventListener('DOMContentLoaded', async () => {
-  // Load events from Supabase (fall back to hardcoded soloEvents)
-  await loadEventsFromDB();
-  // Load cached ticket verification status
-  await loadTicketVerifications();
-
+document.addEventListener('DOMContentLoaded', () => {
+  // Paint the interface first: never let a slow/dead API hold the page hostage.
   initPreloader();
   initAOS();
   initNavbar();
   initMobileMenu();
   initSmoothScroll();
-  initEventsTable();
-  initEventFilters();
-  initCityEvents();
   initTestimonials();
   initFAQ();
   initScrollToTop();
@@ -243,6 +231,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     });
   }
+
+  // Hydrate data in the background, with a hard cap so a bad endpoint cannot stall UX.
+  const timeout = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+  Promise.race([loadEventsFromDB(), timeout(2500)])
+    .catch(err => console.warn('Event sync unavailable, using bundled experiences.', err?.message || err))
+    .finally(() => {
+      initEventsTable();
+      initEventFilters();
+      initCityEvents();
+      loadTicketVerifications().catch(() => {});
+    });
 });
 
 // ---- PRELOADER --------------------------------------------
@@ -643,11 +642,8 @@ function updateBookingFormState(experienceName) {
   }
 
   // Find scheduled instances of this experience in soloEvents
-  const matchingEvents = soloEvents.filter(e => {
-    const firstWord = e.exp.toLowerCase().split(' ')[0];
-    const expWord = experienceName.toLowerCase().split(' ')[0];
-    return e.exp.toLowerCase().includes(expWord) || experienceName.toLowerCase().includes(firstWord);
-  });
+  const wanted = experienceName.trim().toLowerCase();
+  const matchingEvents = soloEvents.filter(e => (e.exp || '').trim().toLowerCase() === wanted);
   
   if (matchingEvents.length === 0) {
     if (dateSelect) {
@@ -837,14 +833,8 @@ window.handleBookingSubmit = function(e) {
   const btn     = document.getElementById('booking-submit-btn');
   if (!form) return;
 
-  // Enforce Guest Portal Account Registration/Login
-  const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-  if (!currentUser) {
-    alert("Please log in or register a guest account to complete your booking.");
-    closeBookingModal();
-    openPortal(); // Opens portal auth modal
-    return;
-  }
+  // Guest checkout is allowed; an account is optional and can be created later.
+  const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
 
   // Form Validation
   const required = form.querySelectorAll('[required]');
@@ -859,6 +849,7 @@ window.handleBookingSubmit = function(e) {
   if (!valid) return;
 
   const experience = document.getElementById('booking-experience').value;
+  const guestEmail = (currentUser && currentUser.email) || document.getElementById('booking-email').value.trim();
   const date = document.getElementById('booking-date').value;
   const guests = parseInt(document.getElementById('booking-guests').value, 10);
   const notes = document.getElementById('booking-notes').value;
@@ -893,7 +884,7 @@ window.handleBookingSubmit = function(e) {
     setTimeout(() => {
       const newBooking = {
         id: bookingRef,
-        userEmail: currentUser.email,
+        userEmail: guestEmail,
         experience: experience,
         date: date,
         guests: guests,
@@ -918,14 +909,17 @@ window.handleBookingSubmit = function(e) {
       // Show success with reference
       const successMsg = document.getElementById('booking-success');
       if (successMsg) {
-        successMsg.innerHTML = `<i class="fas fa-check-circle"></i> Reserved! Ref: <strong>${bookingRef}</strong>`;
+        successMsg.innerHTML = `<div><i class="fas fa-check-circle"></i> Reserved! Ref: <strong>${bookingRef}</strong></div><div style="margin-top:12px;color:#5f6b64;font-size:13px;">A confirmation has been recorded for ${guestEmail}.</div><button type="button" class="btn btn-primary" style="margin-top:16px;" onclick="closeBookingModal()">Done</button>`;
       }
+      form.classList.add('complete');
       success?.classList.add('show');
+      success?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
       btn.innerHTML = '<i class="fas fa-check-circle"></i> Reservation Confirmed!';
       btn.disabled = true;
 
       setTimeout(() => {
         form.reset();
+        form.classList.remove('complete');
         success?.classList.remove('show');
         btn.innerHTML = '<i class="fas fa-check-circle"></i> Reserved!';
         btn.style.display = '';
@@ -942,7 +936,7 @@ window.handleBookingSubmit = function(e) {
 
     // Cache checkout details
     window.tempBooking = {
-      userEmail: currentUser.email,
+      userEmail: guestEmail,
       experience: experience,
       date: date,
       guests: guests,

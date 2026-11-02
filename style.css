@@ -3345,3 +3345,40 @@ input, textarea, select { font-family: 'Poppins', sans-serif; }
 
 
 
+
+
+/* Accessibility + reduced motion */
+.skip-link{position:absolute;left:-9999px;top:0;z-index:100000;background:#2E5E4E;color:#fff;padding:10px 16px;border-radius:0 0 8px 0;font-size:13px}
+.skip-link:focus{left:0}
+:focus-visible{outline:3px solid #A8B8A5;outline-offset:3px;border-radius:4px}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.001ms!important}}
+
+/* Mobile navigation + hero stats corrections */
+@media (max-width: 768px) {
+  .navbar { overflow: visible !important; }
+  .nav-menu, .nav-cta { display: none !important; }
+  .hamburger { display: flex !important; margin-left: auto; flex-shrink: 0; position: relative; z-index: 1006; }
+  .hero-stats { flex-direction: row !important; align-items: flex-start; justify-content: space-between; gap: 10px; margin-top: 26px; }
+  .hero-stat-divider { display: none; }
+  .stat-num { font-size: 28px !important; }
+  .stat-label { font-size: 9px !important; letter-spacing: .06em !important; }
+  .hero-stat { min-width: 0; }
+}
+
+/* Prevent off-canvas menu from widening the layout viewport */
+html, body { max-width: 100%; overflow-x: hidden; }
+.mobile-menu, .mobile-overlay { max-width: 100vw; }
+.navbar { width: 100%; }
+
+
+/* Booking confirmation state */
+#booking-form.complete .form-group,
+#booking-form.complete .booking-payment-note,
+#booking-form.complete .booking-submit { display: none !important; }
+#booking-form.complete #booking-success { display: block !important; }
+#booking-form.complete .booking-success { font-size: 15px; padding: 18px; line-height: 1.7; }
+@media (max-height: 1000px) { .hero-scroll { display: none; } }
+
+
+/* Keep the demo notice full width inside the checkout grid */
+.payfast-body > div[style*="FFF4E5"] { grid-column: 1 / -1; margin: 18px 24px 0; }

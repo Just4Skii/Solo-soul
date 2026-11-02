@@ -1,94 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- ======================== LIVE AUTO-REPAIR AGENT HOOK ======================== -->
-  <script>
-    (function() {
-      function reportRuntimeError(data) {
-        // Send POST payload to server
-        fetch('/report-error', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data)
-        }).catch(err => console.error("Failed to transmit error logs to Live Agent server", err));
-
-        // Create or update HUD overlay
-        let hud = document.getElementById('live-repair-hud');
-        if (!hud) {
-          hud = document.createElement('div');
-          hud.id = 'live-repair-hud';
-          // inline styles for complete styling independence
-          hud.style.position = 'fixed';
-          hud.style.bottom = '20px';
-          hud.style.right = '20px';
-          hud.style.zIndex = '999999';
-          hud.style.background = 'rgba(46, 94, 78, 0.96)';
-          hud.style.border = '1px solid #A8B8A5';
-          hud.style.color = '#FFFFFF';
-          hud.style.padding = '20px';
-          hud.style.borderRadius = '14px';
-          hud.style.fontFamily = "'Poppins', sans-serif";
-          hud.style.fontSize = '13px';
-          hud.style.maxWidth = '360px';
-          hud.style.boxShadow = '0 10px 35px rgba(0, 0, 0, 0.25)';
-          hud.style.backdropFilter = 'blur(8px)';
-          hud.style.webkitBackdropFilter = 'blur(8px)';
-          hud.style.transition = 'all 0.3s ease';
-          hud.style.borderLeft = '4px solid #e74c3c';
-          document.body.appendChild(hud);
-        }
-
-        hud.innerHTML = `
-          <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
-            <span style="font-size:18px; display:inline-block; transform-origin:center;" class="live-agent-icon">🤖</span>
-            <strong style="font-family:'Playfair Display',serif; font-size:15px; letter-spacing:0.5px;">Live Auto-Repair Agent</strong>
-          </div>
-          <p style="margin-bottom:12px; opacity:0.9; line-height:1.4;">I've captured a browser runtime error. The diagnostic stack trace has been recorded for live repair:</p>
-          <div style="background:rgba(0,0,0,0.25); padding:10px; border-radius:6px; font-family:monospace; font-size:11px; max-height:80px; overflow-y:auto; margin-bottom:12px; word-break:break-all; line-height:1.3;">
-            <strong>${data.type === 'javascript' ? 'Syntax/Reference Error' : 'Promise Rejection'}</strong>: ${data.message}
-            ${data.lineno ? `<br/><span style="color:#A8B8A5">Line ${data.lineno}:${data.colno}</span>` : ''}
-          </div>
-          <div style="font-size:11.5px; opacity:0.85; display:flex; align-items:center; gap:8px;">
-            <i class="fas fa-circle-notch fa-spin" style="color:#A8B8A5"></i> <span>Live Agent notified. Autonomic patches incoming...</span>
-          </div>
-        `;
-
-        // Inject animation style keyframe if not present
-        if (!document.getElementById('live-hud-anim')) {
-          const style = document.createElement('style');
-          style.id = 'live-hud-anim';
-          style.textContent = `
-            @keyframes hudSlideUp {
-              from { transform: translateY(50px); opacity: 0; }
-              to { transform: translateY(0); opacity: 1; }
-            }
-            #live-repair-hud { animation: hudSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-          `;
-          document.head.appendChild(style);
-        }
-      }
-
-      window.onerror = function(message, source, lineno, colno, error) {
-        reportRuntimeError({
-          type: 'javascript',
-          message: message,
-          source: source,
-          lineno: lineno,
-          colno: colno,
-          stack: error ? error.stack : ''
-        });
-        return false;
-      };
-
-      window.onunhandledrejection = function(event) {
-        reportRuntimeError({
-          type: 'promise_rejection',
-          message: event.reason ? (event.reason.message || String(event.reason)) : 'Unhandled rejection',
-          stack: event.reason && event.reason.stack ? event.reason.stack : ''
-        });
-      };
-    })();
-  </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="mobile-web-app-capable" content="yes" />
@@ -118,10 +30,12 @@
   <!-- AOS Animation Library -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" />
 
-  <link rel="stylesheet" href="style.css" />
-  <link rel="stylesheet" href="mobile-responsive.css" />
+  <link rel="stylesheet" href="style.css?v=20261102h" />
+  <link rel="stylesheet" href="mobile-responsive.css?v=20261102h" />
+  <link rel="preload" as="image" href="assets/images/hero_ocean_sunrise.webp" fetchpriority="high" />
 </head>
 <body>
+  <a class="skip-link" href="#home">Skip to main content</a>
 
   <!-- ======================== PRELOADER ======================== -->
   <div id="preloader" class="preloader">
@@ -180,7 +94,7 @@
   <!-- ======================== HERO SECTION ======================== -->
   <section id="home" class="hero">
     <div class="hero-bg">
-      <img src="assets/images/hero_ocean_sunrise_1783927366146.png" alt="Woman enjoying sunrise ocean view with coffee" class="hero-img" />
+      <img fetchpriority="high" decoding="async" src="assets/images/hero_ocean_sunrise.webp" alt="Woman enjoying sunrise ocean view with coffee" class="hero-img" />
       <div class="hero-overlay"></div>
     </div>
 
@@ -206,30 +120,27 @@
         <a href="#experiences" class="btn btn-hero-secondary" id="hero-explore-btn">
           <i class="fas fa-compass"></i> Explore Events
         </a>
-        <a href="#about" class="btn btn-hero-ghost" id="hero-about-btn">
-          About Us
-        </a>
       </div>
       <div class="hero-stats">
         <div class="hero-stat">
           <div class="stat-row">
-            <span class="stat-num" data-target="200">0</span><span class="stat-plus">+</span>
+            <span class="stat-num" data-target="12">0</span>
           </div>
-          <span class="stat-label">Experiences Hosted</span>
+          <span class="stat-label">Curated experiences</span>
         </div>
         <div class="hero-stat-divider"></div>
         <div class="hero-stat">
           <div class="stat-row">
-            <span class="stat-num" data-target="500">0</span><span class="stat-plus">+</span>
+            <span class="stat-num" data-target="8">0</span>
           </div>
-          <span class="stat-label">Happy Souls</span>
+          <span class="stat-label">Partner venues</span>
         </div>
         <div class="hero-stat-divider"></div>
         <div class="hero-stat">
           <div class="stat-row">
-            <span class="stat-num" data-target="12">0</span><span class="stat-plus">+</span>
+            <span class="stat-num" data-target="5">0</span>
           </div>
-          <span class="stat-label">Unique Activities</span>
+          <span class="stat-label">Experience styles</span>
         </div>
       </div>
     </div>
@@ -254,7 +165,7 @@
       <div class="about-grid">
         <div class="about-image-wrap" data-aos="fade-right">
           <div class="about-img-frame">
-            <img src="assets/images/about_section_image_1783927472281.png" alt="Woman on coastal cliffs journaling with ocean view" />
+            <img loading="lazy" decoding="async" src="assets/images/about_section_image_1783927472281.webp" alt="Woman on coastal cliffs journaling with ocean view" />
             <div class="about-img-badge">
               <span>❤️</span>
               <span>Because you are enough</span>
@@ -335,7 +246,7 @@
 
         <div class="exp-card" data-aos="fade-up" data-aos-delay="50">
           <div class="exp-img-wrap">
-            <img src="assets/images/experience_brunch_1783927375716.png" alt="Solo brunch club experience" />
+            <img loading="lazy" decoding="async" src="assets/images/experience_brunch_1783927375716.webp" alt="Solo brunch club experience" />
             <div class="exp-badge">Popular</div>
             <div class="exp-overlay">
               <button class="exp-cta" onclick="openBookingModal('Solo Brunch Club')">Book Experience</button>
@@ -354,7 +265,7 @@
 
         <div class="exp-card" data-aos="fade-up" data-aos-delay="100">
           <div class="exp-img-wrap">
-            <img src="assets/images/experience_sunset_walk_1783927384287.png" alt="Sunset beach walk experience" />
+            <img loading="lazy" decoding="async" src="assets/images/experience_sunset_walk_1783927384287.webp" alt="Sunset beach walk experience" />
             <div class="exp-badge new-badge">New</div>
             <div class="exp-overlay">
               <button class="exp-cta" onclick="openBookingModal('Sunset Beach Walk')">Book Experience</button>
@@ -373,7 +284,7 @@
 
         <div class="exp-card" data-aos="fade-up" data-aos-delay="150">
           <div class="exp-img-wrap">
-            <img src="assets/images/experience_sip_paint_1783927393574.png" alt="Sip and paint experience" />
+            <img loading="lazy" decoding="async" src="assets/images/experience_sip_paint_1783927393574.webp" alt="Sip and paint experience" />
             <div class="exp-overlay">
               <button class="exp-cta" onclick="openBookingModal('Sip & Paint')">Book Experience</button>
             </div>
@@ -391,7 +302,7 @@
 
         <div class="exp-card" data-aos="fade-up" data-aos-delay="200">
           <div class="exp-img-wrap">
-            <img src="assets/images/experience_coffee_journal_1783927404043.png" alt="Solo coffee date journaling experience" />
+            <img loading="lazy" decoding="async" src="assets/images/experience_coffee_journal_1783927404043.webp" alt="Solo coffee date journaling experience" />
             <div class="exp-overlay">
               <button class="exp-cta" onclick="openBookingModal('Coffee Date')">Book Experience</button>
             </div>
@@ -409,7 +320,7 @@
 
         <div class="exp-card" data-aos="fade-up" data-aos-delay="250">
           <div class="exp-img-wrap">
-            <img src="assets/images/experience_nature_hike_1783927415406.png" alt="Nature escape hiking experience" />
+            <img loading="lazy" decoding="async" src="assets/images/experience_nature_hike_1783927415406.webp" alt="Nature escape hiking experience" />
             <div class="exp-overlay">
               <button class="exp-cta" onclick="openBookingModal('Nature Escape')">Book Experience</button>
             </div>
@@ -427,7 +338,7 @@
 
         <div class="exp-card" data-aos="fade-up" data-aos-delay="300">
           <div class="exp-img-wrap">
-            <img src="assets/images/experience_luxury_spa_1783927426028.png" alt="Luxury solo spa day experience" />
+            <img loading="lazy" decoding="async" src="assets/images/experience_luxury_spa_1783927426028.webp" alt="Luxury solo spa day experience" />
             <div class="exp-badge luxury-badge">Luxury</div>
             <div class="exp-overlay">
               <button class="exp-cta" onclick="openBookingModal('Luxury Solo Day')">Book Experience</button>
@@ -628,39 +539,39 @@
       </div>
       <div class="gallery-grid" data-aos="fade-up">
         <div class="gallery-item g-large" onclick="openLightbox(this)">
-          <img src="assets/images/hero_ocean_sunrise_1783927366146.png" alt="Woman enjoying ocean sunrise with coffee" />
+          <img fetchpriority="high" decoding="async" src="assets/images/hero_ocean_sunrise.webp" alt="Woman enjoying ocean sunrise with coffee" />
           <div class="gallery-item-overlay"><i class="fas fa-expand"></i></div>
         </div>
         <div class="gallery-item" onclick="openLightbox(this)">
-          <img src="assets/images/gallery_beach_1783927493607.png" alt="Beautiful Durban beach at sunset" />
+          <img loading="lazy" decoding="async" src="assets/images/gallery_beach_1783927493607.webp" alt="Beautiful Durban beach at sunset" />
           <div class="gallery-item-overlay"><i class="fas fa-expand"></i></div>
         </div>
         <div class="gallery-item" onclick="openLightbox(this)">
-          <img src="assets/images/gallery_cafe_1783927503191.png" alt="Cozy café corner for solo journaling" />
+          <img loading="lazy" decoding="async" src="assets/images/gallery_cafe_1783927503191.webp" alt="Cozy café corner for solo journaling" />
           <div class="gallery-item-overlay"><i class="fas fa-expand"></i></div>
         </div>
         <div class="gallery-item" onclick="openLightbox(this)">
-          <img src="assets/images/experience_sip_paint_1783927393574.png" alt="Sip and paint evening experience" />
+          <img loading="lazy" decoding="async" src="assets/images/experience_sip_paint_1783927393574.webp" alt="Sip and paint evening experience" />
           <div class="gallery-item-overlay"><i class="fas fa-expand"></i></div>
         </div>
         <div class="gallery-item g-tall" onclick="openLightbox(this)">
-          <img src="assets/images/gallery_botanical_garden_1783927452910.png" alt="Reading in botanical gardens" />
+          <img loading="lazy" decoding="async" src="assets/images/gallery_botanical_garden_1783927452910.webp" alt="Reading in botanical gardens" />
           <div class="gallery-item-overlay"><i class="fas fa-expand"></i></div>
         </div>
         <div class="gallery-item" onclick="openLightbox(this)">
-          <img src="assets/images/gallery_wine_tasting_1783927462303.png" alt="Elegant solo wine tasting" />
+          <img loading="lazy" decoding="async" src="assets/images/gallery_wine_tasting_1783927462303.webp" alt="Elegant solo wine tasting" />
           <div class="gallery-item-overlay"><i class="fas fa-expand"></i></div>
         </div>
         <div class="gallery-item" onclick="openLightbox(this)">
-          <img src="assets/images/experience_nature_hike_1783927415406.png" alt="Nature hike through forest" />
+          <img loading="lazy" decoding="async" src="assets/images/experience_nature_hike_1783927415406.webp" alt="Nature hike through forest" />
           <div class="gallery-item-overlay"><i class="fas fa-expand"></i></div>
         </div>
         <div class="gallery-item" onclick="openLightbox(this)">
-          <img src="assets/images/gallery_paint_night_1783927512455.png" alt="Colorful paint night session" />
+          <img loading="lazy" decoding="async" src="assets/images/gallery_paint_night_1783927512455.webp" alt="Colorful paint night session" />
           <div class="gallery-item-overlay"><i class="fas fa-expand"></i></div>
         </div>
         <div class="gallery-item g-large" onclick="openLightbox(this)">
-          <img src="assets/images/experience_luxury_spa_1783927426028.png" alt="Luxury spa solo day experience" />
+          <img loading="lazy" decoding="async" src="assets/images/experience_luxury_spa_1783927426028.webp" alt="Luxury spa solo day experience" />
           <div class="gallery-item-overlay"><i class="fas fa-expand"></i></div>
         </div>
       </div>
@@ -679,7 +590,7 @@
 
         <div class="blog-card featured-blog" data-aos="fade-up" data-aos-delay="50" onclick="openBlogModal('blog1')">
           <div class="blog-img">
-            <img src="assets/images/experience_coffee_journal_1783927404043.png" alt="Solo dating journaling" />
+            <img loading="lazy" decoding="async" src="assets/images/experience_coffee_journal_1783927404043.webp" alt="Solo dating journaling" />
             <div class="blog-category-badge">Self Love</div>
           </div>
           <div class="blog-body">
@@ -692,7 +603,7 @@
 
         <div class="blog-card" data-aos="fade-up" data-aos-delay="100" onclick="openBlogModal('blog2')">
           <div class="blog-img">
-            <img src="assets/images/experience_nature_hike_1783927415406.png" alt="Solo travel hiking" />
+            <img loading="lazy" decoding="async" src="assets/images/experience_nature_hike_1783927415406.webp" alt="Solo travel hiking" />
             <div class="blog-category-badge adventure">Adventure</div>
           </div>
           <div class="blog-body">
@@ -705,7 +616,7 @@
 
         <div class="blog-card" data-aos="fade-up" data-aos-delay="150" onclick="openBlogModal('blog3')">
           <div class="blog-img">
-            <img src="assets/images/gallery_cafe_1783927503191.png" alt="Enjoying coffee alone" />
+            <img loading="lazy" decoding="async" src="assets/images/gallery_cafe_1783927503191.webp" alt="Enjoying coffee alone" />
             <div class="blog-category-badge mindful">Mindfulness</div>
           </div>
           <div class="blog-body">
@@ -718,7 +629,7 @@
 
         <div class="blog-card" data-aos="fade-up" data-aos-delay="200" onclick="openBlogModal('blog4')">
           <div class="blog-img">
-            <img src="assets/images/experience_nature_hike_1783927415406.png" alt="Healing through nature" />
+            <img loading="lazy" decoding="async" src="assets/images/experience_nature_hike_1783927415406.webp" alt="Healing through nature" />
             <div class="blog-category-badge healing">Healing</div>
           </div>
           <div class="blog-body">
@@ -739,7 +650,7 @@
       <div class="founder-grid">
         <div class="founder-image-wrap" data-aos="fade-right">
           <div class="founder-img-frame">
-            <img src="assets/images/founder_hazel_portrait_1783927435953.png" alt="Hazel, founder of Solo Soul Experiences" />
+            <img loading="lazy" decoding="async" src="assets/images/founder_hazel_portrait_1783927435953.webp" alt="Hazel, founder of Solo Soul Experiences" />
           </div>
           <div class="founder-quote-bubble">
             <p>"You are enough, exactly as you are."</p>
@@ -822,7 +733,7 @@
             <div class="faq-icon"><i class="fas fa-plus"></i></div>
           </button>
           <div class="faq-answer" id="faq-a6" role="region" aria-labelledby="faq-q6">
-            <p>We accept payments via PayFast, Yoco, EFT, and major credit/debit cards. All payments are processed securely. A deposit may be required to confirm your booking.</p>
+            <p>We accept payments via PayFast and major credit/debit cards. Card details are handled by the payment provider, never stored by us.</p>
           </div>
         </div>
       </div>
@@ -855,7 +766,7 @@
         <!-- Right Side: QR Code & Senior Instructions -->
         <div style="background: rgba(255, 255, 255, 0.55); border: 1px solid var(--border); padding: 22px; border-radius: 16px; backdrop-filter: blur(5px); display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center;">
           <div style="background: white; padding: 10px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); display: inline-block;">
-            <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://whatsapp.com/channel/0029Vb8192g5vKA50mLOdp41" alt="WhatsApp Channel QR Code" style="width: 150px; height: 150px; display: block;" />
+            <img loading="lazy" decoding="async" src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://whatsapp.com/channel/0029Vb8192g5vKA50mLOdp41" alt="WhatsApp Channel QR Code" style="width: 150px; height: 150px; display: block;" />
           </div>
           <strong style="font-size: 13px; color: var(--forest); font-weight:700;">Scan QR Code to Join</strong>
           
@@ -892,7 +803,7 @@
             <div class="contact-icon"><i class="fab fa-whatsapp"></i></div>
             <div>
               <strong>WhatsApp</strong>
-              <a href="https://wa.me/27000000000" target="_blank" rel="noopener noreferrer">+27 (0) 00 000 0000</a>
+              <a href="#contact">Send us a message</a>
             </div>
           </div>
           <div class="contact-item">
@@ -913,7 +824,7 @@
             <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
             <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
             <a href="https://www.tiktok.com" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
-            <a href="https://wa.me/27000000000" target="_blank" rel="noopener noreferrer" class="social-link whatsapp" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+            <a href="https://whatsapp.com/channel/0029Vb8192g5vKA50mLOdp41" target="_blank" rel="noopener noreferrer" class="social-link whatsapp" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
           </div>
         </div>
         <div class="contact-form-wrap" data-aos="fade-left">
@@ -925,7 +836,7 @@
               </div>
               <div class="form-group">
                 <label for="contact-email">Email Address</label>
-                <input type="email" id="contact-email" name="email" placeholder="hello@email.com" required />
+                <input type="email" id="contact-email" name="email" placeholder="you@example.com" autocomplete="email" required />
               </div>
             </div>
             <div class="form-group">
@@ -970,7 +881,7 @@
               <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
               <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
               <a href="https://www.tiktok.com" target="_blank" rel="noopener noreferrer" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
-              <a href="https://wa.me/27000000000" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+              <a href="https://whatsapp.com/channel/0029Vb8192g5vKA50mLOdp41" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
             </div>
           </div>
           <div class="footer-nav">
@@ -1000,7 +911,7 @@
             <ul>
               <li><i class="fas fa-map-marker-alt"></i> Durban, KwaZulu-Natal, SA</li>
               <li><a href="mailto:hello@solosoulexperiences.co.za"><i class="fas fa-envelope"></i> hello@solosoulexperiences.co.za</a></li>
-              <li><a href="https://wa.me/27000000000" target="_blank" rel="noopener noreferrer"><i class="fab fa-whatsapp"></i> WhatsApp Us</a></li>
+              <li><a href="mailto:hello@solosoulexperiences.co.za"><i class="fas fa-envelope"></i> Email us</a></li>
             </ul>
           </div>
         </div>
@@ -1008,7 +919,7 @@
     </div>
     <div class="footer-bottom">
       <div class="container">
-        <p>© 2026 Solo Soul Experiences. All rights reserved. | <a href="#privacy">Privacy Policy</a> | <a href="#terms">Terms & Conditions</a></p>
+        <p>© 2026 Solo Soul Experiences. All rights reserved. | <a href="privacy.html">Privacy Policy</a> | <a href="terms.html">Terms &amp; Conditions</a></p>
         <p class="footer-tagline">Fall in Love with Your Own Company. ✦</p>
       </div>
     </div>
@@ -1021,7 +932,7 @@
       <div class="modal-header">
         <div class="modal-icon">✦</div>
         <h3 id="booking-modal-title">Book Your Experience</h3>
-        <p id="booking-modal-subtitle">Fill in your details and we'll confirm within 24 hours via WhatsApp.</p>
+        <p id="booking-modal-subtitle">Fill in your details and we'll email your confirmation and ticket.</p>
       </div>
       <form id="booking-form" onsubmit="handleBookingSubmit(event)" novalidate>
         <div class="form-group">
@@ -1031,11 +942,11 @@
         <div class="form-row">
           <div class="form-group">
             <label for="booking-email">Email</label>
-            <input type="email" id="booking-email" name="email" placeholder="your@email.com" required />
+            <input type="email" id="booking-email" name="email" placeholder="you@example.com" autocomplete="email" required />
           </div>
           <div class="form-group">
             <label for="booking-phone">Phone / WhatsApp</label>
-            <input type="tel" id="booking-phone" name="phone" placeholder="+27 00 000 0000" required />
+            <input type="tel" id="booking-phone" name="phone" placeholder="+27 82 123 4567" autocomplete="tel" required />
           </div>
         </div>
         <div class="form-group">
@@ -1079,7 +990,7 @@
         </div>
         <div class="booking-payment-note" id="booking-pay-note">
           <i class="fas fa-shield-alt"></i>
-          <span>Secure payment via <strong>PayFast</strong> or <strong>Yoco</strong> after confirmation. No payment required now.</span>
+          <span>Secure payment via <strong>PayFast</strong> after confirmation. No payment is taken now.</span>
         </div>
         <button type="submit" class="btn btn-primary booking-submit" id="booking-submit-btn">
           Request Booking <i class="fas fa-arrow-right"></i>
@@ -1146,7 +1057,7 @@
           </div>
           <div class="form-group">
             <label for="register-whatsapp">WhatsApp Number</label>
-            <input type="tel" id="register-whatsapp" required placeholder="+27 82 000 0000" />
+            <input type="tel" id="register-whatsapp" required placeholder="+27 82 123 4567" autocomplete="tel" />
           </div>
           <div class="form-group">
             <label for="register-password">Password</label>
@@ -1280,11 +1191,12 @@
   <div class="modal-overlay" id="payfast-modal-overlay" onclick="closePayFastModal(event)">
     <div class="modal payfast-modal" id="payfast-modal" role="dialog" aria-modal="true" aria-labelledby="payfast-modal-title">
       <div class="payfast-header">
-        <div class="payfast-lock"><i class="fas fa-lock"></i> SECURE PAYMENT BY <strong>PAYFAST</strong></div>
+        <div class="payfast-lock"><i class="fas fa-lock"></i> PAYFAST <strong>DEMO CHECKOUT</strong> — NO REAL PAYMENT</div>
         <button class="payfast-cancel-btn" onclick="closePayFastModal()">Cancel Payment</button>
       </div>
 
       <div class="payfast-body" id="payfast-main-content">
+        <div style="background:#FFF4E5;border:1px solid #E6B566;color:#6B4A12;padding:10px 14px;border-radius:8px;font-size:12.5px;margin-bottom:16px;">Demo mode: this checkout simulates payment for testing. No card is charged and no real PayFast transaction is created.</div>
         <!-- Merchant & Order details -->
         <div class="payfast-order-summary">
           <div class="payfast-merchant">
@@ -1338,7 +1250,7 @@
                   <input type="password" id="pf-card-cvv" required placeholder="•••" maxlength="3" oninput="this.value=this.value.replace(/\D/g,'')" />
                 </div>
               </div>
-              <button type="submit" class="btn btn-payfast" id="pf-pay-btn"><i class="fas fa-lock"></i> Securely Pay Now</button>
+              <button type="submit" class="btn btn-payfast" id="pf-pay-btn"><i class="fas fa-lock"></i> Simulate Payment</button>
             </form>
           </div>
 
@@ -1396,7 +1308,7 @@
   <!-- ======================== LIGHTBOX ======================== -->
   <div class="lightbox" id="lightbox" onclick="closeLightbox()">
     <button class="lightbox-close" onclick="closeLightbox()" aria-label="Close image">✕</button>
-    <img id="lightbox-img" src="" alt="" />
+    <img loading="lazy" decoding="async" id="lightbox-img" src="" alt="" />
   </div>
 
   <!-- ======================== SCROLL TO TOP ======================== -->
@@ -1406,9 +1318,9 @@
 
   <!-- Supabase Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase.js"></script>
+  <script src="supabase.js?v=20261102h"></script>
   <!-- AOS Library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
-  <script src="app.js"></script>
+  <script src="app.js?v=20261102h"></script>
 </body>
 </html>
