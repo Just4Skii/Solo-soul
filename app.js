@@ -191,6 +191,16 @@ function getTicketStatus(title) {
 // ---- DOM READY --------------------------------------------
 document.addEventListener('DOMContentLoaded', () => {
   // Paint the interface first: never let a slow/dead API hold the page hostage.
+  // Inner pages have no hero, so keep the navigation legible immediately.
+  if (!document.querySelector('.hero')) document.getElementById('navbar')?.classList.add('scrolled');
+
+  // Mark the current page in the navigation
+  const pageName = (window.location.pathname.split('/').pop() || 'index.html');
+  document.querySelectorAll('.nav-link, .mobile-nav-link').forEach(link => {
+    const href = link.getAttribute('href') || '';
+    if (href.split('#')[0] === pageName) link.classList.add('active');
+  });
+
   initPreloader();
   initAOS();
   initNavbar();
@@ -523,7 +533,7 @@ function initEventsTable() {
   if (!allEvents.length) {
     tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px 20px;color:#5f6b64;">' +
       '<strong style="display:block;font-family:\'Playfair Display\',serif;font-size:22px;color:#2E5E4E;margin-bottom:8px;">New experiences are being finalised</strong>' +
-      'Dates are published once confirmed. Join the newsletter or <a href="#contact" style="color:#2E5E4E;text-decoration:underline;">get in touch</a> to hear first.' +
+      'Dates are published once confirmed. Join the newsletter or <a href="contact.html" style="color:#2E5E4E;text-decoration:underline;">get in touch</a> to hear first.' +
       '</td></tr>';
   }
   applyEventFilters();
@@ -1495,7 +1505,7 @@ function loadPortalDashboard() {
         <i class="fas fa-calendar-times"></i>
         <h5>No booked experiences yet</h5>
         <p>Your journey begins with taking the first step. Explore our upcoming Durban solo events and book an experience today!</p>
-        <a href="#experiences" class="btn btn-secondary" onclick="closePortalModal()" style="margin-top:10px; padding:10px 20px; font-size:13px;">View Experiences</a>
+        <a href="experiences.html" class="btn btn-secondary" onclick="closePortalModal()" style="margin-top:10px; padding:10px 20px; font-size:13px;">View Experiences</a>
       </div>
     `;
     return;
