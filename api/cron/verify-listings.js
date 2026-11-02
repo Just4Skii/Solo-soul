@@ -3,7 +3,7 @@
  * /api/cron/verify-listings — Runs every 12 hours via Vercel Cron
  * Solo Soul Experiences — 2026-07-16
  *
- * This is triggered by a cron: "0 */12 * * *" schedule in vercel.json.
+ * This is triggered by a cron: "0 every-12-hours" schedule in vercel.json.
  * It checks all external ticket links and updates the database with results.
  *
  * CRON_SECRET must match the value in vercel.json to prevent unauthorized runs.
@@ -11,14 +11,16 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { runDailyPost } from '../../lib/social.js';
 
-const SUPABASE_URL = process.env.SUPABASE_URL || 'https://iinvfedcrkibnftzbrlz.supabase.co';
+const SUPABASE_URL = process.env.SUPABASE_URL || '';
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'AIzaSyAw6-NI38aZw-u1Ukrb7WWdy1xye81jW3k';
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+if (!GEMINI_API_KEY) console.error('❌ GEMINI_API_KEY not set in cron');
+const genAI = GEMINI_API_KEY ? new GoogleGenerativeAI(GEMINI_API_KEY) : null;
 const CRON_SECRET = process.env.CRON_SECRET || 'solo-soul-cron-secret-2026';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
-const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 
 const CITY_EVENTS = [
   { title: 'Disney On Ice',                 url: 'https://www.webtickets.co.za/v2/search.aspx?search=Disney+On+Ice' },
@@ -95,8 +97,8 @@ async function cacheResult(title, url, status, suggestedUrl) {
 export default async function handler(req, res) {
   // Verify cron secret
   const auth = req.headers['authorization'];
-  if (!auth || auth !== `Bearer ${CRON_SECRET}`) {
-    // Also allow the cron secret in query params for Vercel Cron
+  const isVercelCron = Boolean(req.headers['x-vercel-cron']) || /vercel-cron/i.test(req.headers['user-agent'] || '');
+  if (!isVercelCron && (!auth || auth !== `Bearer ${CRON_SECRET}`)) {
     if (req.query?.secret !== CRON_SECRET) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
@@ -132,6 +134,7 @@ export default async function handler(req, res) {
     }
   }
 
+  const social = await runDailyPost();
   const duration = ((Date.now() - start) / 1000).toFixed(1);
   const verified = results.filter(r => r.status === 'verified').length;
   const dead = results.filter(r => r.status === 'dead').length;
@@ -143,6 +146,7 @@ export default async function handler(req, res) {
     timestamp: new Date().toISOString(),
     summary: { total: results.length, verified, dead, redirected: results.filter(r => r.status === 'redirected').length },
     results,
+    social,
     duration: `${duration}s`,
   });
 }

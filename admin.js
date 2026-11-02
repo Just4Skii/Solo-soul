@@ -283,6 +283,12 @@ async function loadOperations() {
     const auditBox = $('settlement-audit');
     if (auditBox) auditBox.innerHTML = (audit.audit || []).length ? audit.audit.map(x => `<div class="recent-item"><span><strong>${esc(x.action)}</strong> · ${esc(x.provider || '')} ${x.reference ? '· ' + esc(x.reference) : ''}</span><span>${x.previous_status || '—'} → ${x.new_status || '—'} · R${Number(x.amount || 0).toFixed(2)} · ${esc(x.actor_email || x.actor_id || 'system')}</span></div>`).join('') : '<p style="color:var(--text-muted);font-size:13px">No settlement audit entries yet.</p>';
     $('reconcile-btn').onclick = runReconcile;
+    $('social-post-btn').onclick = async () => {
+      const box = $('social-result'); box.innerHTML = '<p style="font-size:13px">Posting…</p>';
+      const res = await api('POST', API.bookings, { action: 'postSocial' });
+      const r = res.result || res;
+      box.innerHTML = '<div class="recent-item"><span>' + esc(r.error || r.skipped || ('Posted: ' + (r.event || ''))) + '</span><span>' + esc(r.post_id || '') + '</span></div>';
+    };
     $('ops-refresh').onclick = loadOperations;
   } catch (e) { toast('Failed to load operations', 'error'); }
 }
