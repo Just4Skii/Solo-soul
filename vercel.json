@@ -2,8 +2,8 @@
   "outputDirectory": ".",
   "rewrites": [
     {
-      "source": "/events/(.*)",
-      "destination": "/portal/index.html"
+      "source": "/events/:slug",
+      "destination": "/portal/index.html?event=:slug"
     },
     {
       "source": "/e/:id",
