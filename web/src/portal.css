@@ -136,3 +136,5 @@ body { margin: 0; background: var(--sand); color: var(--charcoal); font-family: 
 .portal-share { margin-top:16px; padding-top:14px; }
 .portal-share button, .portal-share a { flex:1 1 auto; text-align:center; }
 @media(max-width:900px){ .portal-event-media img,.portal-event-fallback{height:240px} .portal-share{flex-wrap:wrap;gap:8px} .portal-share span{width:100%} .portal-share button,.portal-share a{flex:1 1 40%} }
+
+.portal-price-note { font-family:'Playfair Display',serif; font-size:22px; color:var(--forest); }

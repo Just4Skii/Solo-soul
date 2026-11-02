@@ -406,7 +406,7 @@ function EventDetail({ event }) {
         <aside className="portal-event-aside">
           <div className="portal-card">
             <span className="portal-aside-label">{external ? 'Listing from ' + event.source : 'Hosted by Solo Soul'}</span>
-            <strong className="portal-total">{price}</strong>
+            <strong className={/^[R\d]/.test(String(price)) ? "portal-total" : "portal-price-note"}>{price}</strong>
             <p>{date}<br />{venue}</p>
             {external
               ? <a className="portal-btn" href={event.url} target="_blank" rel="noreferrer">Get tickets ↗</a>
