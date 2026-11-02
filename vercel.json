@@ -2,7 +2,7 @@
   "outputDirectory": ".",
   "rewrites": [
     {
-      "source": "/events/:slug",
+      "source": "/whats-on/:slug",
       "destination": "/portal/index.html?event=:slug"
     },
     {

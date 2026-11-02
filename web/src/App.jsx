@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 
 const params = new URLSearchParams(window.location.search);
 const initialTicket = params.get('ticket') || params.get('ref') || '';
-const pathEvent = (window.location.pathname.match(/\/events\/([^/]+)\/?$/) || [])[1] || '';
+const pathEvent = (window.location.pathname.match(/\/whats-on\/([^/]+)\/?$/) || [])[1] || '';
 const initialEvent = params.get('event') || decodeURIComponent(pathEvent);
 const initialExperience = params.get('experience') || '';
 const initialBook = params.get('book') || '';
@@ -380,7 +380,7 @@ function EventDetail({ event }) {
   }[event.category] || '/assets/images/experience_sunset_walk_1783927384287.webp';
   const image = event.image || event.image_url || fallback;
   const key = event.slug || event.id || '';
-  const url = 'https://ssoul.co.za/events/' + encodeURIComponent(key);
+  const url = 'https://ssoul.co.za/whats-on/' + encodeURIComponent(key);
   return (
     <div className="portal-event-page">
       <nav className="portal-breadcrumb"><a href="/events">Events</a><span>/</span><span>Durban</span></nav>
