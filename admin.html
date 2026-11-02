@@ -301,6 +301,17 @@
             <table class="admin-table"><thead><tr><th>Booking</th><th>Provider</th><th>Gross</th><th>Platform fee</th><th>Provider amount</th><th>Status</th><th></th></tr></thead><tbody id="settlements-tbody"></tbody></table>
           </div>
         </div>
+        <div class="card">
+          <h3><i class="fas fa-envelope-circle-check"></i> Email delivery</h3>
+          <div class="table-wrapper">
+            <table class="admin-table"><thead><tr><th>Template</th><th>Recipient</th><th>Status</th><th>Error</th><th>Sent</th></tr></thead><tbody id="emails-tbody"></tbody></table>
+          </div>
+        </div>
+        <div class="card">
+          <h3><i class="fas fa-code-compare"></i> Paystack reconciliation</h3>
+          <button id="reconcile-btn" class="btn-primary">Run reconciliation</button>
+          <div id="reconcile-result" class="recent-list" style="margin-top:14px;"></div>
+        </div>
       </section>
 
       <!-- ═══ SETTINGS ═══ -->

@@ -455,3 +455,13 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 
 #section-operations .card{margin-bottom:18px;}
 #section-operations textarea{font:inherit;}
+
+/* Durban identity overrides */
+:root { --primary:#0B3C49; --primary-dark:#072A35; --accent:#E76F51; --gold:#E9B44C; }
+.sidebar { background:#101C2C; }
+.nav-item.active { border-left-color:#E76F51; background:rgba(231,111,81,.10); color:#fff; }
+.btn-primary, .btn-primary:hover { background:#0B3C49; }
+.btn-primary:hover { background:#166B7C; }
+.status-badge.open { background:#FFF3D6; color:#8A5A00; }
+.status-badge.resolved { background:#E4F3E8; color:#22633A; }
+.status-badge.requested { background:#FFF3D6; color:#8A5A00; }

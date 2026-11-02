@@ -156,6 +156,31 @@ export default async function handler(req, res) {
         return res.json({ settlement: data });
       }
 
+
+      case 'emails': {
+        const { data, error } = await supabase.from('email_log').select('*').order('created_at', { ascending: false }).limit(200);
+        if (error) throw error;
+        return res.json({ emails: data || [] });
+      }
+
+      case 'reconcile': {
+        const key = process.env.PAYSTACK_SECRET_KEY;
+        if (!key) return res.status(503).json({ error: 'Paystack not configured' });
+        const tx = await fetch('https://api.paystack.co/transaction?perPage=100&status=success', { headers: { Authorization: `Bearer ${key}` } });
+        const tj = await tx.json();
+        if (!tx.ok || !tj.status) return res.status(502).json({ error: tj.message || 'Paystack query failed' });
+        const remote = (tj.data || []).filter(t => t.currency === 'ZAR');
+        const { data: payments } = await supabase.from('payments').select('*');
+        const byRef = new Map((payments || []).map(p => [p.provider_reference, p]));
+        const missingInternal = remote.filter(t => !byRef.has(t.reference)).map(t => ({ reference: t.reference, amount: t.amount / 100, paid_at: t.paid_at }));
+        const remoteRefs = new Set(remote.map(t => t.reference));
+        const missingProvider = (payments || []).filter(p => p.status === 'paid' && p.provider_reference && !remoteRefs.has(p.provider_reference)).map(p => ({ reference: p.provider_reference, amount: p.amount }));
+        return res.json({
+          summary: { paystackTransactions: remote.length, internalPayments: (payments || []).length, missingInternal: missingInternal.length, missingProvider: missingProvider.length },
+          missingInternal, missingProvider,
+        });
+      }
+
       default:
         return res.status(400).json({ error: 'Unknown action' });
     }

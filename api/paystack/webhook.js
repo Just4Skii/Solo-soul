@@ -20,7 +20,13 @@ async function confirmBooking(res, data) {
 
   const { data: booking, error } = await supabase.from('bookings').select('*').eq('booking_ref', reference).single();
   if (error || !booking) return json(res, 200, { received: true });
-  if (booking.status === 'Paid') return json(res, 200, { received: true, idempotent: true });
+  if (booking.status === 'Paid') {
+    const { data: existing } = await supabase.from('payments').select('id').eq('provider_reference', reference).maybeSingle();
+    if (!existing) {
+      await supabase.from('payments').insert({ booking_id: booking.id, provider: 'paystack', provider_reference: reference, amount: Number(booking.total), currency: 'ZAR', status: 'paid', raw: data, paid_at: new Date().toISOString() });
+    }
+    return json(res, 200, { received: true, idempotent: true });
+  }
 
   if (String(data.currency || '').toUpperCase() !== 'ZAR') return json(res, 400, { error: 'Currency mismatch' });
   const paid = Number(data.amount) / 100;
@@ -72,6 +78,15 @@ async function confirmBooking(res, data) {
   return json(res, 200, { received: true });
 }
 
+async function failBooking(res, data) {
+  const reference = data.reference || data.metadata?.booking_ref;
+  if (!reference) return json(res, 200, { received: true });
+  const { data: booking } = await supabase.from('bookings').select('id,status').eq('booking_ref', reference).single();
+  if (booking && booking.status === 'Pending') await supabase.from('bookings').update({ status: 'Cancelled' }).eq('id', booking.id);
+  await supabase.from('payments').update({ status: 'failed' }).eq('provider_reference', reference).eq('status', 'pending');
+  return json(res, 200, { received: true });
+}
+
 async function refundUpdate(res, data) {
   const reference = data.transaction_reference || data.reference || data.metadata?.booking_ref;
   const status = data.status === 'failed' ? 'failed' : 'refunded';
@@ -100,6 +115,7 @@ export default async function handler(req, res) {
 
   try {
     if (req.body?.event === 'charge.success') return await confirmBooking(res, req.body.data || {});
+    if (req.body?.event === 'charge.failed' || req.body?.event === 'charge.abandoned') return await failBooking(res, req.body.data || {});
     if (req.body?.event === 'refund.processed' || req.body?.event === 'refund.failed') return await refundUpdate(res, req.body.data || {});
     return json(res, 200, { received: true });
   } catch (error) {
