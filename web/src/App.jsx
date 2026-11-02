@@ -369,97 +369,49 @@ function EventDetail({ event }) {
   const date = external ? event.dateLabel : event.date;
   const venue = external ? event.venue : event.location;
   const price = external ? event.price : (event.is_free ? 'FREE' : event.price);
+  const image = event.image || event.image_url;
   const url = 'https://ssoul.co.za/portal/?event=' + encodeURIComponent(event.id || '');
   return (
-    <div className="portal-event">
-      <div className="portal-event-media">{(event.image || event.image_url) ? <img src={event.image || event.image_url} alt="" /> : <div className="portal-event-fallback">SS</div>}</div>
-      <div className="portal-event-body">
-        <span className="portal-badge">{external ? event.source : 'Solo Soul Experiences'}</span>
-        <h1>{title}</h1>
-        <p className="portal-event-meta">{date} · {venue}</p>
-        <p className="portal-event-price">{price}</p>
-        <p>{(external ? event.description : event.description) || 'An intimate Solo Soul experience in Durban. Full details and joining instructions are shared after booking.'}</p>
-        <div className="portal-actions">
-          {external && event.url && <a className="portal-btn" href={event.url} target="_blank" rel="noreferrer">Tickets ↗</a>}
-          {!external && <a className="portal-btn" href={'/portal/?book=' + event.id}>Book this experience</a>}
-          <a className="portal-btn ghost" href="/events">Back to events</a>
+    <div className="portal-event-page">
+      <nav className="portal-breadcrumb"><a href="/events">Events</a><span>/</span><span>Durban</span></nav>
+      <div className="portal-event-grid">
+        <div className="portal-event-main">
+          <div className="portal-event-media">{image ? <img src={image} alt={title} /> : <div className="portal-event-fallback">SS</div>}</div>
+          <div className="portal-event-head">
+            <div className="portal-event-tags"><span className="portal-badge">{external ? event.source : 'Solo Soul Experiences'}</span><span className="portal-badge">{event.category || 'Experience'}</span></div>
+            <h1>{title}</h1>
+            <div className="portal-event-facts">
+              <div><span>Date</span><strong>{date}</strong></div>
+              <div><span>Venue</span><strong>{venue}</strong></div>
+              <div><span>Price</span><strong>{price}</strong></div>
+            </div>
+            <p className="portal-event-description">{event.description || 'A small-group Solo Soul experience in Durban. Full joining details are shared after booking.'}</p>
+          </div>
+          <div className="portal-share">
+            <span>Share this</span>
+            <button onClick={() => shareLink(title, title + ' — Solo Soul Experiences', url)}>Share</button>
+            <a href={'https://wa.me/?text=' + encodeURIComponent(title + ' ' + url)} target="_blank" rel="noreferrer">WhatsApp</a>
+            <a href={'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url)} target="_blank" rel="noreferrer">Facebook</a>
+            <a href={'mailto:?subject=' + encodeURIComponent(title) + '&body=' + encodeURIComponent(url)}>Email</a>
+          </div>
         </div>
-        <div className="portal-share">
-          <span>Share</span>
-          <button onClick={() => shareLink(title, title + ' — Solo Soul Experiences', url)}>Share</button>
-          <a href={'https://wa.me/?text=' + encodeURIComponent(title + ' ' + url)} target="_blank" rel="noreferrer">WhatsApp</a>
-          <a href={'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url)} target="_blank" rel="noreferrer">Facebook</a>
-          <a href={'mailto:?subject=' + encodeURIComponent(title) + '&body=' + encodeURIComponent(url)}>Email</a>
-        </div>
+        <aside className="portal-event-aside">
+          <div className="portal-card">
+            <span className="portal-aside-label">{external ? 'Listing from ' + event.source : 'Hosted by Solo Soul'}</span>
+            <strong className="portal-total">{price}</strong>
+            <p>{date}<br />{venue}</p>
+            {external
+              ? <a className="portal-btn" href={event.url} target="_blank" rel="noreferrer">Get tickets ↗</a>
+              : <a className="portal-btn" href={'/portal/?book=' + event.id}>Book this experience</a>}
+            <a className="portal-btn ghost" href="/events" style={{ marginTop: 8 }}>Back to events</a>
+            <div className="portal-aside-note">
+              <strong>Good to know</strong>
+              <span>{external ? 'Tickets and final details are handled by the original organiser.' : 'Small group, hosted, and confirmed by email.'}</span>
+              <span>{external ? 'Always confirm the date and venue on the ticket page before paying.' : 'Free cancellation up to 48 hours before, unless stated otherwise.'}</span>
+            </div>
+          </div>
+        </aside>
       </div>
-    </div>
-  );
-}
-
-
-function BookingView({ experience, session }) {
-  const [message, setMessage] = useState('');
-  const [done, setDone] = useState(null);
-  const [loading, setLoading] = useState(false);
-
-  async function submit(e) {
-    e.preventDefault(); setMessage(''); setLoading(true);
-    const form = new FormData(e.target);
-    const payload = {
-      eventId: experience.id,
-      name: form.get('name'),
-      email: form.get('email'),
-      phone: form.get('phone'),
-      guests: Number(form.get('guests')),
-      notes: form.get('notes'),
-    };
-    const headers = { 'Content-Type': 'application/json' };
-    if (session) headers.Authorization = 'Bearer ' + session.access_token;
-    try {
-      if (experience.is_free) {
-        const res = await fetch('/api/app', { method: 'POST', headers, body: JSON.stringify({ action: 'create-free', ...payload }) });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Booking failed');
-        setDone(data.booking);
-      } else {
-        const res = await fetch('/api/paystack/initialize', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-        const data = await res.json();
-        if (!res.ok || !data.authorization_url) throw new Error(data.error || 'Payment could not start');
-        window.location.href = data.authorization_url;
-      }
-    } catch (err) { setMessage(err.message); }
-    setLoading(false);
-  }
-
-  if (done) return (
-    <div className="portal-card portal-narrow">
-      <h1>You're booked</h1>
-      <p>{done.event_name} · {done.event_date} · {done.event_location}</p>
-      <p>Reference <strong>{done.booking_ref}</strong></p>
-      <div className="portal-actions"><a className="portal-btn" href={'/portal/?ticket=' + done.booking_ref}>View ticket</a><a className="portal-btn ghost" href="/portal/">My bookings</a></div>
-    </div>
-  );
-
-  return (
-    <div className="portal-booking">
-      <div className="portal-card">
-        <span className="portal-badge">{experience.category}</span>
-        <h1>{experience.event_name}</h1>
-        <p>{experience.date} · {experience.location}</p>
-        <p>{experience.description || 'A small-group Solo Soul experience in Durban.'}</p>
-        <strong className="portal-total">{experience.is_free ? 'FREE' : experience.price}</strong>
-      </div>
-      <form className="portal-card" onSubmit={submit}>
-        <h2>Book your place</h2>
-        <label>Full name<input name="name" required defaultValue={session?.user?.user_metadata?.full_name || ''} /></label>
-        <label>Email<input name="email" type="email" required defaultValue={session?.user?.email || ''} /></label>
-        <label>Phone / WhatsApp<input name="phone" required /></label>
-        <label>Guests<select name="guests" defaultValue="1">{[1,2,3,4].map(n => <option key={n} value={n}>{n} guest{n > 1 ? 's' : ''}</option>)}</select></label>
-        <label>Notes<textarea name="notes" rows="3" placeholder="Dietary, access or anything else…" /></label>
-        <button className="portal-btn" disabled={loading}>{loading ? 'Please wait…' : (experience.is_free ? 'Reserve my place' : 'Pay & book')}</button>
-        {message && <p className="portal-error">{message}</p>}
-        <p style={{ fontSize: 12 }}>By booking you accept the <a href="/terms">terms</a> and <a href="/privacy">privacy policy</a>.</p>
-      </form>
     </div>
   );
 }
