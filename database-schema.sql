@@ -186,3 +186,47 @@ alter table public.events add column if not exists image_url text;
 alter table public.events add column if not exists description text;
 alter table public.events add column if not exists is_featured boolean default false;
 alter table public.events add column if not exists updated_by uuid references public.admin_users(id);
+
+-- ============================================================
+-- SEED: current upcoming experiences (safe to re-run)
+-- ============================================================
+insert into public.events (event_name, date, location, duration, price, spots_total, spots_left, category, is_free, description, active)
+select 'Sunset Beach Walk', '2026-11-14', 'Durban Beachfront, Golden Mile', '1–2 hrs', 'R250', 8, 3, 'nature', false, 'A slow golden-hour walk along the Golden Mile, ending with a coffee and a guided reflection.', true
+where not exists (select 1 from public.events where event_name = 'Sunset Beach Walk' and date = '2026-11-14');
+
+insert into public.events (event_name, date, location, duration, price, spots_total, spots_left, category, is_free, description, active)
+select 'Sip & Paint Evening', '2026-11-28', 'Art Studio, Umhlanga', '3 hrs', 'R450', 12, 5, 'creative', false, 'A guided paint session with all materials, a welcome drink and no experience required.', true
+where not exists (select 1 from public.events where event_name = 'Sip & Paint Evening' and date = '2026-11-28');
+
+insert into public.events (event_name, date, location, duration, price, spots_total, spots_left, category, is_free, description, active)
+select 'Solo Brunch Club', '2026-12-05', 'Workshop 17, Waterfall', '2–3 hrs', 'R350', 10, 7, 'dining', false, 'A shared table for solo guests, with a set brunch menu and hosted introductions.', true
+where not exists (select 1 from public.events where event_name = 'Solo Brunch Club' and date = '2026-12-05');
+
+insert into public.events (event_name, date, location, duration, price, spots_total, spots_left, category, is_free, description, active)
+select 'Botanical Gardens Walk', '2026-12-12', 'Durban Botanic Gardens, Berea', '2 hrs', 'FREE', 20, 14, 'nature', true, 'A gentle guided walk through the Botanic Gardens, with time to journal.', true
+where not exists (select 1 from public.events where event_name = 'Botanical Gardens Walk' and date = '2026-12-12');
+
+insert into public.events (event_name, date, location, duration, price, spots_total, spots_left, category, is_free, description, active)
+select 'Luxury Spa Solo Day', '2026-12-19', 'Oyster Box Hotel, Umhlanga', 'Full day', 'R850', 6, 2, 'luxury', false, 'A full spa day with treatments, lunch and quiet time by the sea.', true
+where not exists (select 1 from public.events where event_name = 'Luxury Spa Solo Day' and date = '2026-12-19');
+
+insert into public.events (event_name, date, location, duration, price, spots_total, spots_left, category, is_free, description, active)
+select 'Sunrise Coffee & Journal', '2027-01-09', 'Café 1999, Morningside', '1.5 hrs', 'R150', 20, 15, 'mindful', false, 'An early coffee, guided prompts and a quiet hour to write.', true
+where not exists (select 1 from public.events where event_name = 'Sunrise Coffee & Journal' and date = '2027-01-09');
+
+insert into public.events (event_name, date, location, duration, price, spots_total, spots_left, category, is_free, description, active)
+select 'Nature Hike — Krantzkloof', '2027-01-23', 'Krantzkloof Nature Reserve', '4 hrs', 'R300', 12, 4, 'nature', false, 'A hosted hike through Krantzkloof with a moderate route and scenic stops.', true
+where not exists (select 1 from public.events where event_name = 'Nature Hike — Krantzkloof' and date = '2027-01-23');
+
+insert into public.events (event_name, date, location, duration, price, spots_total, spots_left, category, is_free, description, active)
+select 'Solo Wine Tasting', '2027-02-06', 'Chateau Gateaux, Hillcrest', '2.5 hrs', 'R550', 8, 6, 'luxury', false, 'A guided tasting flight with paired bites in a small group.', true
+where not exists (select 1 from public.events where event_name = 'Solo Wine Tasting' and date = '2027-02-06');
+
+insert into public.events (event_name, date, location, duration, price, spots_total, spots_left, category, is_free, description, active)
+select 'Morning Journaling Circle', '2027-02-20', 'Gateway Terrace, Umhlanga', '2 hrs', 'FREE', 30, 22, 'mindful', true, 'A free guided journaling circle for anyone curious about solo reflection.', true
+where not exists (select 1 from public.events where event_name = 'Morning Journaling Circle' and date = '2027-02-20');
+
+insert into public.events (event_name, date, location, duration, price, spots_total, spots_left, category, is_free, description, active)
+select 'Solo Sunset Picnic', '2027-03-06', 'Umhlanga Lighthouse Reserve', '2 hrs', 'R200', 15, 10, 'nature', false, 'A hosted picnic at golden hour with a shared grazing table.', true
+where not exists (select 1 from public.events where event_name = 'Solo Sunset Picnic' and date = '2027-03-06');
+
