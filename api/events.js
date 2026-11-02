@@ -13,8 +13,8 @@ const OUTSIDE = /cape town|western cape|johannesburg|gauteng|pretoria|soweto|gqe
 
 const CATEGORY_RULES = [
   ['wellness', /wellness|healing|meditat|breath|yoga|sound bath|journal|mindful|self[- ]care|therapy|spa/i],
-  ['food', /brunch|coffee|wine|tasting|food|dinner|lunch|picnic|restaurant|culinary/i],
-  ['music', /live music|concert|jazz|band|musical|music|festival/i],
+  ['food', /brunch|coffee|wine|tasting|food|cook|chef|dinner|lunch|picnic|restaurant|culinary/i],
+  ['music', /live music|concert|jazz|band|musical|music|festival|r&b|amapiano|hip[- ]hop|house music/i],
   ['creative', /art|paint|pottery|craft|poetry|photograph|film|theatre|design|creative/i],
   ['outdoors', /hike|walk|trail|beach|nature|garden|sunset|sunrise|surf|kayak|outdoor/i],
   ['markets', /market|flea|makers|bazaar|pop[- ]up/i],
@@ -24,8 +24,9 @@ const CATEGORY_RULES = [
   ['luxury', /luxury|yacht|premium|champagne|exclusive/i],
 ];
 
-function classify(text, fallback = 'social') {
-  for (const [category, re] of CATEGORY_RULES) if (re.test(text || '')) return category;
+function classify(title, description = '', fallback = 'social') {
+  for (const [category, re] of CATEGORY_RULES) if (re.test(title || '')) return category;
+  for (const [category, re] of CATEGORY_RULES) if (re.test(description || '')) return category;
   return fallback;
 }
 
@@ -79,7 +80,7 @@ function normalise(event, source, categoryHint) {
     price: priceText(event),
     url: event.url || '',
     image: typeof event.image === 'string' ? event.image : event.image?.url || '',
-    category: classify(`${title} ${event.description || ''}`, categoryHint || 'social'),
+    category: classify(title, event.description || '', categoryHint || 'social'),
     source,
     external: true,
   };
