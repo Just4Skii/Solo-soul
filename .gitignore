@@ -1,8 +1,11 @@
-# Environment variables (contains secrets!)
+# Environment variables and credentials (never commit)
 .env
-.env.local
-.env.development.local
-.env.production.local
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
 
 # Dependencies
 node_modules/
