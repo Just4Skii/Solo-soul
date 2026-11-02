@@ -459,6 +459,8 @@ function updateHeroStats() {
 
 // ---- EVENTS TABLE -----------------------------------------
 function initEventsTable() {
+  const list = document.getElementById('events-list');
+  if (list) { renderEventCards(list); return; }
   const tbody = document.getElementById('events-tbody');
   if (!tbody) return;
 
@@ -542,6 +544,35 @@ function initEventsTable() {
   applyEventFilters();
 }
 
+
+function renderEventCards(list) {
+  const all = [...soloEvents, ...externalEvents];
+  if (!all.length) {
+    list.innerHTML = '<div class="event-empty"><strong>New listings are on the way</strong><p>We are refreshing Durban’s calendars. Check back shortly.</p></div>';
+    return;
+  }
+  list.innerHTML = all.map(evt => {
+    const external = Boolean(evt.external);
+    const date = external ? new Date(evt.start) : new Date(evt.date);
+    const day = Number.isNaN(date.getTime()) ? '—' : date.toLocaleDateString('en-ZA', { day: '2-digit' });
+    const month = Number.isNaN(date.getTime()) ? '' : date.toLocaleDateString('en-ZA', { month: 'short' });
+    const title = external ? evt.exp : evt.exp;
+    const category = (evt.category || 'social');
+    const source = external ? evt.source : 'Solo Soul';
+    const area = evt.area || (evt.location || '').match(/durban|umhlanga|kloof|westville|hillcrest|pinetown|berea|ballito/i)?.[0] || 'Durban';
+    const details = external ? '/portal/?event=' + encodeURIComponent(evt.id) : '/portal/?experience=' + encodeURIComponent(evt.id);
+    const ticket = external && evt.url ? '<a class="event-ticket" href="' + escapeHtml(evt.url) + '" target="_blank" rel="noopener noreferrer">Tickets ↗</a>' : '';
+    return '<article class="event-card" data-event data-category="' + escapeHtml(category) + '" data-source="' + escapeHtml(source) + '" data-area="' + escapeHtml(area) + '" data-free="' + (evt.isFree ? '1' : '0') + '" data-date="' + escapeHtml(external ? evt.start : (Number.isNaN(date.getTime()) ? '' : date.toISOString())) + '" data-search="' + escapeHtml((title + ' ' + (evt.location || '')).toLowerCase()) + '">' +
+      '<div class="event-date"><strong>' + day + '</strong><span>' + month + '</span></div>' +
+      '<div class="event-main"><div class="event-tags"><span class="event-cat">' + escapeHtml(category) + '</span><span class="event-src">' + escapeHtml(source) + '</span></div>' +
+      '<h3><a href="' + details + '">' + escapeHtml(title) + '</a></h3>' +
+      '<div class="event-where"><i class="fas fa-location-dot"></i> ' + escapeHtml(evt.location || '') + '</div></div>' +
+      '<div class="event-side"><div class="event-price">' + escapeHtml(evt.price || 'See listing') + '</div><div class="event-actions"><a class="event-details" href="' + details + '">Details</a>' + ticket + '</div></div>' +
+      '</article>';
+  }).join('');
+  applyEventFilters();
+}
+
 // ---- EVENT FILTERS ----------------------------------------
 const CATEGORY_ALIAS = { dining: 'food', nature: 'outdoors', mindful: 'wellness', city: 'social' };
 
@@ -556,7 +587,7 @@ function applyEventFilters() {
   const limit = when === 'week' ? now + 7 * 864e5 : when === 'month' ? now + 31 * 864e5 : when === 'quarter' ? now + 92 * 864e5 : 0;
 
   let visible = 0;
-  document.querySelectorAll('#events-tbody tr[data-search]').forEach(row => {
+  document.querySelectorAll('#events-list [data-event], #events-tbody tr[data-search]').forEach(row => {
     const category = CATEGORY_ALIAS[row.dataset.category] || row.dataset.category;
     const okCategory = active === 'all' || category === active;
     const okSource = source === 'all' || row.dataset.source === source;
@@ -576,10 +607,11 @@ function applyEventFilters() {
   let empty = document.getElementById('event-no-match');
   if (!visible) {
     if (!empty) {
-      empty = document.createElement('tr');
+      const list = document.getElementById('events-list');
+      empty = document.createElement(list ? 'div' : 'tr');
       empty.id = 'event-no-match';
-      empty.innerHTML = '<td colspan="7" style="text-align:center;padding:30px;color:#5f6b64;">No events match those filters. Try another category, area or source.</td>';
-      document.getElementById('events-tbody')?.appendChild(empty);
+      empty.innerHTML = list ? '<div class="event-empty"><strong>No events match those filters</strong><p>Try another category, area or source.</p></div>' : '<td colspan="7" style="text-align:center;padding:30px;color:#5f6b64;">No events match those filters.</td>';
+      (list || document.getElementById('events-tbody'))?.appendChild(empty);
     }
   } else if (empty) {
     empty.remove();

@@ -103,127 +103,57 @@
   <!-- ======================== HERO SECTION ======================== -->
   
 <main id="main">
-<section id="events" class="events section-padding">
-    <div class="container">
-      <div class="section-header" data-aos="fade-up">
-        <div class="section-eyebrow">What's On</div>
-        <h2 class="section-title">Upcoming <em>Experiences</em></h2>
-        <p class="section-subtitle">Live listings from Durban’s event calendars, alongside our own hosted experiences. Tickets open on the original source.</p>
-      </div>
+<section id="events" class="events events-page section-padding">
+  <div class="container">
+    <header class="events-hero" data-aos="fade-up">
+      <div class="events-eyebrow">What's on · Durban</div>
+      <h1>Plans worth <em>showing up for.</em></h1>
+      <p>Live listings from Durban’s event calendars, hand-filtered for the kind of experiences Solo Soul is about. Tickets open on the original source.</p>
+    </header>
 
-      <!-- Filter Tabs -->
-      <div class="event-filters" data-aos="fade-up">
-        <button class="filter-btn active" data-filter="all" id="filter-all">All</button>
-        <button class="filter-btn" data-filter="wellness">Wellness</button>
-        <button class="filter-btn" data-filter="creative">Creative</button>
-        <button class="filter-btn" data-filter="food">Food &amp; Drink</button>
-        <button class="filter-btn" data-filter="outdoors">Outdoors</button>
-        <button class="filter-btn" data-filter="music">Music</button>
-        <button class="filter-btn" data-filter="social">Social</button>
-        <button class="filter-btn" data-filter="markets">Markets</button>
-        <button class="filter-btn" data-filter="fitness">Fitness</button>
-        <button class="filter-btn" data-filter="learning">Learning</button>
-        <button class="filter-btn" data-filter="luxury">Luxury</button>
-      </div>
-
-      <div class="event-smart-filters" data-aos="fade-up">
-        <input type="search" id="event-search" placeholder="Search events or venues..." aria-label="Search events" />
-        <select id="event-source" aria-label="Filter by source">
-          <option value="all">All sources</option>
-          <option>Eventbrite</option><option>Quicket</option><option>Webtickets</option>
-          <option>Ticketmaster</option><option>Facebook</option><option>Solo Soul</option>
-        </select>
-        <select id="event-area" aria-label="Filter by area">
-          <option value="all">All areas</option>
-          <option>Durban</option><option>Umhlanga</option><option>Kloof</option><option>Westville</option>
-          <option>Hillcrest</option><option>Pinetown</option><option>Berea</option><option>Ballito</option>
-        </select>
-        <select id="event-price" aria-label="Filter by price">
-          <option value="all">Any price</option><option value="free">Free</option><option value="paid">Paid</option>
-        </select>
-        <select id="event-date" aria-label="Filter by date">
-          <option value="all">Any date</option><option value="week">This week</option>
-          <option value="month">This month</option><option value="quarter" selected>Next 3 months</option>
-        </select>
-        <span class="event-count" id="event-count"></span>
-      </div>
-
-      <div class="events-table-wrap" data-aos="fade-up">
-        <table class="events-table" id="events-table">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Experience</th>
-              <th>Location</th>
-              <th>Duration</th>
-              <th>Price</th>
-              <th>Spots</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody id="events-tbody">
-            <!-- Events injected by JS -->
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Durban Real Events Banner -->
-      <div class="durban-events-banner" data-aos="fade-up">
-        <div class="durban-banner-content">
-          <div class="durban-banner-icon"><i class="fas fa-city"></i></div>
-          <div>
-            <h4>Happening in Durban This Season</h4>
-            <p>We stay connected to the best of Durban's calendar to enhance your solo experience. Check out these city events that pair beautifully with our offerings.</p>
-          </div>
-          <a href="https://www.eventbrite.com/d/south-africa--durban/events/" target="_blank" rel="noopener noreferrer" class="btn btn-outline-light">View Durban Events <i class="fas fa-external-link-alt"></i></a>
-        </div>
-      </div>
-
-      <!-- City Events Cards -->
-      <div class="city-events-grid" id="city-events-grid" data-aos="fade-up">
-        <!-- Injected by JS -->
-      </div>
-
-      <!-- Explore More Durban Events CTAs -->
-      <div class="durban-portal-links-section" data-aos="fade-up" style="margin-top: 50px; text-align: center;">
-        <h5 style="font-family:'Playfair Display',serif; font-size:18px; margin-bottom:20px; color:var(--forest); letter-spacing:0.5px;">Browse More Durban Events Across South Africa's Ticketing Platforms</h5>
-        <div class="durban-portal-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; max-width: 1000px; margin: 0 auto;">
-          
-          <a href="https://www.webtickets.co.za/v2/search.aspx?search=Durban" target="_blank" rel="noopener noreferrer" class="portal-card" style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; background:#F8EFE4; border:1px solid rgba(127,196,207,0.4); border-radius:12px; text-decoration:none; color:var(--forest); box-shadow:0 4px 15px rgba(0,0,0,0.02);">
-            <span style="font-size:24px; margin-bottom:8px;">🎟️</span>
-            <strong style="font-family:'Poppins',sans-serif; font-size:13.5px; font-weight:600;">Webtickets</strong>
-            <span style="font-size:11px; opacity:0.8; margin-top:4px;">Search Durban listings <i class="fas fa-arrow-right" style="font-size:9px; margin-left:3px;"></i></span>
-          </a>
-
-          <a href="https://tickets.computicket.com/search?q=Durban" target="_blank" rel="noopener noreferrer" class="portal-card" style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; background:#F8EFE4; border:1px solid rgba(127,196,207,0.4); border-radius:12px; text-decoration:none; color:var(--forest); box-shadow:0 4px 15px rgba(0,0,0,0.02);">
-            <span style="font-size:24px; margin-bottom:8px;">🎫</span>
-            <strong style="font-family:'Poppins',sans-serif; font-size:13.5px; font-weight:600;">Computicket</strong>
-            <span style="font-size:11px; opacity:0.8; margin-top:4px;">Search Durban listings <i class="fas fa-arrow-right" style="font-size:9px; margin-left:3px;"></i></span>
-          </a>
-
-          <a href="https://www.ticketmaster.co.za/search?q=Durban" target="_blank" rel="noopener noreferrer" class="portal-card" style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; background:#F8EFE4; border:1px solid rgba(127,196,207,0.4); border-radius:12px; text-decoration:none; color:var(--forest); box-shadow:0 4px 15px rgba(0,0,0,0.02);">
-            <span style="font-size:24px; margin-bottom:8px;">🎤</span>
-            <strong style="font-family:'Poppins',sans-serif; font-size:13.5px; font-weight:600;">Ticketmaster</strong>
-            <span style="font-size:11px; opacity:0.8; margin-top:4px;">Stadiums & ICC tours <i class="fas fa-arrow-right" style="font-size:9px; margin-left:3px;"></i></span>
-          </a>
-
-          <a href="https://www.quicket.co.za/events/durban-south-africa" target="_blank" rel="noopener noreferrer" class="portal-card" style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; background:#F8EFE4; border:1px solid rgba(127,196,207,0.4); border-radius:12px; text-decoration:none; color:var(--forest); box-shadow:0 4px 15px rgba(0,0,0,0.02);">
-            <span style="font-size:24px; margin-bottom:8px;">🧘‍♀️</span>
-            <strong style="font-family:'Poppins',sans-serif; font-size:13.5px; font-weight:600;">Quicket</strong>
-            <span style="font-size:11px; opacity:0.8; margin-top:4px;">Indie & Wellness events <i class="fas fa-arrow-right" style="font-size:9px; margin-left:3px;"></i></span>
-          </a>
-
-          <a href="https://www.howler.co.za" target="_blank" rel="noopener noreferrer" class="portal-card" style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; background:#F8EFE4; border:1px solid rgba(127,196,207,0.4); border-radius:12px; text-decoration:none; color:var(--forest); box-shadow:0 4px 15px rgba(0,0,0,0.02);">
-            <span style="font-size:24px; margin-bottom:8px;">🎵</span>
-            <strong style="font-family:'Poppins',sans-serif; font-size:13.5px; font-weight:600;">Howler</strong>
-            <span style="font-size:11px; opacity:0.8; margin-top:4px;">Festivals & Parties <i class="fas fa-arrow-right" style="font-size:9px; margin-left:3px;"></i></span>
-          </a>
-
-        </div>
-      </div>
-
+    <div class="event-chips" data-aos="fade-up">
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="wellness">Wellness</button>
+      <button class="filter-btn" data-filter="creative">Creative</button>
+      <button class="filter-btn" data-filter="food">Food &amp; Drink</button>
+      <button class="filter-btn" data-filter="outdoors">Outdoors</button>
+      <button class="filter-btn" data-filter="music">Music</button>
+      <button class="filter-btn" data-filter="social">Social</button>
+      <button class="filter-btn" data-filter="markets">Markets</button>
+      <button class="filter-btn" data-filter="fitness">Fitness</button>
+      <button class="filter-btn" data-filter="learning">Learning</button>
+      <button class="filter-btn" data-filter="luxury">Luxury</button>
     </div>
-  </section>
+
+    <div class="event-smart-filters" data-aos="fade-up">
+      <input type="search" id="event-search" placeholder="Search events or venues..." aria-label="Search events" />
+      <select id="event-source" aria-label="Filter by source">
+        <option value="all">All sources</option>
+        <option>Eventbrite</option><option>Quicket</option><option>Webtickets</option>
+        <option>Ticketmaster</option><option>Facebook</option><option>Solo Soul</option>
+      </select>
+      <select id="event-area" aria-label="Filter by area">
+        <option value="all">All areas</option>
+        <option>Durban</option><option>Umhlanga</option><option>Kloof</option><option>Westville</option>
+        <option>Hillcrest</option><option>Pinetown</option><option>Berea</option><option>Ballito</option>
+      </select>
+      <select id="event-price" aria-label="Filter by price">
+        <option value="all">Any price</option><option value="free">Free</option><option value="paid">Paid</option>
+      </select>
+      <select id="event-date" aria-label="Filter by date">
+        <option value="all">Any date</option><option value="week">This week</option>
+        <option value="month">This month</option><option value="quarter" selected>Next 3 months</option>
+      </select>
+      <span class="event-count" id="event-count"></span>
+    </div>
+
+    <div id="events-list" class="event-feed" aria-live="polite"></div>
+
+    <div class="events-footer-note">
+      Listings are pulled live from Eventbrite, Webtickets, Quicket and Ticketmaster. Always confirm details on the source before paying.
+    </div>
+  </div>
+</section>
 </main>
 <footer id="footer" class="footer">
     <div class="footer-top">
