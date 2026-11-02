@@ -6,6 +6,7 @@
 import crypto from 'crypto';
 import { createClient } from '@supabase/supabase-js';
 import { sendEmail, ticketEmail } from '../lib/email.js';
+import { sharePage } from '../lib/share-page.js';
 
 const supabase = createClient(process.env.SUPABASE_URL || '', process.env.SUPABASE_SERVICE_ROLE_KEY || '');
 
@@ -24,6 +25,7 @@ function ticketCode() { return crypto.randomBytes(8).toString('hex'); }
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   res.setHeader('X-Content-Type-Options', 'nosniff');
+  if (req.method === 'GET' && req.query?.share) return sharePage(req, res, String(req.query.share));
   if (req.method !== 'POST') { res.setHeader('Allow', 'POST'); return json(res, 405, { error: 'Method not allowed' }); }
 
   const body = req.body || {};
