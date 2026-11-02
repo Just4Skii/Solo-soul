@@ -12,23 +12,63 @@ const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML,
 
 const AREA = /durban|umhlanga|westville|pinetown|hillcrest|berea|morningside|glenwood|ballito|kwazulu-natal|kzn/i;
 const OUTSIDE = /cape town|western cape|johannesburg|gauteng|pretoria|soweto|gqeberha|port elizabeth|bloemfontein|free state|mpumalanga|limpopo|north west/i;
+const MONTHS = { jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5, jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11 };
+const MAX_FUTURE_MS = 3 * 365 * 864e5;
+
+/**
+ * Webtickets date strings are inconsistent:
+ *   "07 - 08 November 2026", "25 November - 29 November",
+ *   "13 & 16 December 2026", "3rd Dec 2026 - 10th Jan 2027",
+ *   "From 04 Nov 2026 19:00".
+ * Parse the first date, treating times as SAST. If no year is present,
+ * use the current year and roll forward when that date has already passed.
+ */
+function parseListingDate(raw) {
+  const now = new Date();
+  const text = String(raw || '').replace(/^from\s+/i, '').trim();
+  if (!text) return null;
+
+  const iso = text.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2}))?/);
+  if (iso) {
+    const d = new Date(`${iso[1]}-${iso[2]}-${iso[3]}T${iso[4] || '12'}:${iso[5] || '00'}:00+02:00`);
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
+
+  const m = text.match(/^(\d{1,2})(?:st|nd|rd|th)?(?:\s*[-–&]\s*\d{1,2}(?:st|nd|rd|th)?)?\s+([A-Za-z]+)\.?\s*(\d{4})?(?:\s+(\d{1,2}):(\d{2}))?/i);
+  if (!m) return null;
+  const day = Number(m[1]);
+  const month = MONTHS[m[2].slice(0, 3).toLowerCase()];
+  if (month == null) return null;
+  const year = m[3] ? Number(m[3]) : now.getFullYear();
+  const hour = m[4] ? Number(m[4]) : 12;
+  const minute = m[5] ? Number(m[5]) : 0;
+  const build = y => new Date(`${y}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}T${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}:00+02:00`);
+  let d = build(year);
+  if (!m[3] && d.getTime() < now.getTime() - 864e5) d = build(year + 1);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+function dateLabel(date) {
+  return date.toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Africa/Johannesburg' });
+}
 
 const CATEGORY_RULES = [
-  ['wellness', /wellness|healing|meditat|breath|yoga|sound bath|journal|mindful|self[- ]care|therapy|spa/i],
-  ['food', /brunch|coffee|wine|tasting|food|cook|chef|dinner|lunch|picnic|restaurant|culinary/i],
-  ['music', /live music|concert|jazz|band|musical|music|festival|r&b|amapiano|hip[- ]hop|house music/i],
-  ['creative', /art|paint|pottery|craft|poetry|photograph|film|theatre|design|creative/i],
+  ['wellness', /wellness|healing|meditat|breath|yoga|pilates|sound bath|journal|mindful|self[- ]care|therapy|spa/i],
+  ['food', /brunch|coffee|wine|tasting|food|cook|chef|dinner|lunch|picnic|restaurant|culinary|beaujolais/i],
+  ['music', /live music|concert|jazz|band|musical|music|festival|r&b|amapiano|hip[- ]hop|house music|orchestra|symphony|choir|recital/i],
+  ['creative', /art|paint|pottery|craft|poetry|photograph|film|theatre|theater|drama|comedy|stand[- ]?up|improv|exhibition|gallery|opera|ballet|circus|puppet|design|creative/i],
   ['outdoors', /hike|walk|trail|beach|nature|garden|sunset|sunrise|surf|kayak|outdoor/i],
   ['markets', /market|flea|makers|bazaar|pop[- ]up/i],
-  ['fitness', /run|race|fitness|cycle|pilates|gym/i],
-  ['social', /network|connect|social|singles|meetup|club|comedy|games|community/i],
-  ['learning', /workshop|talk|seminar|masterclass|business|learn|course|conference/i],
+  ['fitness', /run|race|marathon|(?<!and )half|10km|15km|5km|athletics|stadium|fitness|cycle|triathlon|gym/i],
+  ['social', /network|connect|social|singles|meetup|club|comedy|games|community|worship|camp|jol|party/i],
+  ['learning', /workshop|talk|seminar|masterclass|business|learn|course|conference|lecture/i],
   ['luxury', /luxury|yacht|premium|champagne|exclusive/i],
 ];
 
-function classify(title, description = '', fallback = 'social') {
+function classify(title, description = '', fallback = 'social', venue = '') {
   for (const [category, re] of CATEGORY_RULES) if (re.test(title || '')) return category;
   for (const [category, re] of CATEGORY_RULES) if (re.test(description || '')) return category;
+  for (const [category, re] of CATEGORY_RULES) if (re.test(venue || '')) return category;
   return fallback;
 }
 
@@ -82,7 +122,7 @@ function normalise(event, source, categoryHint) {
     price: priceText(event),
     url: event.url || '',
     image: typeof event.image === 'string' ? event.image : event.image?.url || '',
-    category: classify(title, event.description || '', categoryHint || 'social'),
+    category: classify(title, event.description || '', categoryHint || 'social', venue),
     source,
     external: true,
   };
@@ -102,36 +142,50 @@ async function fetchJsonLd(name, url, categoryHint, requireArea = true, timeoutM
 }
 
 async function fetchEventbrite() {
+  // Keep this deliberately small: Eventbrite rate-limits directory pages
+  // aggressively, and the local listings repeat across category pages.
   const feeds = [
-    ['events/', 'social'],
     ['art/', 'creative'],
     ['food-and-drink/', 'food'],
     ['networking/', 'social'],
-    ['music/', 'music'],
-    ['outdoors/', 'outdoors'],
-    ['wellness/', 'wellness'],
   ];
   const results = await Promise.all(feeds.map(([suffix, category]) =>
     fetchJsonLd('Eventbrite', `https://www.eventbrite.com/d/south-africa--durban/${suffix}`, category, true, 7000)
   ));
   const events = results.flatMap(r => r.events || []);
   const ok = results.some(r => r.ok);
-  return { name: 'Eventbrite', ok, status: ok ? 200 : 0, events };
+  const errors = results.filter(r => !r.ok).map(r => `${r.status || 'error'}`).join(', ');
+  return { name: 'Eventbrite', ok, status: ok ? 200 : 0, events, error: errors || null };
 }
 
 async function fetchQuicket() {
-  return fetchJsonLd('Quicket', 'https://www.quicket.co.za/events/', 'social', true, 8000);
+  // Quicket paginates 20 events per page and does not expose a Durban-only
+  // feed. Read the national pages, then let normalise() keep KZN listings.
+  const urls = ['https://www.quicket.co.za/events/'];
+  for (let page = 2; page <= 20; page++) urls.push(`https://www.quicket.co.za/events/south-africa/${page}/`);
+  const results = await Promise.all(urls.map(url =>
+    fetchJsonLd('Quicket', url, 'social', true, 7000)
+  ));
+  const events = results.flatMap(r => r.events || []);
+  return { name: 'Quicket', ok: results.some(r => r.ok), status: 200, events };
 }
 
 async function fetchWebtickets() {
-  const searches = ['Durban', 'Umhlanga'];
-  const results = await Promise.all(searches.map(async searchTerm => {
+  // Search pages only expose the first slice; the KZN landing pages include
+  // theatre, festivals and one-off events that the Durban search misses.
+  const pages = [
+    'https://www.webtickets.co.za/v2/search.aspx?search=Durban',
+    'https://www.webtickets.co.za/v2/search.aspx?search=Umhlanga',
+    'https://www.webtickets.co.za/v2/?city=kwazulu-natal',
+    'https://www.webtickets.co.za/v2/category.aspx?city=kwazulu-natal&when=anytime',
+    'https://www.webtickets.co.za/v2/search.aspx?search=KwaZulu-Natal',
+  ];
+  const results = await Promise.all(pages.map(async url => {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 8000);
     try {
-      const url = `https://www.webtickets.co.za/v2/search.aspx?search=${encodeURIComponent(searchTerm)}`;
       const res = await fetch(url, { headers: { 'User-Agent': UA, Accept: 'text/html' }, signal: controller.signal });
-      if (!res.ok) return [];
+      if (!res.ok) return { ok: false, events: [] };
       const html = await res.text();
       const cards = html.split('product-card-thumb').slice(1);
       const events = [];
@@ -140,30 +194,45 @@ async function fetchWebtickets() {
         const meta = card.match(/product-card-meta[^>]*>\s*([^<]+)</i);
         const venue = card.match(/product-card-category[\s\S]*?<li>([^<]+)<\/li>/i);
         if (!link || !meta) continue;
-        const start = new Date(meta[1].trim());
-        if (Number.isNaN(start.getTime())) continue;
-        const title = link[2].replace(/\s+/g, ' ').trim();
-        const place = (venue ? venue[1] : '').trim() || 'Durban';
+        const start = parseListingDate(meta[1]);
+        if (!start || start.getTime() > Date.now() + MAX_FUTURE_MS) continue;
+        const title = link[2].replace(/\s+/g, ' ').replace(/&amp;/g, '&').trim();
+        if (!title || /membership|season pass|gift card|voucher|permit|reservation|parking/i.test(title)) continue;
+        const place = (venue ? venue[1] : '').replace(/&amp;/g, '&').trim() || 'Durban';
         if (!AREA.test(place)) continue;
         events.push({
           id: `ext-webtickets-${link[1].match(/\d+/)[0]}`,
           title,
           start: start.toISOString(),
-          dateLabel: start.toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Africa/Johannesburg' }),
+          dateLabel: dateLabel(start),
           venue: place,
           area: (place.match(AREA) || ['Durban'])[0],
           price: 'See listing',
           url: `https://www.webtickets.co.za/v2/${link[1]}`,
           image: '',
-          category: classify(title),
+          category: classify(title, '', 'social', place),
           source: 'Webtickets',
           external: true,
         });
       }
-      return events;
-    } catch { return []; } finally { clearTimeout(timer); }
+      return { ok: true, events };
+    } catch {
+      return { ok: false, events: [] };
+    } finally {
+      clearTimeout(timer);
+    }
   }));
-  return { name: 'Webtickets', ok: true, status: 200, events: results.flat() };
+
+  const seen = new Set();
+  const events = [];
+  for (const result of results) {
+    for (const event of result.events) {
+      if (seen.has(event.id)) continue;
+      seen.add(event.id);
+      events.push(event);
+    }
+  }
+  return { name: 'Webtickets', ok: results.some(r => r.ok), status: 200, events };
 }
 
 async function fetchTicketmaster() {
@@ -183,7 +252,7 @@ async function fetchTicketmaster() {
       price: e.priceRanges?.[0]?.min != null ? `From R${e.priceRanges[0].min}` : 'See listing',
       url: e.url,
       image: e.images?.find(i => i.ratio === '16_9')?.url || '',
-      category: classify(e.name),
+      category: classify(e.name, '', 'social', e._embedded?.venues?.[0]?.name || ''),
       source: 'Ticketmaster',
       external: true,
     })).filter(e => e.start && e.title);
@@ -211,7 +280,7 @@ async function fetchFacebook() {
         price: 'See listing',
         url: `https://www.facebook.com/events/${e.id}`,
         image: e.cover?.source || '',
-        category: classify(e.name + ' ' + (e.description || '')),
+        category: classify(e.name, e.description || '', 'social', e.place?.name || ''),
         source: 'Facebook',
         external: true,
       }));
@@ -243,7 +312,7 @@ export default async function handler(req, res) {
   for (const source of sources) {
     for (const event of source.events || []) {
       const start = new Date(event.start).getTime();
-      if (!start || start < since) continue;
+      if (!start || start < since || start > Date.now() + MAX_FUTURE_MS) continue;
       const key = `${event.title.toLowerCase()}|${event.start.slice(0, 10)}`;
       if (seen.has(key)) continue;
       seen.add(key);
