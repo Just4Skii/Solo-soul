@@ -34,6 +34,7 @@ create index if not exists social_posts_platform_posted_idx
 
 alter table public.social_posts enable row level security;
 
+revoke all on table public.social_posts from public;
 revoke all on table public.social_posts from anon, authenticated;
 grant select, insert, update, delete on table public.social_posts to service_role;
 
