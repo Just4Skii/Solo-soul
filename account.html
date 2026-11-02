@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <title>My Solo Soul | Solo Soul Experiences</title>
+  <meta name="description" content="Manage your Solo Soul bookings, tickets, payments and support." />
+  <meta name="keywords" content="solo experiences Durban, solo activities, self-love, healing experiences, solo travel, women's experiences Durban, mindful activities" />
+  <meta property="og:title" content="Solo Soul Experiences | Fall in Love with Your Own Company" />
+  <meta property="og:description" content="Curated solo experiences in Durban — coastal walks, shared tables, creative evenings and slow mornings." />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico?v=ssoul3" sizes="any" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=ssoul3" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon-180.png?v=ssoul3" />
+  <meta name="theme-color" content="#0B3C49" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Font Awesome for Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <!-- AOS Animation Library -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" />
+
+  <link rel="stylesheet" href="account.css?v=1" />
+  <link rel="stylesheet" href="style.css?v=20261102multi" />
+  <link rel="stylesheet" href="mobile-responsive.css?v=20261102multi" />
+  <link rel="preload" as="image" href="assets/images/hero_ocean_sunrise.webp" fetchpriority="high" />
+
+<style id="page-nav-style">
+  main { display:block; }
+  .nav-link.active { color:#fff; }
+  .nav-link.active::after { width:100%; }
+  main > section:first-child { padding-top:150px; }
+</style>
+
+</head>
+<body class="page-inner">
+<a class="skip-link" href="#main">Skip to main content</a>
+<div id="preloader" class="preloader">
+    <div class="preloader-inner">
+      <div class="preloader-logo">✦</div>
+      <div class="preloader-text">Solo Soul Experiences</div>
+      <div class="preloader-tagline">Fall in Love with Your Own Company</div>
+      <div class="preloader-bar"><div class="preloader-fill"></div></div>
+    </div>
+  </div>
+
+  <!-- ======================== NAVIGATION ======================== -->
+  
+<header id="navbar" class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo" id="nav-logo-link">
+        <img src="assets/images/logo.png" alt="Solo Soul Experiences logo" class="nav-logo-img" />
+        <span class="logo-text">Solo Soul</span>
+      </a>
+
+      <nav class="nav-menu" id="nav-menu" role="navigation" aria-label="Main navigation">
+        <a href="about.html" class="nav-link">About</a>
+        <a href="experiences.html" class="nav-link">Experiences</a>
+        <a href="events.html" class="nav-link">Events</a>
+        <a href="gallery.html" class="nav-link">Gallery</a>
+        <a href="journal.html" class="nav-link">Blog</a>
+        <a href="about.html#founder" class="nav-link">Meet Hazel</a>
+        <a href="contact.html" class="nav-link">Contact</a>
+        <a href="account.html" id="nav-portal-btn" class="nav-link portal-nav-item"><i class="fas fa-user-circle"></i> My Portal</a>
+      </nav>
+
+      <a href="experiences.html#booking" id="nav-book-btn" class="btn btn-primary nav-cta" onclick="openBookingModal()">Book Now</a>
+
+      <button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+
+  <!-- Mobile Menu Overlay -->
+  <div class="mobile-overlay" id="mobile-overlay"></div>
+  <div class="mobile-menu" id="mobile-menu">
+    <button class="mobile-close" id="mobile-close" aria-label="Close menu">✕</button>
+    <nav>
+      <a href="about.html" class="mobile-nav-link">About</a>
+      <a href="experiences.html" class="mobile-nav-link">Experiences</a>
+      <a href="events.html" class="mobile-nav-link">Events</a>
+      <a href="gallery.html" class="mobile-nav-link">Gallery</a>
+      <a href="journal.html" class="mobile-nav-link">Blog</a>
+      <a href="about.html#founder" class="mobile-nav-link">Meet Hazel</a>
+      <a href="contact.html" class="mobile-nav-link">Contact</a>
+      <a href="account.html" id="mobile-portal-btn" class="mobile-nav-link"><i class="fas fa-user-circle"></i> My Portal</a>
+      <a href="experiences.html#booking" class="btn btn-primary mobile-nav-btn" onclick="openBookingModal()">Book Now</a>
+    </nav>
+  </div>
+
+  <!-- ======================== HERO SECTION ======================== -->
+  
+
+<main id="main">
+
+<section class="account-shell">
+  <div class="account-head">
+    <div class="eyebrow">Your account</div>
+    <h1>My Solo Soul</h1>
+    <p>Bookings, tickets, payments and support — all in one place.</p>
+  </div>
+
+  <div id="auth-panel" class="account-card auth-grid">
+    <form id="login-form" class="auth-form">
+      <h2>Welcome back</h2>
+      <label>Email <input type="email" id="login-email" autocomplete="email" required /></label>
+      <label>Password <input type="password" id="login-password" autocomplete="current-password" required /></label>
+      <button class="btn btn-primary" type="submit">Sign in</button>
+      <p class="auth-note">New here? Use the register form.</p>
+    </form>
+    <form id="register-form" class="auth-form">
+      <h2>Create your account</h2>
+      <label>Full name <input type="text" id="register-name" autocomplete="name" required /></label>
+      <label>Email <input type="email" id="register-email" autocomplete="email" required /></label>
+      <label>Password <input type="password" id="register-password" autocomplete="new-password" minlength="8" required /></label>
+      <button class="btn btn-primary" type="submit">Create account</button>
+      <p class="auth-note">Your bookings and tickets will be linked to this email.</p>
+    </form>
+    <div id="auth-message" class="auth-message" role="status"></div>
+  </div>
+
+  <div id="dashboard" hidden>
+    <div class="account-bar">
+      <div><strong id="account-name">Your account</strong><span id="account-email"></span></div>
+      <button id="signout-btn" class="btn btn-secondary">Sign out</button>
+    </div>
+    <div class="account-tabs" role="tablist">
+      <button class="active" data-tab="bookings">My bookings</button>
+      <button data-tab="payments">Payments</button>
+      <button data-tab="support">Support</button>
+    </div>
+    <div id="tab-bookings" class="account-panel active"><div id="bookings-list" class="stack"></div></div>
+    <div id="tab-payments" class="account-panel">
+      <div id="payments-summary" class="stack"></div>
+      <div id="payments-list" class="stack"></div>
+    </div>
+    <div id="tab-support" class="account-panel">
+      <div class="section-head"><h2>Your support tickets</h2><a class="btn btn-primary" href="help.html">Open a ticket</a></div>
+      <div id="support-list" class="stack"></div>
+      <div id="support-thread"></div>
+    </div>
+  </div>
+</section>
+
+<div id="refund-dialog" class="account-modal" hidden>
+  <div class="account-modal-card">
+    <h2>Request a refund</h2>
+    <p id="refund-booking-label"></p>
+    <label>Reason <textarea id="refund-reason" rows="4" placeholder="Tell us what happened..."></textarea></label>
+    <div class="modal-actions"><button class="btn btn-secondary" id="refund-cancel">Cancel</button><button class="btn btn-primary" id="refund-submit">Submit request</button></div>
+  </div>
+</div>
+
+</main>
+<footer id="footer" class="footer">
+    <div class="footer-top">
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-brand">
+            <div class="footer-logo">
+              <span class="logo-symbol">✦</span>
+              <span>Solo Soul Experiences</span>
+            </div>
+            <p>Helping you fall in love with your own company. Curated solo experiences in Durban, South Africa.</p>
+            <div class="footer-social">
+              <a href="https://www.facebook.com/profile.php?id=1043119168882555" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+              <a href="https://whatsapp.com/channel/0029Vb8192g5vKA50mLOdp41" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+            </div>
+          </div>
+          <div class="footer-nav">
+            <h4>Quick Links</h4>
+            <ul>
+              <li><a href="index.html">Home</a></li>
+              <li><a href="about.html">About</a></li>
+              <li><a href="experiences.html">Experiences</a></li>
+              <li><a href="events.html">Events</a></li>
+              <li><a href="gallery.html">Gallery</a></li>
+              <li><a href="journal.html">Blog</a></li>
+            </ul>
+          </div>
+          <div class="footer-nav">
+            <h4>Experiences</h4>
+            <ul>
+              <li><a href="experiences.html">Solo Brunch Club</a></li>
+              <li><a href="experiences.html">Sunset Walks</a></li>
+              <li><a href="experiences.html">Sip & Paint</a></li>
+              <li><a href="experiences.html">Coffee Dates</a></li>
+              <li><a href="experiences.html">Nature Escapes</a></li>
+              <li><a href="experiences.html">Luxury Solo Days</a></li>
+            </ul>
+          </div>
+          <div class="footer-contact">
+            <h4>Contact</h4>
+            <ul>
+              <li><i class="fas fa-map-marker-alt"></i> Durban, KwaZulu-Natal, SA</li>
+              <li><a href="mailto:SSoulZAR@outlook.com"><i class="fas fa-envelope"></i> SSoulZAR@outlook.com</a></li>
+              <li><a href="mailto:SSoulZAR@outlook.com"><i class="fas fa-envelope"></i> Email us</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="container">
+        <p>© 2026 Solo Soul Experiences. All rights reserved. | <a href="privacy.html">Privacy Policy</a> | <a href="terms.html">Terms &amp; Conditions</a></p>
+        <p class="footer-tagline">Fall in Love with Your Own Company. ✦</p>
+      </div>
+    </div>
+  </footer>
+<!-- app.js for nav/mobile -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js?v=20261102multi"></script>
+  <!-- AOS Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+  <script src="app.js?v=20261102multi"></script>
+
+<script src="account.js?v=1"></script>
+</body>
+</html>

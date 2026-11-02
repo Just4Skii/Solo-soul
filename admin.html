@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <link rel="stylesheet" href="admin.css" />
 </head>
-<body>
+<body class="page-inner">
 
   <!-- ══════════════════════════════════════════════════════
        LOGIN SCREEN
@@ -63,6 +63,9 @@
         </a>
         <a href="#" class="nav-item" data-section="revenue">
           <i class="fas fa-coins"></i> Revenue
+        </a>
+        <a href="#" class="nav-item" data-section="operations">
+          <i class="fas fa-headset"></i> Operations
         </a>
         <a href="#" class="nav-item" data-section="settings">
           <i class="fas fa-cog"></i> Settings
@@ -264,6 +267,39 @@
         <div class="card">
           <h3><i class="fas fa-hourglass-half"></i> Pipeline</h3>
           <div id="revenue-pipeline" class="recent-list"></div>
+        </div>
+      </section>
+
+      <!-- ═══ OPERATIONS ═══ -->
+      <section id="section-operations" class="section">
+        <div class="section-header">
+          <h2><i class="fas fa-headset"></i> Operations</h2>
+          <button id="ops-refresh" class="btn-primary">Refresh</button>
+        </div>
+        <div class="card">
+          <h3><i class="fas fa-rotate-left"></i> Refund requests</h3>
+          <div class="table-wrapper">
+            <table class="admin-table"><thead><tr><th>Booking</th><th>Customer</th><th>Amount</th><th>Reason</th><th>Status</th><th>Action</th></tr></thead><tbody id="refunds-tbody"></tbody></table>
+          </div>
+        </div>
+        <div class="card">
+          <h3><i class="fas fa-life-ring"></i> Support tickets</h3>
+          <div class="table-wrapper">
+            <table class="admin-table"><thead><tr><th>Subject</th><th>Customer</th><th>Category</th><th>Status</th><th>Created</th><th></th></tr></thead><tbody id="support-tbody"></tbody></table>
+          </div>
+          <div id="support-thread" class="recent-list"></div>
+        </div>
+        <div class="card">
+          <h3><i class="fas fa-credit-card"></i> Payments</h3>
+          <div class="table-wrapper">
+            <table class="admin-table"><thead><tr><th>Reference</th><th>Booking</th><th>Amount</th><th>Status</th><th>Paid</th></tr></thead><tbody id="payments-tbody"></tbody></table>
+          </div>
+        </div>
+        <div class="card">
+          <h3><i class="fas fa-scale-balanced"></i> Settlements</h3>
+          <div class="table-wrapper">
+            <table class="admin-table"><thead><tr><th>Booking</th><th>Provider</th><th>Gross</th><th>Platform fee</th><th>Provider amount</th><th>Status</th><th></th></tr></thead><tbody id="settlements-tbody"></tbody></table>
+          </div>
         </div>
       </section>
 

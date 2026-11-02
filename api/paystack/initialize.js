@@ -58,8 +58,20 @@ export default async function handler(req, res) {
     });
     if (insertError) return res.status(500).json({ error: 'Could not create booking' });
 
+    await supabase.from('payments').insert({
+      booking_id: null,
+      provider: 'paystack',
+      provider_reference: bookingRef,
+      amount: total,
+      currency: 'ZAR',
+      status: 'pending',
+    });
+
     const origin = process.env.APP_URL || (req.headers.origin && /^https?:\/\//.test(req.headers.origin) ? req.headers.origin : '');
     const callback = origin ? `${origin.replace(/\/$/, '')}/index.html?payment=success&ref=${encodeURIComponent(bookingRef)}` : undefined;
+
+    const { data: bookingRow } = await supabase.from('bookings').select('id').eq('booking_ref', bookingRef).single();
+    if (bookingRow) await supabase.from('payments').update({ booking_id: bookingRow.id }).eq('provider_reference', bookingRef);
 
     const paystackRes = await fetch('https://api.paystack.co/transaction/initialize', {
       method: 'POST',
@@ -76,6 +88,7 @@ export default async function handler(req, res) {
     const data = await paystackRes.json();
     if (!paystackRes.ok || !data.status) {
       await supabase.from('bookings').update({ status: 'Cancelled' }).eq('booking_ref', bookingRef);
+      await supabase.from('payments').update({ status: 'failed' }).eq('provider_reference', bookingRef);
       return res.status(502).json({ error: data.message || 'Paystack initialisation failed' });
     }
 

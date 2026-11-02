@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <title>Help Centre | Solo Soul Experiences</title>
+  <meta name="description" content="Help with bookings, payments, refunds and experiences." />
+  <meta name="keywords" content="solo experiences Durban, solo activities, self-love, healing experiences, solo travel, women's experiences Durban, mindful activities" />
+  <meta property="og:title" content="Solo Soul Experiences | Fall in Love with Your Own Company" />
+  <meta property="og:description" content="Curated solo experiences in Durban — coastal walks, shared tables, creative evenings and slow mornings." />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico?v=ssoul3" sizes="any" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=ssoul3" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon-180.png?v=ssoul3" />
+  <meta name="theme-color" content="#0B3C49" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Font Awesome for Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+  <!-- AOS Animation Library -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" />
+
+  <link rel="stylesheet" href="account.css?v=1" />
+  <link rel="stylesheet" href="style.css?v=20261102multi" />
+  <link rel="stylesheet" href="mobile-responsive.css?v=20261102multi" />
+  <link rel="preload" as="image" href="assets/images/hero_ocean_sunrise.webp" fetchpriority="high" />
+
+<style id="page-nav-style">
+  main { display:block; }
+  .nav-link.active { color:#fff; }
+  .nav-link.active::after { width:100%; }
+  main > section:first-child { padding-top:150px; }
+</style>
+
+</head>
+<body class="page-inner">
+<a class="skip-link" href="#main">Skip to main content</a>
+<div id="preloader" class="preloader">
+    <div class="preloader-inner">
+      <div class="preloader-logo">✦</div>
+      <div class="preloader-text">Solo Soul Experiences</div>
+      <div class="preloader-tagline">Fall in Love with Your Own Company</div>
+      <div class="preloader-bar"><div class="preloader-fill"></div></div>
+    </div>
+  </div>
+
+  <!-- ======================== NAVIGATION ======================== -->
+  
+<header id="navbar" class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo" id="nav-logo-link">
+        <img src="assets/images/logo.png" alt="Solo Soul Experiences logo" class="nav-logo-img" />
+        <span class="logo-text">Solo Soul</span>
+      </a>
+
+      <nav class="nav-menu" id="nav-menu" role="navigation" aria-label="Main navigation">
+        <a href="about.html" class="nav-link">About</a>
+        <a href="experiences.html" class="nav-link">Experiences</a>
+        <a href="events.html" class="nav-link">Events</a>
+        <a href="gallery.html" class="nav-link">Gallery</a>
+        <a href="journal.html" class="nav-link">Blog</a>
+        <a href="about.html#founder" class="nav-link">Meet Hazel</a>
+        <a href="contact.html" class="nav-link">Contact</a>
+        <a href="account.html" id="nav-portal-btn" class="nav-link portal-nav-item"><i class="fas fa-user-circle"></i> My Portal</a>
+      </nav>
+
+      <a href="experiences.html#booking" id="nav-book-btn" class="btn btn-primary nav-cta" onclick="openBookingModal()">Book Now</a>
+
+      <button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+
+  <!-- Mobile Menu Overlay -->
+  <div class="mobile-overlay" id="mobile-overlay"></div>
+  <div class="mobile-menu" id="mobile-menu">
+    <button class="mobile-close" id="mobile-close" aria-label="Close menu">✕</button>
+    <nav>
+      <a href="about.html" class="mobile-nav-link">About</a>
+      <a href="experiences.html" class="mobile-nav-link">Experiences</a>
+      <a href="events.html" class="mobile-nav-link">Events</a>
+      <a href="gallery.html" class="mobile-nav-link">Gallery</a>
+      <a href="journal.html" class="mobile-nav-link">Blog</a>
+      <a href="about.html#founder" class="mobile-nav-link">Meet Hazel</a>
+      <a href="contact.html" class="mobile-nav-link">Contact</a>
+      <a href="account.html" id="mobile-portal-btn" class="mobile-nav-link"><i class="fas fa-user-circle"></i> My Portal</a>
+      <a href="experiences.html#booking" class="btn btn-primary mobile-nav-btn" onclick="openBookingModal()">Book Now</a>
+    </nav>
+  </div>
+
+  <!-- ======================== HERO SECTION ======================== -->
+  
+
+<main id="main">
+
+<section class="help-shell">
+  <div class="account-head">
+    <div class="eyebrow">Help centre</div>
+    <h1>How can we help?</h1>
+    <p>Answers to common questions, plus a direct line to the Solo Soul team.</p>
+  </div>
+  <div class="help-search"><input id="help-search" type="search" placeholder="Search help — bookings, refunds, payments, tickets..." /></div>
+  <div class="help-layout">
+    <div>
+      <div id="help-faq" class="faq-list">
+        <details data-tags="booking date change reschedule"><summary>Can I change the date of my booking?</summary><p>Yes, subject to availability and at least 48 hours before the experience. Open the booking in <a href="account.html">My Solo Soul</a> and contact support with the new date.</p></details>
+        <details data-tags="refund cancellation money"><summary>How do refunds work?</summary><p>Paid bookings can request a refund from <a href="account.html">My Solo Soul → Payments</a>. We review every request, then Paystack processes approved refunds to the original payment method.</p></details>
+        <details data-tags="ticket email qr entry"><summary>Where is my ticket?</summary><p>After payment, your ticket is available in <a href="account.html">My Solo Soul</a> and emailed to your registered address. Each ticket has a reference and QR code.</p></details>
+        <details data-tags="payment failed paystack retry"><summary>My payment failed — what now?</summary><p>No booking is confirmed until payment succeeds. Open the booking and use the payment retry option, or contact support and we will send a new payment link.</p></details>
+        <details data-tags="solo alone safety group"><summary>Do I have to come with someone?</summary><p>No. Solo Soul experiences are designed for people arriving alone. Hosts introduce the group gently, and there is no pressure to perform.</p></details>
+        <details data-tags="accessibility dietary needs"><summary>Can you accommodate dietary or access needs?</summary><p>Yes. Add the detail when booking, or raise a support ticket and we will confirm with the venue before the event.</p></details>
+      </div>
+    </div>
+    <aside class="help-contact">
+      <h2>Still stuck?</h2>
+      <p>Email <a href="mailto:SSoulZAR@outlook.com">SSoulZAR@outlook.com</a> or send a ticket. We reply within one business day.</p>
+      <form id="help-form">
+        <label>Name <input id="help-name" type="text" required /></label>
+        <label>Email <input id="help-email" type="email" required /></label>
+        <label>Booking reference <input id="help-ref" type="text" placeholder="Optional" /></label>
+        <label>Topic <select id="help-category"><option value="booking">Booking</option><option value="payment">Payment</option><option value="refund">Refund</option><option value="experience">Experience</option><option value="account">Account</option><option value="other">Other</option></select></label>
+        <label>Message <textarea id="help-message" rows="5" required></textarea></label>
+        <button class="btn btn-primary" type="submit">Send to support</button>
+      </form>
+      <div id="help-status" class="auth-message"></div>
+    </aside>
+  </div>
+</section>
+
+</main>
+<footer id="footer" class="footer">
+    <div class="footer-top">
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-brand">
+            <div class="footer-logo">
+              <span class="logo-symbol">✦</span>
+              <span>Solo Soul Experiences</span>
+            </div>
+            <p>Helping you fall in love with your own company. Curated solo experiences in Durban, South Africa.</p>
+            <div class="footer-social">
+              <a href="https://www.facebook.com/profile.php?id=1043119168882555" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+              <a href="https://whatsapp.com/channel/0029Vb8192g5vKA50mLOdp41" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+            </div>
+          </div>
+          <div class="footer-nav">
+            <h4>Quick Links</h4>
+            <ul>
+              <li><a href="index.html">Home</a></li>
+              <li><a href="about.html">About</a></li>
+              <li><a href="experiences.html">Experiences</a></li>
+              <li><a href="events.html">Events</a></li>
+              <li><a href="gallery.html">Gallery</a></li>
+              <li><a href="journal.html">Blog</a></li>
+            </ul>
+          </div>
+          <div class="footer-nav">
+            <h4>Experiences</h4>
+            <ul>
+              <li><a href="experiences.html">Solo Brunch Club</a></li>
+              <li><a href="experiences.html">Sunset Walks</a></li>
+              <li><a href="experiences.html">Sip & Paint</a></li>
+              <li><a href="experiences.html">Coffee Dates</a></li>
+              <li><a href="experiences.html">Nature Escapes</a></li>
+              <li><a href="experiences.html">Luxury Solo Days</a></li>
+            </ul>
+          </div>
+          <div class="footer-contact">
+            <h4>Contact</h4>
+            <ul>
+              <li><i class="fas fa-map-marker-alt"></i> Durban, KwaZulu-Natal, SA</li>
+              <li><a href="mailto:SSoulZAR@outlook.com"><i class="fas fa-envelope"></i> SSoulZAR@outlook.com</a></li>
+              <li><a href="mailto:SSoulZAR@outlook.com"><i class="fas fa-envelope"></i> Email us</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="container">
+        <p>© 2026 Solo Soul Experiences. All rights reserved. | <a href="privacy.html">Privacy Policy</a> | <a href="terms.html">Terms &amp; Conditions</a></p>
+        <p class="footer-tagline">Fall in Love with Your Own Company. ✦</p>
+      </div>
+    </div>
+  </footer>
+<!-- app.js for nav/mobile -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js?v=20261102multi"></script>
+  <!-- AOS Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+  <script src="app.js?v=20261102multi"></script>
+
+<script src="help.js?v=1"></script>
+</body>
+</html>

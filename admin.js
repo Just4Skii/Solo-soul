@@ -134,6 +134,7 @@ function initNavigation() {
           case 'events': loadEvents(); break;
           case 'bookings': loadBookings(); break;
           case 'revenue': loadRevenue(); break;
+          case 'operations': loadOperations(); break;
         }
       }
     });
@@ -233,6 +234,93 @@ async function loadRevenue() {
     toast('Failed to load revenue', 'error');
   }
 }
+
+function esc(value) {
+  return String(value == null ? '' : value).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+async function loadOperations() {
+  try {
+    const [refunds, support, payments, settlements] = await Promise.all([
+      api('POST', API.bookings, { action: 'refunds' }),
+      api('POST', API.bookings, { action: 'support' }),
+      api('POST', API.bookings, { action: 'payments' }),
+      api('POST', API.bookings, { action: 'settlements' }),
+    ]);
+
+    $('refunds-tbody').innerHTML = (refunds.refunds || []).length ? refunds.refunds.map(r => `<tr>
+      <td><strong>${esc(r.booking?.booking_ref || '-')}</strong><br><span style="font-size:11px;color:var(--text-muted)">${esc(r.booking?.event_name || '')}</span></td>
+      <td>${esc(r.booking?.user_email || '-')}</td>
+      <td>R${Number(r.amount || 0).toFixed(2)}</td>
+      <td style="max-width:260px">${esc(r.reason)}</td>
+      <td><span class="status-badge ${esc(r.status)}">${esc(r.status)}</span></td>
+      <td>${r.status === 'requested' ? `<button class="btn-primary" onclick="adminRefund('${r.id}','approve')">Approve</button> <button class="btn-secondary" onclick="adminRefund('${r.id}','reject')">Reject</button>` : '-'}</td>
+    </tr>`).join('') : '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted)">No refund requests.</td></tr>';
+
+    $('support-tbody').innerHTML = (support.tickets || []).length ? support.tickets.map(t => `<tr>
+      <td><strong>${esc(t.subject)}</strong><br><span style="font-size:11px;color:var(--text-muted)">${esc(t.booking_ref || '')}</span></td>
+      <td>${esc(t.email)}</td><td>${esc(t.category)}</td>
+      <td><span class="status-badge ${esc(t.status)}">${esc(t.status)}</span></td>
+      <td>${formatDate(t.created_at)}</td>
+      <td><button class="btn-secondary" onclick="adminSupportOpen('${t.id}')">Open</button></td>
+    </tr>`).join('') : '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted)">No support tickets.</td></tr>';
+
+    $('payments-tbody').innerHTML = (payments.payments || []).length ? payments.payments.map(p => `<tr>
+      <td>${esc(p.provider_reference || '-')}</td><td>${esc(p.booking?.booking_ref || '-')}<br><span style="font-size:11px;color:var(--text-muted)">${esc(p.booking?.event_name || '')}</span></td>
+      <td>R${Number(p.amount || 0).toFixed(2)}</td><td><span class="status-badge ${esc(p.status)}">${esc(p.status)}</span></td><td>${p.paid_at ? formatDate(p.paid_at) : '-'}</td>
+    </tr>`).join('') : '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text-muted)">No payments yet.</td></tr>';
+
+    $('settlements-tbody').innerHTML = (settlements.settlements || []).length ? settlements.settlements.map(x => `<tr>
+      <td>${esc(x.reference || '-')}</td><td>${esc(x.provider_name)}</td><td>R${Number(x.gross || 0).toFixed(2)}</td>
+      <td>R${Number(x.platform_fee || 0).toFixed(2)}</td><td>R${Number(x.provider_amount || 0).toFixed(2)}</td>
+      <td><span class="status-badge ${esc(x.status)}">${esc(x.status)}</span></td>
+      <td>${x.status === 'pending' ? `<button class="btn-secondary" onclick="markSettled('${x.id}')">Mark paid</button>` : '-'}</td>
+    </tr>`).join('') : '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text-muted)">No settlements yet.</td></tr>';
+
+    $('ops-refresh').onclick = loadOperations;
+  } catch (e) { toast('Failed to load operations', 'error'); }
+}
+
+window.adminRefund = async function(id, decision) {
+  const note = prompt(decision === 'approve' ? 'Refund note (optional)' : 'Rejection reason (optional)') || '';
+  const res = await api('POST', API.bookings, { action: 'refundAction', id, decision, note });
+  if (res.error) return toast(res.error, 'error');
+  toast(decision === 'approve' ? 'Refund submitted to Paystack' : 'Refund rejected', 'success');
+  loadOperations();
+};
+
+window.adminSupportOpen = async function(id) {
+  const res = await api('POST', API.bookings, { action: 'supportGet', id });
+  if (res.error) return toast(res.error, 'error');
+  const t = res.ticket;
+  $('support-thread').innerHTML = `<div class="card" style="margin-top:14px">
+    <h3>${esc(t.subject)}</h3>
+    <p style="font-size:12px;color:var(--text-muted)">${esc(t.email)} · ${esc(t.category)} · ${esc(t.status)}</p>
+    <div style="margin:14px 0">${(res.messages || []).map(m => `<div style="padding:10px 0;border-bottom:1px solid var(--border)"><strong>${esc(m.author_name || m.author_type)}</strong><div style="font-size:13px;margin-top:4px">${esc(m.message)}</div></div>`).join('')}</div>
+    <textarea id="admin-reply" rows="3" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px" placeholder="Reply to customer..."></textarea>
+    <div style="margin-top:10px;display:flex;gap:8px">
+      <button class="btn-primary" onclick="adminSupportReply('${t.id}','in_progress')">Send reply</button>
+      <button class="btn-secondary" onclick="adminSupportReply('${t.id}','resolved')">Resolve</button>
+    </div>
+  </div>`;
+};
+
+window.adminSupportReply = async function(id, status) {
+  const message = $('admin-reply').value.trim();
+  if (!message) return;
+  const res = await api('POST', API.bookings, { action: 'supportReply', id, message, status });
+  if (res.error) return toast(res.error, 'error');
+  toast('Reply sent', 'success');
+  adminSupportOpen(id);
+  loadOperations();
+};
+
+window.markSettled = async function(id) {
+  const res = await api('POST', API.bookings, { action: 'settle', id });
+  if (res.error) return toast(res.error, 'error');
+  toast('Settlement marked paid', 'success');
+  loadOperations();
+};
 
 // ══════════════════════════════════════════════════════════
 // EVENTS

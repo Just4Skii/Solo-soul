@@ -68,6 +68,94 @@ export default async function handler(req, res) {
         return res.json({ booking: data });
       }
 
+
+      case 'payments': {
+        const { data: payments, error } = await supabase.from('payments').select('*').order('created_at', { ascending: false }).limit(200);
+        if (error) throw error;
+        const bookingIds = [...new Set((payments || []).map(p => p.booking_id).filter(Boolean))];
+        const { data: bookings } = bookingIds.length ? await supabase.from('bookings').select('id,booking_ref,event_name,user_email,status').in('id', bookingIds) : { data: [] };
+        const map = new Map((bookings || []).map(b => [b.id, b]));
+        return res.json({ payments: (payments || []).map(p => ({ ...p, booking: map.get(p.booking_id) || null })) });
+      }
+
+      case 'refunds': {
+        const { data: refunds, error } = await supabase.from('refunds').select('*').order('created_at', { ascending: false }).limit(200);
+        if (error) throw error;
+        const bookingIds = [...new Set((refunds || []).map(r => r.booking_id).filter(Boolean))];
+        const { data: bookings } = bookingIds.length ? await supabase.from('bookings').select('id,booking_ref,event_name,event_date,user_email,total,status').in('id', bookingIds) : { data: [] };
+        const map = new Map((bookings || []).map(b => [b.id, b]));
+        return res.json({ refunds: (refunds || []).map(r => ({ ...r, booking: map.get(r.booking_id) || null })) });
+      }
+
+      case 'refundAction': {
+        const { id, decision, note } = body;
+        if (!id || !['approve', 'reject'].includes(decision)) return res.status(400).json({ error: 'Refund id and decision required' });
+        const { data: refund } = await supabase.from('refunds').select('*').eq('id', id).single();
+        if (!refund) return res.status(404).json({ error: 'Refund not found' });
+        if (decision === 'reject') {
+          const { data, error } = await supabase.from('refunds').update({ status: 'rejected', admin_note: note || null, updated_at: new Date().toISOString() }).eq('id', id).select().single();
+          if (error) throw error;
+          return res.json({ refund: data });
+        }
+        const { data: payment } = refund.payment_id
+          ? await supabase.from('payments').select('*').eq('id', refund.payment_id).maybeSingle()
+          : await supabase.from('payments').select('*').eq('booking_id', refund.booking_id).eq('status', 'paid').maybeSingle();
+        if (!payment?.provider_reference) return res.status(400).json({ error: 'No Paystack transaction linked to this refund' });
+        const paystack = await fetch('https://api.paystack.co/refund', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ transaction: payment.provider_reference, amount: Math.round(Number(refund.amount) * 100), merchant_note: note || 'Solo Soul refund' }),
+        });
+        const result = await paystack.json().catch(() => ({}));
+        if (!paystack.ok || !result.status) return res.status(502).json({ error: result.message || 'Paystack refund failed' });
+        const { data, error } = await supabase.from('refunds').update({
+          status: 'processing',
+          provider_refund_ref: result.data?.id ? String(result.data.id) : null,
+          admin_note: note || null,
+          updated_at: new Date().toISOString(),
+        }).eq('id', id).select().single();
+        if (error) throw error;
+        return res.json({ refund: data, provider: result.data });
+      }
+
+      case 'support': {
+        const { data: tickets, error } = await supabase.from('support_tickets').select('*').order('created_at', { ascending: false }).limit(200);
+        if (error) throw error;
+        return res.json({ tickets: tickets || [] });
+      }
+
+      case 'supportGet': {
+        const { id } = body;
+        const { data: ticket } = await supabase.from('support_tickets').select('*').eq('id', id).single();
+        if (!ticket) return res.status(404).json({ error: 'Ticket not found' });
+        const { data: messages } = await supabase.from('support_messages').select('*').eq('ticket_id', id).order('created_at');
+        return res.json({ ticket, messages: messages || [] });
+      }
+
+      case 'supportReply': {
+        const { id, message, status } = body;
+        if (!id || !message) return res.status(400).json({ error: 'Ticket id and message required' });
+        await supabase.from('support_messages').insert({ ticket_id: id, author_type: 'admin', author_name: admin.name || 'Support', message });
+        const patch = { updated_at: new Date().toISOString() };
+        if (status) patch.status = status;
+        const { data, error } = await supabase.from('support_tickets').update(patch).eq('id', id).select().single();
+        if (error) throw error;
+        return res.json({ ticket: data });
+      }
+
+      case 'settlements': {
+        const { data, error } = await supabase.from('settlements').select('*').order('created_at', { ascending: false }).limit(200);
+        if (error) throw error;
+        return res.json({ settlements: data || [] });
+      }
+
+      case 'settle': {
+        const { id } = body;
+        const { data, error } = await supabase.from('settlements').update({ status: 'paid', paid_at: new Date().toISOString() }).eq('id', id).select().single();
+        if (error) throw error;
+        return res.json({ settlement: data });
+      }
+
       default:
         return res.status(400).json({ error: 'Unknown action' });
     }
