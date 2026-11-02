@@ -32,6 +32,19 @@ export default async function handler(req, res) {
 
   try {
     switch (action) {
+      case 'experiences': {
+        const { data, error } = await supabase.from('events').select('*').eq('active', true).order('date', { ascending: true });
+        if (error) throw error;
+        return json(res, 200, { experiences: data || [] });
+      }
+
+      case 'experience': {
+        const id = String(body.id || '');
+        const { data, error } = await supabase.from('events').select('*').eq('id', id).single();
+        if (error || !data) return json(res, 404, { error: 'Experience not found' });
+        return json(res, 200, { experience: data });
+      }
+
       case 'my-bookings': {
         if (!user) return json(res, 401, { error: 'Sign in required' });
         const { data: bookings, error } = await supabase

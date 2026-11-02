@@ -416,7 +416,10 @@ async function loadExternalEvents() {
       isFree: /free/i.test(e.price || ''),
       category: e.category || 'social',
       external: true,
+      id: e.id,
       url: e.url,
+      image: e.image,
+      description: e.description || '',
       source: e.source,
     }));
   } catch {
@@ -482,7 +485,7 @@ function initEventsTable() {
         '<td><i class="fas fa-map-marker-alt" style="color:var(--sage);margin-right:6px;font-size:12px;"></i>' + escapeHtml(evt.location) + '</td>' +
         '<td>—</td><td><span class="event-price">' + escapeHtml(evt.price) + '</span></td>' +
         '<td><span class="spots-pill spots-ok">Live listing</span></td>' +
-        '<td>' + (evt.url ? '<a class="book-event-btn" href="' + escapeHtml(evt.url) + '" target="_blank" rel="noopener noreferrer">Tickets ↗</a>' : '—') + '</td>';
+        '<td><a class="book-event-btn" href="/portal/?event=' + encodeURIComponent(evt.id) + '">Details</a> ' + (evt.url ? '<a href="' + escapeHtml(evt.url) + '" target="_blank" rel="noopener noreferrer" style="font-size:11px;margin-left:8px;">Tickets ↗</a>' : '') + '</td>';
       tbody.appendChild(tr);
       return;
     }

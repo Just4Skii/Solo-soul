@@ -79,3 +79,20 @@ body { margin: 0; background: var(--sand); color: var(--charcoal); font-family: 
 }
 
 .portal-card .portal-btn:not(.ghost) { width: 100%; }
+
+
+.portal-calendar { display:grid; grid-template-columns:repeat(7,1fr); gap:1px; padding:0; overflow:hidden; }
+.cal-head { background:#0B3C49; color:#F8EFE4; text-align:center; font-size:10px; letter-spacing:.12em; text-transform:uppercase; padding:10px 4px; }
+.cal-day { min-height:96px; padding:8px; border-top:1px solid var(--line); border-right:1px solid var(--line); background:#fff; font-size:12px; }
+.cal-day.muted { opacity:.4; }
+.cal-day.has { background:#FBF4EA; }
+.cal-event { display:block; width:100%; text-align:left; margin-top:4px; border:0; border-radius:6px; background:#E76F51; color:#fff; font:inherit; font-size:10px; line-height:1.3; padding:4px 5px; cursor:pointer; }
+.portal-event { display:grid; grid-template-columns:1.05fr 1fr; gap:28px; align-items:start; }
+.portal-event-media img { width:100%; height:420px; object-fit:cover; border-radius:18px; }
+.portal-event-fallback { height:420px; border-radius:18px; display:grid; place-items:center; background:linear-gradient(150deg,#0B3C49,#2B1B2F); color:#E9B44C; font-family:'Playfair Display',serif; font-size:54px; }
+.portal-event h1 { font-family:'Playfair Display',serif; font-weight:400; font-size:52px; color:var(--forest); margin:12px 0; }
+.portal-event-meta { color:#5f6b64; }
+.portal-event-price { font-family:'Playfair Display',serif; font-size:30px; color:var(--coral); }
+.portal-share { display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-top:24px; padding-top:18px; border-top:1px solid var(--line); font-size:12px; }
+.portal-share button, .portal-share a { background:none; border:1px solid rgba(46,94,78,.25); border-radius:999px; padding:7px 12px; color:var(--forest); text-decoration:none; cursor:pointer; font:inherit; font-size:12px; }
+@media(max-width:800px){.portal-event{grid-template-columns:1fr}.portal-event-media img,.portal-event-fallback{height:280px}.portal-event h1{font-size:36px}.cal-day{min-height:72px;padding:4px}.cal-event{font-size:9px}}

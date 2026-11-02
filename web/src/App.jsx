@@ -3,6 +3,8 @@ import { createClient } from '@supabase/supabase-js';
 
 const params = new URLSearchParams(window.location.search);
 const initialTicket = params.get('ticket') || params.get('ref') || '';
+const initialEvent = params.get('event') || '';
+const initialExperience = params.get('experience') || '';
 
 function App() {
   const [supabase, setSupabase] = useState(null);
@@ -15,6 +17,7 @@ function App() {
   const [support, setSupport] = useState([]);
   const [thread, setThread] = useState(null);
   const [ticket, setTicket] = useState(null);
+  const [eventDetail, setEventDetail] = useState(null);
   const [ticketEmail, setTicketEmail] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -29,6 +32,8 @@ function App() {
       client.auth.onAuthStateChange((_e, next) => setSession(next));
       setBooted(true);
       if (initialTicket) loadTicket(client, data.session, '');
+      if (initialEvent) loadExternalEvent(initialEvent);
+      if (initialExperience) loadExperience(initialExperience);
     })();
   }, []);
 
@@ -45,6 +50,23 @@ function App() {
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || 'Request failed');
     return data;
+  }
+
+
+  async function loadExternalEvent(id) {
+    try {
+      const data = await fetch('/api/events').then(r => r.json());
+      const found = (data.events || []).find(e => e.id === id);
+      if (!found) throw new Error('Event not found');
+      setEventDetail({ type: 'external', ...found });
+    } catch (e) { setError(e.message); }
+  }
+
+  async function loadExperience(id) {
+    try {
+      const data = await api('experience', { id });
+      setEventDetail({ type: 'own', ...data.experience });
+    } catch (e) { setError(e.message); }
   }
 
   async function loadBookings() {
@@ -146,6 +168,8 @@ function App() {
 
   if (ticket) return <Shell><Ticket booking={ticket} /></Shell>;
 
+  if (eventDetail) return <Shell><EventDetail event={eventDetail} /></Shell>;
+
   if (!authed) {
     return (
       <Shell>
@@ -175,7 +199,7 @@ function App() {
   return (
     <Shell user={session.user} onSignOut={() => supabase.auth.signOut()}>
       <div className="portal-tabs">
-        {['bookings','payments','support'].map(t => (
+        {['bookings','calendar','payments','support'].map(t => (
           <button key={t} className={tab === t ? 'active' : ''} onClick={() => setTab(t)}>{t[0].toUpperCase() + t.slice(1)}</button>
         ))}
       </div>
@@ -200,6 +224,7 @@ function App() {
           ))}
         </div>
       )}
+      {tab === 'calendar' && <Calendar bookings={bookings} />}
       {tab === 'payments' && (
         <div className="portal-stack">
           <div className="portal-card portal-row"><div><h3>Total paid</h3><p>{paid.length} paid booking(s)</p></div><strong className="portal-total">R{total.toFixed(2)}</strong></div>
@@ -247,6 +272,118 @@ function App() {
   );
 }
 
+
+function icsDate(value) {
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return '';
+  return d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+}
+
+function downloadCalendar(bookings) {
+  const lines = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Solo Soul Experiences//EN','CALSCALE:GREGORIAN'];
+  bookings.forEach(b => {
+    lines.push('BEGIN:VEVENT');
+    lines.push('UID:' + b.booking_ref + '@ssoul.co.za');
+    lines.push('DTSTAMP:' + icsDate(new Date()));
+    lines.push('DTSTART;VALUE=DATE:' + icsDate(b.event_date).slice(0, 8));
+    lines.push('SUMMARY:' + b.event_name);
+    lines.push('LOCATION:' + (b.event_location || ''));
+    lines.push('DESCRIPTION:Booking ' + b.booking_ref + ' · ' + b.guests + ' guest(s) · https://ssoul.co.za/portal/?ticket=' + b.booking_ref);
+    lines.push('END:VEVENT');
+  });
+  lines.push('END:VCALENDAR');
+  const blob = new Blob([lines.join('\r\n')], { type: 'text/calendar' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = 'solo-soul-bookings.ics'; a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function googleCalendar(booking) {
+  const date = icsDate(booking.event_date).slice(0, 8);
+  const url = new URL('https://calendar.google.com/calendar/render');
+  url.searchParams.set('action', 'TEMPLATE');
+  url.searchParams.set('text', booking.event_name);
+  url.searchParams.set('dates', date + '/' + date);
+  url.searchParams.set('location', booking.event_location || '');
+  url.searchParams.set('details', 'Booking ' + booking.booking_ref + ' · https://ssoul.co.za/portal/?ticket=' + booking.booking_ref);
+  return url.toString();
+}
+
+function shareLink(title, text, url) {
+  if (navigator.share) return navigator.share({ title, text, url }).catch(() => {});
+  navigator.clipboard?.writeText(url).then(() => alert('Link copied'));
+}
+
+function Calendar({ bookings }) {
+  const [cursor, setCursor] = React.useState(() => new Date());
+  const year = cursor.getFullYear(), month = cursor.getMonth();
+  const first = new Date(year, month, 1);
+  const start = new Date(first); start.setDate(1 - first.getDay());
+  const days = Array.from({ length: 42 }, (_, i) => { const d = new Date(start); d.setDate(start.getDate() + i); return d; });
+  const byDay = {};
+  bookings.forEach(b => { const key = new Date(b.event_date).toDateString(); (byDay[key] = byDay[key] || []).push(b); });
+  const label = cursor.toLocaleDateString('en-ZA', { month: 'long', year: 'numeric' });
+  return (
+    <div className="portal-stack">
+      <div className="portal-card portal-row">
+        <div><h2 style={{ margin: 0 }}>{label}</h2><p>Your booked experiences.</p></div>
+        <div className="portal-actions">
+          <button className="portal-btn ghost" onClick={() => setCursor(new Date(year, month - 1, 1))}>←</button>
+          <button className="portal-btn ghost" onClick={() => setCursor(new Date())}>Today</button>
+          <button className="portal-btn ghost" onClick={() => setCursor(new Date(year, month + 1, 1))}>→</button>
+        </div>
+      </div>
+      <div className="portal-card portal-calendar">
+        {['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d => <div className="cal-head" key={d}>{d}</div>)}
+        {days.map((d, i) => {
+          const items = byDay[d.toDateString()] || [];
+          const inMonth = d.getMonth() === month;
+          return <div key={i} className={'cal-day' + (inMonth ? '' : ' muted') + (items.length ? ' has' : '')}>
+            <span>{d.getDate()}</span>
+            {items.map(b => <button key={b.id} className="cal-event" onClick={() => window.location.href = '/portal/?ticket=' + b.booking_ref}>{b.event_name}</button>)}
+          </div>;
+        })}
+      </div>
+      <div className="portal-actions">
+        <button className="portal-btn" onClick={() => downloadCalendar(bookings)}>Download calendar (.ics)</button>
+      </div>
+    </div>
+  );
+}
+
+function EventDetail({ event }) {
+  const external = event.type === 'external';
+  const title = external ? event.title : event.event_name;
+  const date = external ? event.dateLabel : event.date;
+  const venue = external ? event.venue : event.location;
+  const price = external ? event.price : (event.is_free ? 'FREE' : event.price);
+  const url = 'https://ssoul.co.za/portal/?event=' + encodeURIComponent(event.id || '');
+  return (
+    <div className="portal-event">
+      <div className="portal-event-media">{(event.image || event.image_url) ? <img src={event.image || event.image_url} alt="" /> : <div className="portal-event-fallback">SS</div>}</div>
+      <div className="portal-event-body">
+        <span className="portal-badge">{external ? event.source : 'Solo Soul Experiences'}</span>
+        <h1>{title}</h1>
+        <p className="portal-event-meta">{date} · {venue}</p>
+        <p className="portal-event-price">{price}</p>
+        <p>{(external ? event.description : event.description) || 'An intimate Solo Soul experience in Durban. Full details and joining instructions are shared after booking.'}</p>
+        <div className="portal-actions">
+          {external && event.url && <a className="portal-btn" href={event.url} target="_blank" rel="noreferrer">Tickets ↗</a>}
+          {!external && <a className="portal-btn" href="/experiences.html">Book this experience</a>}
+          <a className="portal-btn ghost" href="/events">Back to events</a>
+        </div>
+        <div className="portal-share">
+          <span>Share</span>
+          <button onClick={() => shareLink(title, title + ' — Solo Soul Experiences', url)}>Share</button>
+          <a href={'https://wa.me/?text=' + encodeURIComponent(title + ' ' + url)} target="_blank" rel="noreferrer">WhatsApp</a>
+          <a href={'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url)} target="_blank" rel="noreferrer">Facebook</a>
+          <a href={'mailto:?subject=' + encodeURIComponent(title) + '&body=' + encodeURIComponent(url)}>Email</a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function Shell({ children, user, onSignOut }) {
   return (
     <div className="portal-shell">
@@ -267,7 +404,7 @@ function Ticket({ booking }) {
       <h1>{booking.event_name}</h1>
       <div className="portal-ticket-meta"><div><span>Date</span><strong>{booking.event_date}</strong></div><div><span>Venue</span><strong>{booking.event_location}</strong></div><div><span>Guests</span><strong>{booking.guests}</strong></div></div>
       <div className="portal-ticket-ref"><span>Booking reference</span><strong>{booking.booking_ref}</strong><span>Ticket code</span><strong>{booking.ticket_code}</strong></div>
-      <div className="portal-actions"><button className="portal-btn" onClick={() => window.print()}>Print / save PDF</button><a className="portal-btn ghost" href="/portal/">My bookings</a></div>
+      <div className="portal-actions"><button className="portal-btn" onClick={() => window.print()}>Print / save PDF</button><button className="portal-btn ghost" onClick={() => downloadCalendar([booking])}>Add to calendar</button><a className="portal-btn ghost" href={googleCalendar(booking)} target="_blank" rel="noreferrer">Google Calendar</a><button className="portal-btn ghost" onClick={() => shareLink(booking.event_name, 'I am going to ' + booking.event_name, 'https://ssoul.co.za/portal/?ticket=' + booking.booking_ref)}>Share</button></div>
     </div>
   );
 }
