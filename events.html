@@ -31,8 +31,8 @@
   <!-- AOS Animation Library -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" />
 
-  <link rel="stylesheet" href="style.css?v=20261102multi" />
-  <link rel="stylesheet" href="mobile-responsive.css?v=20261102multi" />
+  <link rel="stylesheet" href="style.css?v=20261103exp2" />
+  <link rel="stylesheet" href="mobile-responsive.css?v=20261103exp2" />
   <link rel="preload" as="image" href="assets/images/hero_ocean_sunrise.webp" fetchpriority="high" />
 
 <style id="page-nav-style">
@@ -74,7 +74,7 @@
         <a href="/portal/" id="nav-portal-btn" class="nav-link portal-nav-item"><i class="fas fa-user-circle"></i> My Portal</a>
       </nav>
 
-      <a href="experiences.html#booking" id="nav-book-btn" class="btn btn-primary nav-cta" onclick="openBookingModal()">Book Now</a>
+      <a href="/events" id="nav-book-btn" class="btn btn-primary nav-cta">What's On</a>
 
       <button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">
         <span></span><span></span><span></span>
@@ -96,7 +96,7 @@
       <a href="/about#founder" class="mobile-nav-link">Meet Hazel</a>
       <a href="/contact" class="mobile-nav-link">Contact</a>
       <a href="/portal/" id="mobile-portal-btn" class="mobile-nav-link"><i class="fas fa-user-circle"></i> My Portal</a>
-      <a href="experiences.html#booking" class="btn btn-primary mobile-nav-btn" onclick="openBookingModal()">Book Now</a>
+      <a href="/events" class="btn btn-primary mobile-nav-btn">What's On</a>
     </nav>
   </div>
 
@@ -145,7 +145,7 @@
     <div id="events-list" class="event-feed" aria-live="polite"></div>
 
     <div class="events-footer-note">
-      Listings are pulled from live Durban event calendars. Tickets are fulfilled by the partner organiser — always confirm details on the ticket page before paying.
+      Listings are pulled from live Durban event calendars. Some categories have no current listings — we don't invent them. Tickets are fulfilled by the partner organiser, so always confirm details on the ticket page before paying.
     </div>
   </div>
 </section>
@@ -159,7 +159,7 @@
               <span class="logo-symbol">✦</span>
               <span>Solo Soul Experiences</span>
             </div>
-            <p>Helping you fall in love with your own company. Curated solo experiences in Durban, South Africa.</p>
+            <p>Helping you fall in love with your own company. Solo experience discovery in Durban, South Africa.</p>
             <div class="footer-social">
               <a href="https://www.facebook.com/profile.php?id=1043119168882555" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
               <a href="https://whatsapp.com/channel/0029Vb8192g5vKA50mLOdp41" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
@@ -177,14 +177,14 @@
             </ul>
           </div>
           <div class="footer-nav">
-            <h4>Experiences</h4>
+            <h4>Explore by theme</h4>
             <ul>
-              <li><a href="/experiences">Solo Brunch Club</a></li>
-              <li><a href="/experiences">Sunset Walks</a></li>
-              <li><a href="/experiences">Sip & Paint</a></li>
-              <li><a href="/experiences">Coffee Dates</a></li>
-              <li><a href="/experiences">Nature Escapes</a></li>
-              <li><a href="/experiences">Luxury Solo Days</a></li>
+              <li><a href="/events?category=food">Solo Dining &amp; Brunch</a></li>
+              <li><a href="/events?category=outdoors">Beach Walks &amp; Nature</a></li>
+              <li><a href="/events?category=creative">Creative Activities</a></li>
+              <li><a href="/events?category=food">Coffee Dates &amp; Journaling</a></li>
+              <li><a href="/events?category=wellness">Wellness &amp; Relaxation</a></li>
+              <li><a href="/events?category=luxury">Luxury Solo Experiences</a></li>
             </ul>
           </div>
           <div class="footer-contact">
@@ -206,73 +206,6 @@
     </div>
   </footer>
 
-
-  <!-- ======================== BOOKING MODAL ======================== -->
-  <div class="modal-overlay" id="booking-modal-overlay" onclick="closeBookingModal(event)">
-    <div class="modal booking-modal" id="booking-modal" role="dialog" aria-modal="true" aria-labelledby="booking-modal-title">
-      <button class="modal-close" onclick="closeBookingModal()" aria-label="Close booking modal">✕</button>
-      <div class="modal-header">
-        <div class="modal-icon">✦</div>
-        <h3 id="booking-modal-title">Book Your Experience</h3>
-        <p id="booking-modal-subtitle">Fill in your details and we'll email your confirmation and ticket.</p>
-      </div>
-      <form id="booking-form" onsubmit="handleBookingSubmit(event)" novalidate>
-        <div class="form-group">
-          <label for="booking-name">Full Name</label>
-          <input type="text" id="booking-name" name="name" placeholder="Your full name" required />
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label for="booking-email">Email</label>
-            <input type="email" id="booking-email" name="email" placeholder="you@example.com" autocomplete="email" required />
-          </div>
-          <div class="form-group">
-            <label for="booking-phone">Phone / WhatsApp</label>
-            <input type="tel" id="booking-phone" name="phone" placeholder="+27 82 123 4567" autocomplete="tel" required />
-          </div>
-        </div>
-        <div class="form-group">
-          <label for="booking-experience">Experience</label>
-          <select id="booking-experience" name="experience" required>
-            <option value="">Choose an experience...</option>
-          </select>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label for="booking-date">Available Date</label>
-            <select id="booking-date" name="date" required disabled>
-              <option value="">Select an experience first...</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="booking-guests">Number of Spots</label>
-            <!-- Rebuilt dynamically by JS based on available spots per event -->
-            <select id="booking-guests" name="guests">
-              <option value="1">1 guest (just me)</option>
-              <option value="2">2 guests</option>
-              <option value="3">3 guests</option>
-              <option value="4">4 guests</option>
-              <option value="5">5 guests</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-group">
-          <label for="booking-notes">Any notes or special requirements?</label>
-          <textarea id="booking-notes" name="notes" placeholder="Dietary requirements, accessibility needs, anything else..." rows="3"></textarea>
-        </div>
-        <div class="booking-payment-note" id="booking-pay-note">
-          <i class="fas fa-shield-alt"></i>
-          <span>Secure payment via <strong>PayFast</strong> after confirmation. No payment is taken now.</span>
-        </div>
-        <button type="submit" class="btn btn-primary booking-submit" id="booking-submit-btn">
-          Request Booking <i class="fas fa-arrow-right"></i>
-        </button>
-        <div class="booking-success" id="booking-success">
-          <i class="fas fa-check-circle"></i> Booking request received! We'll WhatsApp you within 24 hours to confirm. 💚
-        </div>
-      </form>
-    </div>
-  </div>
 
   <!-- ======================== BLOG MODAL ======================== -->
   <div class="modal-overlay" id="blog-modal-overlay" onclick="closeBlogModal(event)">
@@ -459,124 +392,6 @@
     </div>
   </div>
 
-  <!-- ======================== PAYFAST SIMULATOR MODAL ======================== -->
-  <div class="modal-overlay" id="payfast-modal-overlay" onclick="closePayFastModal(event)">
-    <div class="modal payfast-modal" id="payfast-modal" role="dialog" aria-modal="true" aria-labelledby="payfast-modal-title">
-      <div class="payfast-header">
-        <div class="payfast-lock"><i class="fas fa-lock"></i> PAYFAST <strong>DEMO CHECKOUT</strong> — NO REAL PAYMENT</div>
-        <button class="payfast-cancel-btn" onclick="closePayFastModal()">Cancel Payment</button>
-      </div>
-
-      <div class="payfast-body" id="payfast-main-content">
-        <div style="background:#FFF4E5;border:1px solid #E6B566;color:#6B4A12;padding:10px 14px;border-radius:8px;font-size:12.5px;margin-bottom:16px;">Demo mode: this checkout simulates payment for testing. No card is charged and no real PayFast transaction is created.</div>
-        <!-- Merchant & Order details -->
-        <div class="payfast-order-summary">
-          <div class="payfast-merchant">
-            <img src="assets/images/logo.png" alt="Solo Soul Logo" class="payfast-logo" />
-            <div>
-              <h4>Solo Soul Experiences</h4>
-              <p>Durban, South Africa</p>
-            </div>
-          </div>
-          <hr/>
-          <div class="payfast-item-details">
-            <h5 id="pf-experience-title">Experience Name</h5>
-            <p><i class="fas fa-calendar-day"></i> Date: <strong id="pf-experience-date">---</strong></p>
-            <p><i class="fas fa-users"></i> Spots: <strong id="pf-experience-guests">1 spot</strong></p>
-          </div>
-          <div class="payfast-amount-box">
-            <span>Total Payable</span>
-            <strong id="pf-total-amount">R0.00</strong>
-          </div>
-        </div>
-
-        <!-- Payment input methods -->
-        <div class="payfast-payment-methods">
-          <h5>Select Payment Method</h5>
-          <div class="payfast-tabs">
-            <button class="pf-tab active" id="pf-tab-card" onclick="switchPayFastMethod('card')"><i class="fas fa-credit-card"></i> Card</button>
-            <button class="pf-tab" id="pf-tab-eft" onclick="switchPayFastMethod('eft')"><i class="fas fa-university"></i> Instant EFT</button>
-          </div>
-
-          <!-- Card Form View -->
-          <div class="pf-method-content active" id="pf-method-card-container">
-            <form id="payfast-card-form" onsubmit="handlePayFastCardSubmit(event)" novalidate>
-              <div class="form-group">
-                <label>Cardholder Name</label>
-                <input type="text" id="pf-card-name" required placeholder="Hazel Soul" />
-              </div>
-              <div class="form-group">
-                <label>Card Number</label>
-                <div class="pf-input-wrapper">
-                  <input type="text" id="pf-card-number" required placeholder="4000 1234 5678 9010" maxlength="19" oninput="formatCardNumber(this)" />
-                  <i class="fab fa-cc-visa" id="pf-card-icon"></i>
-                </div>
-              </div>
-              <div class="form-row">
-                <div class="form-group">
-                  <label>Expiry Date</label>
-                  <input type="text" id="pf-card-expiry" required placeholder="MM/YY" maxlength="5" oninput="formatCardExpiry(this)" />
-                </div>
-                <div class="form-group">
-                  <label>CVV / CVC</label>
-                  <input type="password" id="pf-card-cvv" required placeholder="•••" maxlength="3" oninput="this.value=this.value.replace(/\D/g,'')" />
-                </div>
-              </div>
-              <button type="submit" class="btn btn-payfast" id="pf-pay-btn"><i class="fas fa-lock"></i> Simulate Payment</button>
-            </form>
-          </div>
-
-          <!-- EFT View -->
-          <div class="pf-method-content" id="pf-method-eft-container">
-            <p style="font-size:13px; color:#555; margin-bottom:15px;">Choose your bank to complete Instant EFT payment via secure sandbox authorization:</p>
-            <div class="eft-bank-grid">
-              <button class="bank-btn" onclick="startEFT('FNB')">FNB</button>
-              <button class="bank-btn" onclick="startEFT('Standard Bank')">Standard Bank</button>
-              <button class="bank-btn" onclick="startEFT('Absa')">Absa</button>
-              <button class="bank-btn" onclick="startEFT('Capitec')">Capitec</button>
-              <button class="bank-btn" onclick="startEFT('Nedbank')">Nedbank</button>
-              <button class="bank-btn" onclick="startEFT('TymeBank')">TymeBank</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Payment Processing Animation View -->
-      <div class="payfast-loading-view" id="payfast-loading-view">
-        <div class="pf-spinner"></div>
-        <h4 id="pf-loader-status">Securing checkout window...</h4>
-        <p>Do not close your browser or navigate away.</p>
-      </div>
-
-      <!-- Bank OTP Verification View -->
-      <div class="payfast-otp-view" id="payfast-otp-view">
-        <div class="otp-header">
-          <strong id="otp-bank-name">SECURE 3D SECURE OTP</strong>
-          <span style="font-size:11px;color:#666;">Verification Code Sent</span>
-        </div>
-        <div class="otp-body">
-          <p>Please enter the 6-digit OTP verification code sent to your phone/email to authorize this payment.</p>
-          <div class="form-group">
-            <input type="text" id="pf-otp-input" placeholder="123456" maxlength="6" style="text-align:center; font-size:24px; letter-spacing:4px; font-weight:700; width:100%; border:2px solid var(--beige);" />
-          </div>
-          <div class="otp-error" id="pf-otp-error" style="color:#e74c3c; font-size:13px; text-align:center; margin-bottom:10px;"></div>
-          <div class="otp-buttons">
-            <button class="btn btn-primary" onclick="verifyOTP()" style="width:100%;">Submit Verification Code</button>
-            <button class="btn btn-secondary" onclick="resendOTP()" style="width:100%; margin-top:8px;">Resend Code</button>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Payment Success view -->
-      <div class="payfast-success-view" id="payfast-success-view">
-        <div class="pf-success-circle">✓</div>
-        <h3>Payment Successful!</h3>
-        <p>Order reference: <strong id="pf-success-ref">#12345</strong></p>
-        <p>Your ticket is now confirmed and visible on your dashboard portal. Redirecting you shortly...</p>
-      </div>
-    </div>
-  </div>
-
   <!-- ======================== LIGHTBOX ======================== -->
   <div class="lightbox" id="lightbox" onclick="closeLightbox()">
     <button class="lightbox-close" onclick="closeLightbox()" aria-label="Close image">✕</button>
@@ -591,10 +406,10 @@
   <!-- Supabase Client -->
   
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase.js?v=20261102multi"></script>
+  <script src="supabase.js?v=20261103exp2"></script>
   <!-- AOS Library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
-  <script src="app.js?v=20261102multi"></script>
+  <script src="app.js?v=20261103exp2"></script>
 
 </body>
 </html>

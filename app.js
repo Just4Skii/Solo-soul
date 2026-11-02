@@ -194,11 +194,14 @@ document.addEventListener('DOMContentLoaded', () => {
   // Inner pages have no hero, so keep the navigation legible immediately.
   if (!document.querySelector('.hero')) document.getElementById('navbar')?.classList.add('scrolled');
 
-  // Mark the current page in the navigation
-  const pageName = (window.location.pathname.split('/').pop() || 'index.html');
+  // Mark the current page in the navigation. Works for clean URLs (/experiences)
+  // as well as direct .html previews.
+  const pageName = (window.location.pathname.replace(/\/+$/, '').split('/').pop() || 'index').replace(/\.html$/, '');
   document.querySelectorAll('.nav-link, .mobile-nav-link').forEach(link => {
     const href = link.getAttribute('href') || '';
-    if (href.split('#')[0] === pageName) link.classList.add('active');
+    if (href.includes('#')) return;
+    const target = href.split('#')[0].replace(/\/+$/, '').split('/').pop().replace(/\.html$/, '') || 'index';
+    if (target === pageName) link.classList.add('active');
   });
 
   initPreloader();
@@ -243,6 +246,10 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+  // Apply event deep links before the feed paints so a shared
+  // /events?category=... URL opens on the right filter, not a flash of all events.
+  applyEventQueryParams();
 
   // Hydrate real events in the background; never block the page on the API.
   const timeout = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -576,9 +583,60 @@ function renderEventCards(list) {
 
 // ---- EVENT FILTERS ----------------------------------------
 const CATEGORY_ALIAS = { dining: 'food', nature: 'outdoors', mindful: 'wellness', city: 'social' };
+const CATEGORY_LABELS = {
+  all: 'event', wellness: 'wellness', creative: 'creative', food: 'food & drink',
+  outdoors: 'outdoors', music: 'music', social: 'social', markets: 'markets',
+  fitness: 'fitness', learning: 'learning', luxury: 'luxury'
+};
+
+function getActiveEventCategory() {
+  return document.querySelector('.filter-btn.active')?.dataset.filter || 'all';
+}
+
+function applyEventQueryParams() {
+  const params = new URLSearchParams(window.location.search);
+  const requested = (params.get('category') || '').trim().toLowerCase();
+  const category = CATEGORY_ALIAS[requested] || requested;
+  const buttons = Array.from(document.querySelectorAll('.filter-btn'));
+  const match = buttons.find(btn => btn.dataset.filter === category);
+  if (match) {
+    buttons.forEach(btn => btn.classList.remove('active'));
+    match.classList.add('active');
+    const chips = match.closest('.event-chips');
+    if (chips) {
+      chips.scrollLeft = match.offsetLeft - (chips.clientWidth / 2) + (match.clientWidth / 2);
+    }
+  }
+
+  const term = params.get('q');
+  const search = document.getElementById('event-search');
+  if (term && search) search.value = term;
+
+  const area = (params.get('area') || '').trim();
+  const areaSelect = document.getElementById('event-area');
+  if (area && areaSelect && Array.from(areaSelect.options).some(o => o.value === area)) {
+    areaSelect.value = area;
+  }
+}
+
+function syncEventQueryParams() {
+  const params = new URLSearchParams(window.location.search);
+  const active = getActiveEventCategory();
+  if (active && active !== 'all') params.set('category', active);
+  else params.delete('category');
+  const url = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+  window.history.replaceState({}, '', url);
+}
+
+function resetEventDateFilter() {
+  const dateSelect = document.getElementById('event-date');
+  if (dateSelect) dateSelect.value = 'all';
+  applyEventFilters();
+}
+window.resetEventDateFilter = resetEventDateFilter;
 
 function applyEventFilters() {
-  const active = document.querySelector('.filter-btn.active')?.dataset.filter || 'all';
+  const active = getActiveEventCategory();
   const source = document.getElementById('event-source')?.value || 'all';
   const area = (document.getElementById('event-area')?.value || 'all').toLowerCase();
   const price = document.getElementById('event-price')?.value || 'all';
@@ -586,9 +644,19 @@ function applyEventFilters() {
   const term = (document.getElementById('event-search')?.value || '').trim().toLowerCase();
   const now = Date.now();
   const limit = when === 'week' ? now + 7 * 864e5 : when === 'month' ? now + 31 * 864e5 : when === 'quarter' ? now + 92 * 864e5 : 0;
+  const counter = document.getElementById('event-count');
+
+  const rows = document.querySelectorAll('#events-list [data-event], #events-tbody tr[data-search]');
+  // No rows means the feed has not loaded (or every source is down). Keep the
+  // page's own "listings are on the way" state instead of stacking a second empty state.
+  if (!rows.length) {
+    document.getElementById('event-no-match')?.remove();
+    if (counter) counter.textContent = '';
+    return;
+  }
 
   let visible = 0;
-  document.querySelectorAll('#events-list [data-event], #events-tbody tr[data-search]').forEach(row => {
+  rows.forEach(row => {
     const category = CATEGORY_ALIAS[row.dataset.category] || row.dataset.category;
     const okCategory = active === 'all' || category === active;
     const okSource = source === 'all' || row.dataset.source === source;
@@ -602,29 +670,44 @@ function applyEventFilters() {
     if (show) visible++;
   });
 
-  const counter = document.getElementById('event-count');
-  if (counter) counter.textContent = visible ? visible + ' events' : '';
+  if (counter) counter.textContent = visible ? visible + (visible === 1 ? ' event' : ' events') : '';
 
   let empty = document.getElementById('event-no-match');
   if (!visible) {
-    if (!empty) {
-      const list = document.getElementById('events-list');
-      empty = document.createElement(list ? 'div' : 'tr');
-      empty.id = 'event-no-match';
-      empty.innerHTML = list ? '<div class="event-empty"><strong>No events match those filters</strong><p>Try another category, area or source.</p></div>' : '<td colspan="7" style="text-align:center;padding:30px;color:#5f6b64;">No events match those filters.</td>';
-      (list || document.getElementById('events-tbody'))?.appendChild(empty);
+    if (empty) empty.remove();
+    const list = document.getElementById('events-list');
+    empty = document.createElement(list ? 'div' : 'tr');
+    empty.id = 'event-no-match';
+    if (list) {
+      const label = CATEGORY_LABELS[active] || active;
+      const whenLabel = when === 'week' ? ' this week' : when === 'month' ? ' this month' : when === 'quarter' ? ' in the next three months' : '';
+      const heading = active === 'all'
+        ? 'No events match those filters'
+        : 'No ' + label + ' listings' + whenLabel;
+      const helper = active === 'all'
+        ? 'Try another category, area or date range.'
+        : 'Nothing in this theme right now. You can widen the date range or browse everything that is on.';
+      empty.innerHTML = '<div class="event-empty"><strong>' + heading + '</strong><p>' + helper + '</p>' +
+        '<div class="event-empty-actions">' +
+        (when !== 'all' ? '<button type="button" onclick="resetEventDateFilter()">See all dates</button>' : '') +
+        '<a href="/events">Browse all events</a></div></div>';
+    } else {
+      empty.innerHTML = '<td colspan="7" style="text-align:center;padding:30px;color:#5f6b64;">No events match those filters.</td>';
     }
+    (list || document.getElementById('events-tbody'))?.appendChild(empty);
   } else if (empty) {
     empty.remove();
   }
 }
 
 function initEventFilters() {
+  applyEventQueryParams();
   const filterBtns = document.querySelectorAll('.filter-btn');
   filterBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       filterBtns.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
+      syncEventQueryParams();
       applyEventFilters();
     });
   });
@@ -632,6 +715,7 @@ function initEventFilters() {
     document.getElementById(id)?.addEventListener('change', applyEventFilters);
   });
   document.getElementById('event-search')?.addEventListener('input', applyEventFilters);
+  applyEventFilters();
 }
 
 // ---- CITY EVENTS ------------------------------------------
@@ -1170,15 +1254,13 @@ window.handleBookingSubmit = function(e) {
         .catch(err => {
           btn.disabled = false;
           btn.innerHTML = '<i class="fas fa-lock"></i> Pay & Book';
-          alert('Secure checkout could not start: ' + err.message + '. Opening the demo checkout instead.');
-          closeBookingModal();
-          openPayFastModal(experience, date, guests, totalAmount);
+          alert('Secure checkout could not start: ' + err.message + '. Please try again, or contact us to arrange payment.');
         });
       return;
     }
 
     closeBookingModal();
-    openPayFastModal(experience, date, guests, totalAmount);
+    alert('Online card checkout is not available right now. Please contact SSoulZAR@outlook.com to arrange payment for this experience.');
   }
 };
 
@@ -1695,37 +1777,20 @@ window.closeTicketModal = closeTicketModal;
 window.cancelBooking = cancelBooking;
 
 // ---- PAYFAST SIMULATOR GATEWAY CONTROLLERS -------------------
+// Legacy demo checkout. It is intentionally unreachable from any public
+// booking path: real card payments must go through Paystack. Keep the
+// functions below so old pages/scripts fail safely instead of throwing.
 function openPayFastModal(experience, date, guests, totalAmount) {
-  const overlay = document.getElementById('payfast-modal-overlay');
-  if (!overlay) return;
-
-  // Set fields
-  document.getElementById('pf-experience-title').textContent = experience;
-  document.getElementById('pf-experience-date').textContent = date;
-  document.getElementById('pf-experience-guests').textContent = `${guests} spot${guests > 1 ? 's' : ''}`;
-  document.getElementById('pf-total-amount').textContent = `R${totalAmount}.00`;
-  
-  // Clear inputs & views
-  document.getElementById('payfast-card-form')?.reset();
-  document.getElementById('pf-otp-input').value = '';
-  document.getElementById('pf-otp-error').textContent = '';
-
-  // Reset checkout views
-  document.getElementById('payfast-main-content').style.display = 'grid';
-  document.getElementById('payfast-loading-view').style.display = 'none';
-  document.getElementById('payfast-otp-view').style.display = 'none';
-  document.getElementById('payfast-success-view').style.display = 'none';
-
-  switchPayFastMethod('card');
-
-  overlay.classList.add('active');
-  document.body.style.overflow = 'hidden';
+  console.warn('Legacy PayFast demo checkout is disabled. Use the Paystack checkout.');
+  return;
 }
 
 function closePayFastModal(event) {
   // Prevent closing overlay by accident while payment is in progress
-  const loading = document.getElementById('payfast-loading-view').style.display === 'flex';
-  const otp = document.getElementById('payfast-otp-view').style.display === 'flex';
+  const loadingView = document.getElementById('payfast-loading-view');
+  const otpView = document.getElementById('payfast-otp-view');
+  const loading = loadingView && loadingView.style.display === 'flex';
+  const otp = otpView && otpView.style.display === 'flex';
   if ((loading || otp) && event) return; // ignore background clicks during transaction
 
   if (event && event.target !== document.getElementById('payfast-modal-overlay')) return;

@@ -3578,3 +3578,259 @@ body.page-inner .navbar.scrolled { background: rgba(7,42,53,.98); }
 .event-empty strong { display:block; font-family:'Playfair Display',serif; font-size:26px; color:var(--forest); margin-bottom:6px; }
 .events-footer-note { font-size:12px; color:#7a6a63; text-align:center; margin-top:26px; line-height:1.6; }
 @media(max-width:700px){ .event-card { grid-template-columns:58px 1fr; gap:12px; padding:14px; } .event-date strong{font-size:24px} .event-side{grid-column:2;align-items:flex-start;text-align:left;flex-direction:row;justify-content:space-between;width:100%} .event-main h3{font-size:19px} .event-chips{justify-content:flex-start;flex-wrap:nowrap} .events-page{padding-top:120px} }
+
+
+/* ============================================================
+   EXPERIENCES — EVERGREEN DISCOVERY PAGE
+   Keeps the existing brand palette and card language, but treats
+   each theme as inspiration rather than a bookable product.
+   ============================================================ */
+.exp-page {
+  background: var(--sand);
+  padding-top: 150px;
+}
+.exp-page .container { max-width: 1180px; }
+
+.exp-hero {
+  max-width: 820px;
+  margin: 0 auto 28px;
+  text-align: center;
+}
+.exp-eyebrow {
+  font-size: 10px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--coral-ink, #B84A36);
+  font-weight: 700;
+  margin-bottom: 14px;
+}
+.exp-hero h1 {
+  font-family: 'Playfair Display', serif;
+  font-weight: 400;
+  font-size: clamp(38px, 5vw, 64px);
+  line-height: 1.05;
+  color: var(--forest);
+  margin: 0 0 18px;
+}
+.exp-hero h1 em { color: var(--coral); }
+.exp-hero p {
+  max-width: 640px;
+  margin: 0 auto;
+  color: #5f6b64;
+  font-size: 16px;
+  line-height: 1.75;
+}
+.exp-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 26px;
+}
+
+.exp-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  max-width: 880px;
+  margin: 0 auto 42px;
+  padding: 18px 20px;
+  background: #fff;
+  border: 1px solid rgba(46, 94, 78, .14);
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(43, 27, 47, .05);
+}
+.exp-note-icon {
+  flex: 0 0 34px;
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(231, 111, 81, .12);
+  color: var(--coral-ink, #B84A36);
+  font-size: 14px;
+}
+.exp-note p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.65;
+  color: #5f6b64;
+}
+.exp-note strong { color: var(--forest); }
+
+.exp-card--theme {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(46, 94, 78, .12);
+  box-shadow: 0 8px 24px rgba(43, 27, 47, .05);
+}
+.exp-card--theme:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 18px 40px rgba(43, 27, 47, .10);
+}
+.exp-card--theme .exp-img-wrap { height: 220px; }
+.exp-index {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 1;
+  min-width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: rgba(248, 239, 228, .92);
+  color: var(--forest);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .12em;
+}
+.exp-card--theme .exp-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 24px 24px 22px;
+}
+.exp-card--theme .exp-category {
+  color: var(--coral-ink, #B84A36);
+  margin-bottom: 9px;
+}
+.exp-card--theme .exp-body h3 {
+  font-size: 23px;
+  margin-bottom: 10px;
+}
+.exp-card--theme .exp-body p {
+  font-size: 13.5px;
+  line-height: 1.7;
+  color: #5f6b64;
+  margin-bottom: 16px;
+}
+.exp-ideas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+.exp-ideas span {
+  display: inline-flex;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: #FBF4EA;
+  color: #6b5e63;
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.exp-card--theme .exp-footer {
+  margin-top: auto;
+  border-top: 1px solid rgba(46, 94, 78, .12);
+  padding-top: 16px;
+}
+.exp-explore-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--forest);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .01em;
+  transition: color .2s ease, gap .2s ease;
+}
+.exp-explore-link:hover { color: var(--coral-ink, #B84A36); gap: 10px; }
+.exp-explore-link i { font-size: 10px; }
+
+.exp-how {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 26px;
+  margin-top: 64px;
+  padding: 30px 0;
+  border-top: 1px solid rgba(46, 94, 78, .15);
+  border-bottom: 1px solid rgba(46, 94, 78, .15);
+}
+.exp-how-item { display: flex; flex-direction: column; gap: 6px; }
+.exp-how-number {
+  font-size: 10px;
+  letter-spacing: .16em;
+  font-weight: 700;
+  color: var(--coral-ink, #B84A36);
+}
+.exp-how-item strong {
+  font-family: 'Playfair Display', serif;
+  font-size: 19px;
+  font-weight: 500;
+  color: var(--forest);
+}
+.exp-how-item p {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: #6b5e63;
+}
+
+.exp-closing {
+  max-width: 660px;
+  margin: 38px auto 0;
+  text-align: center;
+}
+.exp-closing p {
+  font-size: 12.5px;
+  line-height: 1.7;
+  color: #7a6a63;
+  margin-bottom: 18px;
+}
+
+/* Events empty state with a useful next step */
+.event-empty-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 18px;
+}
+.event-empty-actions a,
+.event-empty-actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border-radius: 999px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 11.5px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+.event-empty-actions a {
+  background: var(--forest);
+  border: 1px solid var(--forest);
+  color: #fff;
+}
+.event-empty-actions button {
+  background: transparent;
+  border: 1px solid rgba(46, 94, 78, .3);
+  color: var(--forest);
+}
+
+@media (max-width: 900px) {
+  .exp-grid { grid-template-columns: repeat(2, 1fr); }
+  .exp-how { grid-template-columns: 1fr; gap: 20px; }
+}
+@media (max-width: 700px) {
+  .exp-page { padding-top: 120px; }
+  .exp-hero h1 { font-size: clamp(34px, 9vw, 48px); }
+  .exp-hero p { font-size: 14.5px; }
+  .exp-note { padding: 15px 16px; margin-bottom: 30px; }
+  .exp-grid { grid-template-columns: 1fr; gap: 20px; }
+  .exp-card--theme .exp-img-wrap { height: 200px; }
+  .exp-how { margin-top: 44px; }
+}
+
+/* The event feed is card-based; the table-row rule above does not apply. */
+.event-card.hidden,
+#events-list [data-event].hidden { display: none !important; }
