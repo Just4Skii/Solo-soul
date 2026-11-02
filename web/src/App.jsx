@@ -369,7 +369,15 @@ function EventDetail({ event }) {
   const date = external ? event.dateLabel : event.date;
   const venue = external ? event.venue : event.location;
   const price = external ? event.price : (event.is_free ? 'FREE' : event.price);
-  const image = event.image || event.image_url;
+  const fallback = {
+    creative: '/assets/images/experience_sip_paint_1783927393574.webp',
+    food: '/assets/images/experience_brunch_1783927375716.webp',
+    outdoors: '/assets/images/experience_sunset_walk_1783927384287.webp',
+    wellness: '/assets/images/experience_coffee_journal_1783927404043.webp',
+    luxury: '/assets/images/experience_luxury_spa_1783927426028.webp',
+    fitness: '/assets/images/experience_nature_hike_1783927415406.webp',
+  }[event.category] || '/assets/images/experience_sunset_walk_1783927384287.webp';
+  const image = event.image || event.image_url || fallback;
   const url = 'https://ssoul.co.za/portal/?event=' + encodeURIComponent(event.id || '');
   return (
     <div className="portal-event-page">
