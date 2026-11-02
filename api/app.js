@@ -56,7 +56,7 @@ export default async function handler(req, res) {
         return json(res, 200, {
           bookings: (bookings || []).map(b => ({
             ...b,
-            ticket_url: `/ticket.html?ref=${encodeURIComponent(b.booking_ref)}`,
+            ticket_url: `/portal/?ticket=${encodeURIComponent(b.booking_ref)}`,
             refund: (refunds || []).find(r => r.booking_id === b.id) || null,
           })),
           support: tickets,
@@ -103,7 +103,7 @@ export default async function handler(req, res) {
         }).select().single();
         if (insertError) throw insertError;
 
-        const ticketUrl = `${process.env.APP_URL || 'https://ssoul.co.za'}/ticket.html?ref=${encodeURIComponent(ref)}`;
+        const ticketUrl = `${process.env.APP_URL || 'https://ssoul.co.za'}/portal/?ticket=${encodeURIComponent(ref)}`;
         await sendEmail({ to: booking.user_email, subject: `Your ticket — ${booking.event_name}`, html: ticketEmail({ booking, ticketUrl }), bookingId: booking.id, template: 'ticket' });
         return json(res, 200, { booking, ticket_url: ticketUrl });
       }

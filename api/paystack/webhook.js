@@ -64,8 +64,8 @@ async function confirmBooking(res, data) {
     });
   }
 
-  const ticketUrl = `${appUrl()}/ticket.html?ref=${encodeURIComponent(booking.booking_ref)}`;
-  const receiptUrl = `${appUrl()}/account.html?tab=payments`;
+  const ticketUrl = `${appUrl()}/portal/?ticket=${encodeURIComponent(booking.booking_ref)}`;
+  const receiptUrl = `${appUrl()}/portal/`;
   await sendEmail({ to: booking.user_email, subject: `Your ticket — ${booking.event_name}`, html: ticketEmail({ booking, ticketUrl }), bookingId: booking.id, template: 'ticket' });
   await sendEmail({ to: booking.user_email, subject: `Receipt — ${booking.event_name}`, html: receiptEmail({ booking, receiptUrl }), bookingId: booking.id, template: 'receipt' });
 
