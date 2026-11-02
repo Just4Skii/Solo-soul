@@ -2,6 +2,10 @@
   "outputDirectory": ".",
   "rewrites": [
     {
+      "source": "/events/:slug",
+      "destination": "/portal/index.html"
+    },
+    {
       "source": "/e/:id",
       "destination": "/api/app?share=:id"
     },

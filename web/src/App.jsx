@@ -3,7 +3,8 @@ import { createClient } from '@supabase/supabase-js';
 
 const params = new URLSearchParams(window.location.search);
 const initialTicket = params.get('ticket') || params.get('ref') || '';
-const initialEvent = params.get('event') || '';
+const pathEvent = (window.location.pathname.match(/\/events\/([^/]+)\/?$/) || [])[1] || '';
+const initialEvent = params.get('event') || decodeURIComponent(pathEvent);
 const initialExperience = params.get('experience') || '';
 const initialBook = params.get('book') || '';
 
@@ -59,7 +60,7 @@ function App() {
   async function loadExternalEvent(id) {
     try {
       const data = await fetch('/api/events').then(r => r.json());
-      const found = (data.events || []).find(e => e.id === id);
+      const found = (data.events || []).find(e => e.id === id || e.slug === id);
       if (!found) throw new Error('Event not found');
       setEventDetail({ type: 'external', ...found });
     } catch (e) { setError(e.message); }
@@ -378,7 +379,8 @@ function EventDetail({ event }) {
     fitness: '/assets/images/experience_nature_hike_1783927415406.webp',
   }[event.category] || '/assets/images/experience_sunset_walk_1783927384287.webp';
   const image = event.image || event.image_url || fallback;
-  const url = 'https://ssoul.co.za/portal/?event=' + encodeURIComponent(event.id || '');
+  const key = event.slug || event.id || '';
+  const url = 'https://ssoul.co.za/events/' + encodeURIComponent(key);
   return (
     <div className="portal-event-page">
       <nav className="portal-breadcrumb"><a href="/events">Events</a><span>/</span><span>Durban</span></nav>

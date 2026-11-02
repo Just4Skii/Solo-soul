@@ -4,6 +4,8 @@
  * only future, Durban-area events relevant to Solo Soul's offering.
  * Nothing is invented: failed/empty sources are reported in `sources`.
  */
+import { eventSlug } from '../lib/slug.js';
+
 const CACHE_TTL_MS = 15 * 60 * 1000;
 let cache = { at: 0, payload: null };
 const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36';
@@ -249,6 +251,7 @@ export default async function handler(req, res) {
     }
   }
   events.sort((a, b) => new Date(a.start) - new Date(b.start));
+  for (const event of events) event.slug = eventSlug(event.title, event.start);
 
   const payload = {
     updatedAt: new Date().toISOString(),
