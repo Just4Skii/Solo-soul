@@ -7,16 +7,20 @@
  * Results cached in Supabase ticket_verifications table (24h TTL).
  */
 
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { generateText, geminiConfigured } from '../../lib/ai.js';
 import { createClient } from '@supabase/supabase-js';
 
-const SUPABASE_URL = process.env.SUPABASE_URL || 'https://iinvfedcrkibnftzbrlz.supabase.co';
+const SUPABASE_URL = process.env.SUPABASE_URL || '';
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'AIzaSyAw6-NI38aZw-u1Ukrb7WWdy1xye81jW3k';
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+
+if (!GEMINI_API_KEY) {
+  console.error('❌ GEMINI_API_KEY environment variable not set');
+}
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
-const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
+
 
 // ── City events that need verification ───────────────────
 const CITY_EVENTS = [
@@ -49,7 +53,7 @@ async function checkUrl(url) {
 
 // ── Use Gemini to verify and search for a replacement ────
 async function geminiVerify(title, url) {
-  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+  if (!geminiConfigured()) return { status: 'uncertain', suggestedUrl: null, notes: 'Gemini API key not configured', confidence: 0 };
   const prompt = `You are a ticket verification assistant for Solo Soul Experiences in Durban, South Africa.
 
 I need you to verify this event ticket link:
@@ -68,8 +72,7 @@ URL: ${url}
 }`;
 
   try {
-    const result = await model.generateContent(prompt);
-    const text = result.response.text().trim();
+    const { text } = await generateText(prompt, { temperature: 0.2, maxOutputTokens: 300 });
     // Strip markdown code blocks if present
     const json = JSON.parse(text.replace(/```json\s*/i, '').replace(/```\s*$/, '').trim());
     return {
