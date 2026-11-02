@@ -6,6 +6,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import jwt from 'jsonwebtoken';
+import pg from 'pg';
 
 const SUPABASE_URL = process.env.SUPABASE_URL || '';
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
@@ -24,6 +25,7 @@ function requireAdmin(req, res) {
   if (!auth || !auth.startsWith('Bearer ')) { res.status(401).json({ error: 'Unauthorized' }); return null; }
   const decoded = verifyToken(auth.slice(7));
   if (!decoded) { res.status(401).json({ error: 'Invalid or expired token' }); return null; }
+  if (decoded.role !== 'admin') { res.status(403).json({ error: 'Admin role required' }); return null; }
   return decoded;
 }
 
@@ -179,6 +181,35 @@ export default async function handler(req, res) {
           summary: { paystackTransactions: remote.length, internalPayments: (payments || []).length, missingInternal: missingInternal.length, missingProvider: missingProvider.length },
           missingInternal, missingProvider,
         });
+      }
+
+      case 'migrateAudit': {
+        if (!process.env.SETUP_TOKEN || req.headers['x-setup-token'] !== process.env.SETUP_TOKEN) return res.status(403).json({ error: 'Forbidden' });
+        const cs = process.env.POSTGRES_URL_NON_POOLING || process.env.DATABASE_URL || process.env.POSTGRES_URL;
+        if (!cs) return res.status(500).json({ error: 'No Postgres connection string' });
+        const u = new URL(cs); u.searchParams.delete('sslmode'); u.searchParams.delete('ssl');
+        const c = new pg.Client({ connectionString: u.toString(), ssl: { rejectUnauthorized: false }, connectionTimeoutMillis: 15000 });
+        await c.connect();
+        await c.query(`create table if not exists public.settlement_audit (
+          id uuid primary key default gen_random_uuid(),
+          settlement_id uuid,
+          booking_id uuid,
+          action text not null,
+          previous_status text,
+          new_status text,
+          amount numeric,
+          provider text,
+          reference text,
+          actor_id text,
+          actor_email text,
+          reason text,
+          metadata jsonb,
+          created_at timestamptz default now()
+        );
+        alter table public.settlement_audit enable row level security;
+        create index if not exists settlement_audit_settlement_idx on public.settlement_audit(settlement_id);`);
+        await c.end();
+        return res.json({ ok: true });
       }
 
       default:
