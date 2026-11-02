@@ -484,7 +484,7 @@ function initEventsTable() {
       tr.dataset.search = (evt.exp + ' ' + evt.location).toLowerCase();
       tr.dataset.spotsLeft = 0;
       tr.innerHTML = '<td><strong>' + escapeHtml(evt.date) + '</strong></td>' +
-        '<td><span class="event-name">' + escapeHtml(evt.exp) + '</span> <span class="event-cat-badge">' + escapeHtml(evt.source) + '</span></td>' +
+        '<td><span class="event-name">' + escapeHtml(evt.exp) + '</span></td>' +
         '<td><i class="fas fa-map-marker-alt" style="color:var(--sage);margin-right:6px;font-size:12px;"></i>' + escapeHtml(evt.location) + '</td>' +
         '<td>—</td><td><span class="event-price">' + escapeHtml(evt.price) + '</span></td>' +
         '<td><span class="spots-pill spots-ok">Live listing</span></td>' +

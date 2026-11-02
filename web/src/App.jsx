@@ -388,7 +388,7 @@ function EventDetail({ event }) {
         <div className="portal-event-main">
           <div className="portal-event-media">{image ? <img src={image} alt={title} /> : <div className="portal-event-fallback">SS</div>}</div>
           <div className="portal-event-head">
-            <div className="portal-event-tags"><span className="portal-badge">{external ? event.source : 'Solo Soul Experiences'}</span><span className="portal-badge">{event.category || 'Experience'}</span></div>
+            <div className="portal-event-tags"><span className="portal-badge">{external ? 'Partner listing' : 'Solo Soul Experiences'}</span><span className="portal-badge">{event.category || 'Experience'}</span></div>
             <h1>{title}</h1>
             <div className="portal-event-facts">
               <div><span>Date</span><strong>{date}</strong></div>
@@ -407,7 +407,7 @@ function EventDetail({ event }) {
         </div>
         <aside className="portal-event-aside">
           <div className="portal-card">
-            <span className="portal-aside-label">{external ? 'Listing from ' + event.source : 'Hosted by Solo Soul'}</span>
+            <span className="portal-aside-label">{external ? 'Curated partner listing' : 'Hosted by Solo Soul'}</span>
             <strong className={/^[R\d]/.test(String(price)) ? "portal-total" : "portal-price-note"}>{price}</strong>
             <p>{date}<br />{venue}</p>
             {external
@@ -416,7 +416,7 @@ function EventDetail({ event }) {
             <a className="portal-btn ghost" href="/events" style={{ marginTop: 8 }}>Back to events</a>
             <div className="portal-aside-note">
               <strong>Good to know</strong>
-              <span>{external ? 'Tickets and final details are handled by the original organiser.' : 'Small group, hosted, and confirmed by email.'}</span>
+              <span>{external ? 'Tickets are fulfilled by the partner organiser. Their name appears at checkout.' : 'Small group, hosted, and confirmed by email.'}</span>
               <span>{external ? 'Always confirm the date and venue on the ticket page before paying.' : 'Free cancellation up to 48 hours before, unless stated otherwise.'}</span>
             </div>
           </div>
