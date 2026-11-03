@@ -1,5 +1,22 @@
 {
   "outputDirectory": ".",
+  "redirects": [
+    {
+      "source": "/lib/:path*",
+      "destination": "/404",
+      "permanent": false
+    },
+    {
+      "source": "/migrations/:path*",
+      "destination": "/404",
+      "permanent": false
+    },
+    {
+      "source": "/web/:path*",
+      "destination": "/404",
+      "permanent": false
+    }
+  ],
   "rewrites": [
     {
       "source": "/e/:id",
@@ -8,30 +25,6 @@
     {
       "source": "/api/(.*)",
       "destination": "/api/$1"
-    },
-    {
-      "source": "/lib/(.*)",
-      "destination": "/404.html"
-    },
-    {
-      "source": "/migrations/(.*)",
-      "destination": "/404.html"
-    },
-    {
-      "source": "/web/(.*)",
-      "destination": "/404.html"
-    },
-    {
-      "source": "/database-schema.sql",
-      "destination": "/404.html"
-    },
-    {
-      "source": "/(.*)\\.(sql|md)",
-      "destination": "/404.html"
-    },
-    {
-      "source": "/package(-lock)?\\.json",
-      "destination": "/404.html"
     }
   ],
   "crons": [

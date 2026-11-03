@@ -6,41 +6,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import jwt from 'jsonwebtoken';
-import pg from 'pg';
 import { runDailyPost } from '../../lib/social.js';
-
-const HARDEN_RLS_SQL = `
-alter table public.users enable row level security;
-drop policy if exists "users_can_crud_own" on public.users;
-drop policy if exists "users_select_own" on public.users;
-drop policy if exists "users_insert_own" on public.users;
-drop policy if exists "users_update_own" on public.users;
-create policy "users_select_own" on public.users for select using (auth.uid() = id);
-create policy "users_insert_own" on public.users for insert with check (auth.uid() = id and lower(email) = lower(coalesce(auth.jwt() ->> 'email', '')));
-create policy "users_update_own" on public.users for update using (auth.uid() = id) with check (auth.uid() = id and lower(email) = lower(coalesce(auth.jwt() ->> 'email', '')));
-
-alter table public.events enable row level security;
-drop policy if exists "events_admin_write" on public.events;
-drop policy if exists "events_public_read" on public.events;
-create policy "events_public_read" on public.events for select using (active = true);
-
-alter table public.bookings enable row level security;
-drop policy if exists "bookings_own_only" on public.bookings;
-drop policy if exists "bookings_select_own" on public.bookings;
-create policy "bookings_select_own" on public.bookings for select using (auth.uid() = user_id);
-
-alter table public.booking_reservations enable row level security;
-drop policy if exists "reservations_own_only" on public.booking_reservations;
-drop policy if exists "reservations_select_own" on public.booking_reservations;
-create policy "reservations_select_own" on public.booking_reservations for select using (auth.uid() = user_id);
-
-alter table public.admin_users enable row level security;
-drop policy if exists "admin_users_self_only" on public.admin_users;
-
-alter table public.ticket_verifications enable row level security;
-drop policy if exists "ticket_verifications_public_read" on public.ticket_verifications;
-create policy "ticket_verifications_public_read" on public.ticket_verifications for select using (true);
-`;
 
 const SUPABASE_URL = process.env.SUPABASE_URL || '';
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
@@ -188,19 +154,6 @@ export default async function handler(req, res) {
       case 'postSocial': {
         const result = await runDailyPost();
         return res.json({ result });
-      }
-
-      case 'hardenRls': {
-        const conn = process.env.POSTGRES_URL_NON_POOLING || process.env.DATABASE_URL || process.env.POSTGRES_URL;
-        if (!conn) return res.status(503).json({ error: 'Database connection string not configured in environment' });
-        const client = new pg.Client({ connectionString: conn, ssl: { rejectUnauthorized: false }, connectionTimeoutMillis: 10000 });
-        try {
-          await client.connect();
-          await client.query(HARDEN_RLS_SQL);
-          return res.json({ ok: true, message: 'Hardened RLS policies applied' });
-        } finally {
-          await client.end().catch(() => {});
-        }
       }
 
       case 'settlementAudit': {
