@@ -189,6 +189,35 @@ async function fetchEventbrite() {
   return { name: 'Eventbrite', ok, status: ok ? 200 : 0, events, error: errors || null };
 }
 
+const quicketImageCache = new Map();
+
+async function upgradeQuicketImage(event) {
+  if (!event.url || !event.image || !event.image.includes('_247_247')) return;
+  if (quicketImageCache.has(event.url)) {
+    event.image = quicketImageCache.get(event.url);
+    return;
+  }
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 5000);
+  try {
+    const res = await fetch(event.url, {
+      headers: { 'User-Agent': UA, Accept: 'text/html' },
+      signal: controller.signal,
+    });
+    if (!res.ok) return;
+    const html = await res.text();
+    const bannerTag = html.match(/<img[^>]*class=["'][^"']*banner-img[^"']*["'][^>]*>/i);
+    const bannerSrc = bannerTag?.[0].match(/src=["']([^"']+)["']/i)?.[1];
+    if (!bannerSrc) return;
+    const image = bannerSrc.startsWith('//') ? `https:${bannerSrc}` : bannerSrc;
+    if (/_0\.(jpe?g|png|webp)(\?|$)/i.test(image)) {
+      quicketImageCache.set(event.url, image);
+      event.image = image;
+    }
+  } catch { /* keep the thumbnail if the detail page is slow */ }
+  finally { clearTimeout(timer); }
+}
+
 async function fetchQuicket() {
   // Quicket paginates 20 events per page and does not expose a Durban-only
   // feed. Read the national pages, then let normalise() keep KZN listings.
@@ -198,6 +227,7 @@ async function fetchQuicket() {
     fetchJsonLd('Quicket', url, 'social', true, 7000)
   ));
   const events = results.flatMap(r => r.events || []);
+  await Promise.all(events.map(event => upgradeQuicketImage(event)));
   return { name: 'Quicket', ok: results.some(r => r.ok), status: 200, events };
 }
 
@@ -394,3 +424,5 @@ export default async function handler(req, res) {
   cache = { at: Date.now(), payload };
   return res.status(200).json(publicPayload(payload, req));
 }
+
+export const config = { maxDuration: 60 };

@@ -373,6 +373,25 @@ function Calendar({ bookings }) {
   );
 }
 
+function EventImage({ src, fallback, alt }) {
+  const [current, setCurrent] = React.useState(src || fallback);
+  React.useEffect(() => { setCurrent(src || fallback); }, [src, fallback]);
+  return (
+    <img
+      src={current}
+      alt={alt}
+      loading="lazy"
+      decoding="async"
+      onError={() => { if (fallback && current !== fallback) setCurrent(fallback); }}
+      onLoad={e => {
+        if (fallback && current !== fallback && e.currentTarget.naturalWidth > 0 && e.currentTarget.naturalWidth < 500) {
+          setCurrent(fallback);
+        }
+      }}
+    />
+  );
+}
+
 function EventDetail({ event }) {
   const external = event.type === 'external';
   const title = external ? event.title : event.event_name;
@@ -403,7 +422,7 @@ function EventDetail({ event }) {
       <nav className="portal-breadcrumb"><a href="/events">Events</a><span>/</span><span>Durban</span></nav>
       <div className="portal-event-grid">
         <div className="portal-event-main">
-          <div className="portal-event-media">{image ? <img src={image} alt={title} /> : <div className="portal-event-fallback">SS</div>}</div>
+          <div className="portal-event-media">{image ? <EventImage src={image} fallback={fallback} alt={title} /> : <div className="portal-event-fallback">SS</div>}</div>
           <div className="portal-event-head">
             <div className="portal-event-tags"><span className="portal-badge">{external ? 'Partner listing' : 'Solo Soul Experiences'}</span><span className="portal-badge">{event.category || 'Experience'}</span></div>
             <h1>{title}</h1>
@@ -416,10 +435,12 @@ function EventDetail({ event }) {
           </div>
           <div className="portal-share">
             <span>Share this</span>
-            <button onClick={() => shareLink(title, shareText, shareUrl)}>Share</button>
-            <a href={'https://wa.me/?text=' + encodeURIComponent(shareText + '\n' + shareUrl)} target="_blank" rel="noopener noreferrer">WhatsApp</a>
-            <a href={'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(shareUrl)} target="_blank" rel="noopener noreferrer">Facebook</a>
-            <a href={'mailto:?subject=' + encodeURIComponent(title) + '&body=' + encodeURIComponent(shareText + '\n\n' + shareUrl)}>Email</a>
+            <div className="portal-share-actions">
+              <button onClick={() => shareLink(title, shareText, shareUrl)}>Share</button>
+              <a href={'https://wa.me/?text=' + encodeURIComponent(shareText + '\n' + shareUrl)} target="_blank" rel="noopener noreferrer">WhatsApp</a>
+              <a href={'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(shareUrl)} target="_blank" rel="noopener noreferrer">Facebook</a>
+              <a href={'mailto:?subject=' + encodeURIComponent(title) + '&body=' + encodeURIComponent(shareText + '\n\n' + shareUrl)}>Email</a>
+            </div>
           </div>
         </div>
         <aside className="portal-event-aside">
