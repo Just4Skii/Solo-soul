@@ -327,7 +327,13 @@ function googleCalendar(booking) {
 
 function shareLink(title, text, url) {
   if (navigator.share) return navigator.share({ title, text, url }).catch(() => {});
-  navigator.clipboard?.writeText(url).then(() => alert('Link copied'));
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(url)
+      .then(() => alert('Link copied'))
+      .catch(() => window.prompt('Copy this link', url));
+    return;
+  }
+  window.prompt('Copy this link', url);
 }
 
 function Calendar({ bookings }) {
@@ -383,7 +389,8 @@ function EventDetail({ event }) {
   }[event.category] || '/assets/images/experience_sunset_walk_1783927384287.webp';
   const image = event.image || event.image_url || fallback;
   const key = event.slug || event.id || '';
-  const url = 'https://ssoul.co.za/portal/?event=' + encodeURIComponent(key);
+  const shareUrl = 'https://ssoul.co.za/e/' + encodeURIComponent(key) + '?utm_source=share&utm_medium=social&utm_campaign=event_share';
+  const shareText = `${title} — Solo Soul Experiences`;
   useEffect(() => {
     window.ssoulTrack?.('event_view', {
       eventId: key,
@@ -409,10 +416,10 @@ function EventDetail({ event }) {
           </div>
           <div className="portal-share">
             <span>Share this</span>
-            <button onClick={() => shareLink(title, title + ' — Solo Soul Experiences', url)}>Share</button>
-            <a href={'https://wa.me/?text=' + encodeURIComponent(title + ' ' + url)} target="_blank" rel="noreferrer">WhatsApp</a>
-            <a href={'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url)} target="_blank" rel="noreferrer">Facebook</a>
-            <a href={'mailto:?subject=' + encodeURIComponent(title) + '&body=' + encodeURIComponent(url)}>Email</a>
+            <button onClick={() => shareLink(title, shareText, shareUrl)}>Share</button>
+            <a href={'https://wa.me/?text=' + encodeURIComponent(shareText + '\n' + shareUrl)} target="_blank" rel="noopener noreferrer">WhatsApp</a>
+            <a href={'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(shareUrl)} target="_blank" rel="noopener noreferrer">Facebook</a>
+            <a href={'mailto:?subject=' + encodeURIComponent(title) + '&body=' + encodeURIComponent(shareText + '\n\n' + shareUrl)}>Email</a>
           </div>
         </div>
         <aside className="portal-event-aside">
