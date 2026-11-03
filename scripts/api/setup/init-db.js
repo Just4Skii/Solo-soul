@@ -123,25 +123,35 @@ alter table public.events enable row level security;
 alter table public.bookings enable row level security;
 alter table public.booking_reservations enable row level security;
 alter table public.admin_users enable row level security;
+alter table public.ticket_verifications enable row level security;
 
--- RLS Policies
-create policy if not exists "users_can_crud_own" on public.users
-  for all using (auth.uid() = id);
-
-create policy if not exists "events_public_read" on public.events
-  for select using (true);
-
-create policy if not exists "events_admin_write" on public.events
-  for all using (auth.uid() in (select id from public.users where email in ('admin@solosoul.co.za')));
-
-create policy if not exists "bookings_own_only" on public.bookings
-  for all using (auth.uid() = user_id);
-
-create policy if not exists "reservations_own_only" on public.booking_reservations
-  for all using (auth.uid() = user_id);
-
-create policy if not exists "admin_users_self_only" on public.admin_users
+-- RLS Policies (Hardened)
+drop policy if exists "users_can_crud_own" on public.users;
+create policy if not exists "users_select_own" on public.users
   for select using (auth.uid() = id);
+create policy if not exists "users_insert_own" on public.users
+  for insert with check (auth.uid() = id and lower(email) = lower(coalesce(auth.jwt() ->> 'email', '')));
+create policy if not exists "users_update_own" on public.users
+  for update using (auth.uid() = id)
+  with check (auth.uid() = id and lower(email) = lower(coalesce(auth.jwt() ->> 'email', '')));
+
+drop policy if exists "events_admin_write" on public.events;
+drop policy if exists "events_public_read" on public.events;
+create policy if not exists "events_public_read" on public.events
+  for select using (active = true);
+
+drop policy if exists "bookings_own_only" on public.bookings;
+create policy if not exists "bookings_select_own" on public.bookings
+  for select using (auth.uid() = user_id);
+
+drop policy if exists "reservations_own_only" on public.booking_reservations;
+create policy if not exists "reservations_select_own" on public.booking_reservations
+  for select using (auth.uid() = user_id);
+
+drop policy if exists "admin_users_self_only" on public.admin_users;
+
+create policy if not exists "ticket_verifications_public_read" on public.ticket_verifications
+  for select using (true);
 `.trim();
 
 // ── Trigger functions (run separately) ──────────────────────
@@ -150,9 +160,12 @@ const SQL_TRIGGERS = `
 create or replace function public.update_event_spots()
 returns trigger
 language plpgsql
+security definer
+set search_path = public
 as $func$
 begin
-  if NEW.status = 'Paid' or NEW.status = 'Free' then
+  if (TG_OP = 'INSERT' and NEW.status in ('Paid', 'Free'))
+     or (TG_OP = 'UPDATE' and OLD.status not in ('Paid', 'Free') and NEW.status in ('Paid', 'Free')) then
     update public.events
     set spots_left = spots_left - NEW.guests,
         updated_at = timezone('utc'::text, now())
@@ -162,9 +175,11 @@ begin
     if not found then
       raise exception 'Not enough spots available for event %', NEW.event_id;
     end if;
-  elsif NEW.status = 'Cancelled' or NEW.status = 'Refunded' then
+  elsif TG_OP = 'UPDATE'
+        and OLD.status in ('Paid', 'Free')
+        and NEW.status in ('Cancelled', 'Refunded') then
     update public.events
-    set spots_left = spots_left + NEW.guests,
+    set spots_left = least(spots_total, spots_left + NEW.guests),
         updated_at = timezone('utc'::text, now())
     where id = NEW.event_id;
   end if;

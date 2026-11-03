@@ -70,8 +70,8 @@
   }
 
   function badge(status) {
-    const safe = String(status || '').toLowerCase();
-    return `<span class="badge ${safe}">${status}</span>`;
+    const safe = escapeHtml(String(status || '').toLowerCase());
+    return `<span class="badge ${safe}">${escapeHtml(status)}</span>`;
   }
 
   async function loadBookings() {
@@ -86,13 +86,13 @@
       }
       list.innerHTML = bookings.map(b => {
         const paid = b.status === 'Paid' || b.status === 'Free';
-        const ticket = paid ? `<a class="btn btn-primary" href="${b.ticket_url}" target="_blank">View ticket</a>` : '';
-        const refund = b.refund ? `<span class="badge refunded">Refund ${b.refund.status}</span>` : (b.status === 'Paid' ? `<button class="btn btn-secondary" data-refund="${b.booking_ref}">Request refund</button>` : '');
-        const cancel = !['Cancelled','Refunded'].includes(b.status) ? `<button class="btn btn-secondary" data-cancel="${b.booking_ref}">Cancel</button>` : '';
+        const ticket = paid ? `<a class="btn btn-primary" href="${escapeHtml(b.ticket_url)}" target="_blank">View ticket</a>` : '';
+        const refund = b.refund ? `<span class="badge refunded">Refund ${escapeHtml(b.refund.status)}</span>` : (b.status === 'Paid' ? `<button class="btn btn-secondary" data-refund="${escapeHtml(b.booking_ref)}">Request refund</button>` : '');
+        const cancel = !['Cancelled','Refunded'].includes(b.status) ? `<button class="btn btn-secondary" data-cancel="${escapeHtml(b.booking_ref)}">Cancel</button>` : '';
         return `<div class="booking-card">
           <div>
             <h3>${escapeHtml(b.event_name)}</h3>
-            <div class="booking-meta">${escapeHtml(b.event_date)} · ${escapeHtml(b.event_location)}<br/>${b.guests} guest${b.guests > 1 ? 's' : ''} · ${escapeHtml(b.booking_ref)} · R${Number(b.total || 0).toFixed(2)}</div>
+            <div class="booking-meta">${escapeHtml(b.event_date)} · ${escapeHtml(b.event_location)}<br/>${Number(b.guests) || 1} guest${b.guests > 1 ? 's' : ''} · ${escapeHtml(b.booking_ref)} · R${Number(b.total || 0).toFixed(2)}</div>
             <div style="margin-top:8px">${badge(b.status)}</div>
           </div>
           <div class="booking-actions">${ticket}${refund}${cancel}</div>
@@ -116,9 +116,9 @@
       const total = paid.reduce((sum, b) => sum + Number(b.total || 0), 0);
       summary.innerHTML = `<div class="booking-card"><div><h3>Total paid</h3><div class="booking-meta">${paid.length} paid booking${paid.length === 1 ? '' : 's'}</div></div><div style="font-family:'Playfair Display',serif;font-size:34px;color:#0B3C49">R${total.toFixed(2)}</div></div>`;
       if (!payments.length) {
-        list.innerHTML = paid.length ? paid.map(b => `<div class="payment-row"><div><strong>${escapeHtml(b.event_name)}</strong><div class="booking-meta">${escapeHtml(b.booking_ref)} · ${escapeHtml(b.event_name)}</div></div><div style="text-align:right"><strong>R${Number(b.total).toFixed(2)}</strong><div class="booking-meta">${badge(b.status)}</div><button class="btn btn-secondary" data-receipt="${b.booking_ref}">Receipt</button></div></div>`).join('') : '<p class="auth-note">No payments yet.</p>';
+        list.innerHTML = paid.length ? paid.map(b => `<div class="payment-row"><div><strong>${escapeHtml(b.event_name)}</strong><div class="booking-meta">${escapeHtml(b.booking_ref)} · ${escapeHtml(b.event_name)}</div></div><div style="text-align:right"><strong>R${Number(b.total).toFixed(2)}</strong><div class="booking-meta">${badge(b.status)}</div><button class="btn btn-secondary" data-receipt="${escapeHtml(b.booking_ref)}">Receipt</button></div></div>`).join('') : '<p class="auth-note">No payments yet.</p>';
       } else {
-        list.innerHTML = payments.map(p => `<div class="payment-row"><div><strong>${escapeHtml(p.booking?.event_name || 'Payment')}</strong><div class="booking-meta">${escapeHtml(p.provider_reference || '')} · ${p.paid_at ? new Date(p.paid_at).toLocaleDateString('en-ZA') : ''}</div></div><div style="text-align:right"><strong>R${Number(p.amount).toFixed(2)}</strong><div class="booking-meta">${badge(p.status)}</div><button class="btn btn-secondary" data-receipt="${p.booking?.booking_ref || ''}">Receipt</button></div></div>`).join('');
+        list.innerHTML = payments.map(p => `<div class="payment-row"><div><strong>${escapeHtml(p.booking?.event_name || 'Payment')}</strong><div class="booking-meta">${escapeHtml(p.provider_reference || '')} · ${p.paid_at ? escapeHtml(new Date(p.paid_at).toLocaleDateString('en-ZA')) : ''}</div></div><div style="text-align:right"><strong>R${Number(p.amount).toFixed(2)}</strong><div class="booking-meta">${badge(p.status)}</div><button class="btn btn-secondary" data-receipt="${escapeHtml(p.booking?.booking_ref || '')}">Receipt</button></div></div>`).join('');
       }
       list.querySelectorAll('[data-receipt]').forEach(btn => btn.addEventListener('click', () => downloadReceipt(btn.dataset.receipt, bookings, payments)));
     } catch (error) {
@@ -130,10 +130,11 @@
     const booking = bookings.find(b => b.booking_ref === ref);
     if (!booking) return;
     const payment = payments.find(p => p.booking?.booking_ref === ref);
-    const html = `<!doctype html><meta charset="utf-8"><title>Receipt ${booking.booking_ref}</title><body style="font-family:Georgia,serif;padding:40px;color:#2A2430"><h1>Solo Soul Experiences</h1><h2>Receipt</h2><p>${booking.event_name}<br>${booking.event_date}<br>${booking.guests} guest(s)</p><p><strong>R${Number(booking.total).toFixed(2)}</strong></p><p>Reference: ${booking.booking_ref}<br>Payment: ${payment ? payment.status : booking.status}</p><p>SSoulZAR@outlook.com · ssoul.co.za</p></body>`;
+    const safeRef = String(booking.booking_ref || 'receipt').replace(/[^a-zA-Z0-9_-]/g, '');
+    const html = `<!doctype html><meta charset="utf-8"><title>Receipt ${escapeHtml(booking.booking_ref)}</title><body style="font-family:Georgia,serif;padding:40px;color:#2A2430"><h1>Solo Soul Experiences</h1><h2>Receipt</h2><p>${escapeHtml(booking.event_name)}<br>${escapeHtml(booking.event_date)}<br>${Number(booking.guests) || 1} guest(s)</p><p><strong>R${Number(booking.total).toFixed(2)}</strong></p><p>Reference: ${escapeHtml(booking.booking_ref)}<br>Payment: ${escapeHtml(payment ? payment.status : booking.status)}</p><p>SSoulZAR@outlook.com · ssoul.co.za</p></body>`;
     const blob = new Blob([html], { type: 'text/html' });
     const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob); a.download = `receipt-${booking.booking_ref}.html`; a.click();
+    a.href = URL.createObjectURL(blob); a.download = `receipt-${safeRef}.html`; a.click();
     URL.revokeObjectURL(a.href);
   }
 
@@ -176,7 +177,7 @@
         list.innerHTML = '<div class="booking-card"><div><h3>No support tickets</h3><p class="booking-meta">Need help with a booking or payment? Open a ticket.</p></div><a class="btn btn-primary" href="help.html">Get help</a></div>';
         return;
       }
-      list.innerHTML = tickets.map(t => `<div class="support-row"><div><h3>${escapeHtml(t.subject)}</h3><div class="booking-meta">${escapeHtml(t.category)} · ${t.booking_ref ? escapeHtml(t.booking_ref) + ' · ' : ''}${new Date(t.created_at).toLocaleDateString('en-ZA')}</div><div style="margin-top:6px">${badge(t.status)}</div></div><button class="btn btn-secondary" data-thread="${t.id}">Open</button></div>`).join('');
+      list.innerHTML = tickets.map(t => `<div class="support-row"><div><h3>${escapeHtml(t.subject)}</h3><div class="booking-meta">${escapeHtml(t.category)} · ${t.booking_ref ? escapeHtml(t.booking_ref) + ' · ' : ''}${escapeHtml(new Date(t.created_at).toLocaleDateString('en-ZA'))}</div><div style="margin-top:6px">${badge(t.status)}</div></div><button class="btn-secondary btn" data-thread="${escapeHtml(t.id)}">Open</button></div>`).join('');
       list.querySelectorAll('[data-thread]').forEach(btn => btn.addEventListener('click', () => openThread(btn.dataset.thread)));
     } catch (error) { list.innerHTML = `<p class="auth-message">${escapeHtml(error.message)}</p>`; }
   }
@@ -186,7 +187,7 @@
     try {
       const data = await api('support/get', { id });
       const t = data.ticket;
-      $('support-thread').innerHTML = `<div class="account-card" style="margin-top:16px"><h2>${escapeHtml(t.subject)}</h2><p class="booking-meta">${escapeHtml(t.status)} · ${escapeHtml(t.category)}</p><div class="stack" style="margin:16px 0">${(data.messages || []).map(m => `<div class="booking-card"><div><strong>${escapeHtml(m.author_name || m.author_type)}</strong><div class="booking-meta">${escapeHtml(m.message)}</div></div><span class="badge">${m.author_type}</span></div>`).join('')}</div><label>Reply<textarea id="thread-reply" rows="3" placeholder="Add a reply..."></textarea></label><button class="btn btn-primary" id="thread-send" style="margin-top:10px">Send reply</button></div>`;
+      $('support-thread').innerHTML = `<div class="account-card" style="margin-top:16px"><h2>${escapeHtml(t.subject)}</h2><p class="booking-meta">${escapeHtml(t.status)} · ${escapeHtml(t.category)}</p><div class="stack" style="margin:16px 0">${(data.messages || []).map(m => `<div class="booking-card"><div><strong>${escapeHtml(m.author_name || m.author_type)}</strong><div class="booking-meta">${escapeHtml(m.message)}</div></div><span class="badge">${escapeHtml(m.author_type)}</span></div>`).join('')}</div><label>Reply<textarea id="thread-reply" rows="3" placeholder="Add a reply..."></textarea></label><button class="btn btn-primary" id="thread-send" style="margin-top:10px">Send reply</button></div>`;
       $('thread-send').addEventListener('click', async () => {
         const message = $('thread-reply').value.trim();
         if (!message) return;

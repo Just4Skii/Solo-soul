@@ -1,7 +1,7 @@
 /**
  * Admin Authentication Endpoint
  * /api/admin/auth — Login, verify token
- * Solo Soul Experiences — 2026-07-16
+ * Solo Soul Experiences
  *
  * Uses bcryptjs for password hashing and jsonwebtoken for sessions.
  * Admin user data stored in Supabase admin_users table.
@@ -21,21 +21,32 @@ const WINDOW_MS = 15 * 60 * 1000;
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
+function clientIp(req) {
+  return String(
+    req.headers['x-real-ip'] ||
+    (req.headers['x-forwarded-for'] || '').split(',').pop().trim() ||
+    req.socket?.remoteAddress ||
+    'unknown'
+  );
+}
+
 function verifyToken(token) {
+  if (!JWT_SECRET) return null;
   try {
-    return jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] });
+    if (!decoded || !['admin', 'superadmin'].includes(decoded.role)) return null;
+    return decoded;
   } catch {
     return null;
   }
 }
 
 export default async function handler(req, res) {
-  // Same-origin by default; set APP_ORIGIN only if the admin UI is hosted elsewhere.
   res.setHeader('Cache-Control', 'no-store');
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'DENY');
-  const allowedOrigin = process.env.APP_ORIGIN || '';
-  if (allowedOrigin && req.headers.origin === allowedOrigin) {
+  const allowedOrigin = process.env.APP_ORIGIN || 'https://ssoul.co.za';
+  if (req.headers.origin && req.headers.origin === allowedOrigin) {
     res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
     res.setHeader('Vary', 'Origin');
   }
@@ -57,9 +68,9 @@ export default async function handler(req, res) {
     // ── LOGIN ──────────────────────────────────────────────
     case 'login': {
       if (!JWT_SECRET) {
-        return res.status(500).json({ error: 'Admin authentication is not configured (JWT_ADMIN_SECRET missing).' });
+        return res.status(500).json({ error: 'Admin authentication is not configured.' });
       }
-      const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || req.socket?.remoteAddress || 'unknown';
+      const ip = clientIp(req);
       const now = Date.now();
       const record = attempts.get(ip);
       if (record && record.count >= MAX_ATTEMPTS && now - record.first < WINDOW_MS) {
@@ -75,10 +86,10 @@ export default async function handler(req, res) {
       const { data: admin, error } = await supabase
         .from('admin_users')
         .select('*')
-        .eq('email', email.toLowerCase().trim())
+        .eq('email', String(email).toLowerCase().trim())
         .single();
 
-      if (error || !admin) {
+      if (error || !admin || !['admin', 'superadmin'].includes(admin.role)) {
         const prev = attempts.get(ip) || { count: 0, first: now };
         attempts.set(ip, { count: prev.count + 1, first: prev.first });
         return res.status(401).json({ error: 'Invalid credentials' });
@@ -92,17 +103,15 @@ export default async function handler(req, res) {
       }
       attempts.delete(ip);
 
-      // Update last login
       await supabase
         .from('admin_users')
         .update({ last_login: new Date().toISOString() })
         .eq('id', admin.id);
 
-      if (!JWT_SECRET) return res.status(500).json({ error: 'Admin authentication not configured' });
       const token = jwt.sign(
         { id: admin.id, email: admin.email, name: admin.name, role: admin.role },
         JWT_SECRET,
-        { expiresIn: '2h' }
+        { algorithm: 'HS256', expiresIn: '2h' }
       );
 
       return res.json({

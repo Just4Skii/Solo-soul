@@ -1,7 +1,7 @@
 /**
  * Admin Image Upload Endpoint
  * /api/admin/upload — Upload event images to Supabase Storage
- * Solo Soul Experiences — 2026-07-16
+ * Solo Soul Experiences
  *
  * Accepts multipart/form-data with field "image" and returns a public URL.
  * Images stored in Supabase Storage bucket "event-images".
@@ -13,6 +13,14 @@ import jwt from 'jsonwebtoken';
 const SUPABASE_URL = process.env.SUPABASE_URL || '';
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 const JWT_SECRET = process.env.JWT_ADMIN_SECRET || '';
+const MAX_UPLOAD_BYTES = 5 * 1024 * 1024; // 5 MB
+const ALLOWED_EXT_MIME = {
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.webp': 'image/webp',
+  '.gif': 'image/gif',
+};
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
@@ -22,11 +30,17 @@ export const config = {
 
 function verifyToken(token) {
   if (!JWT_SECRET) return null;
-  try { return jwt.verify(token, JWT_SECRET); } catch { return null; }
+  try { return jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] }); } catch { return null; }
 }
 
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Cache-Control', 'no-store');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  const allowedOrigin = process.env.APP_ORIGIN || 'https://ssoul.co.za';
+  if (req.headers.origin && req.headers.origin === allowedOrigin) {
+    res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
+    res.setHeader('Vary', 'Origin');
+  }
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   if (req.method === 'OPTIONS') return res.status(204).end();
@@ -35,20 +49,26 @@ export default async function handler(req, res) {
   if (!JWT_SECRET) { res.status(500).json({ error: 'Admin authentication is not configured' }); return null; }
   const auth = req.headers['authorization'];
   if (!auth || !auth.startsWith('Bearer ')) return res.status(401).json({ error: 'Unauthorized' });
-  if (!verifyToken(auth.slice(7))) return res.status(401).json({ error: 'Invalid token' });
+  const decoded = verifyToken(auth.slice(7));
+  if (!decoded) return res.status(401).json({ error: 'Invalid token' });
+  if (!['admin', 'superadmin'].includes(decoded.role)) return res.status(403).json({ error: 'Admin role required' });
 
   try {
-    // Parse multipart form data
     const chunks = [];
-    for await (const chunk of req) chunks.push(chunk);
+    let totalBytes = 0;
+    for await (const chunk of req) {
+      totalBytes += chunk.length;
+      if (totalBytes > MAX_UPLOAD_BYTES) {
+        return res.status(413).json({ error: 'Image file exceeds 5 MB limit' });
+      }
+      chunks.push(chunk);
+    }
     const buffer = Buffer.concat(chunks);
 
-    // Extract filename from Content-Disposition
     const contentType = req.headers['content-type'] || '';
     const boundary = contentType.split('boundary=')[1];
     if (!boundary) return res.status(400).json({ error: 'Missing boundary' });
 
-    // Simple multipart parser
     const parts = buffer.toString('binary').split(`--${boundary}`);
     let fileData = null;
     let fileName = `event-${Date.now()}.png`;
@@ -69,23 +89,26 @@ export default async function handler(req, res) {
 
     if (!fileData) return res.status(400).json({ error: 'No image file found in upload' });
 
-    // Upload to Supabase Storage
-    const filePath = `${Date.now()}-${fileName}`;
-    const { data, error } = await supabase.storage
+    const extMatch = fileName.toLowerCase().match(/\.(png|jpe?g|webp|gif)$/);
+    const ext = extMatch ? `.${extMatch[1]}` : '.png';
+    const mimeType = ALLOWED_EXT_MIME[ext] || 'image/png';
+    const safeBase = fileName.replace(/\.[^.]+$/, '').replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 60) || 'event';
+
+    const filePath = `${Date.now()}-${safeBase}${ext}`;
+    const { error } = await supabase.storage
       .from('event-images')
       .upload(filePath, fileData, {
-        contentType: req.headers['content-type']?.includes('image') ? req.headers['content-type'] : 'image/png',
+        contentType: mimeType,
         upsert: false,
       });
 
     if (error) throw error;
 
-    // Get public URL
     const { data: { publicUrl } } = supabase.storage.from('event-images').getPublicUrl(filePath);
 
     return res.json({ url: publicUrl, path: filePath });
   } catch (err) {
     console.error('Upload error:', err);
-    return res.status(500).json({ error: err.message || 'Upload failed' });
+    return res.status(500).json({ error: 'Upload failed' });
   }
 }

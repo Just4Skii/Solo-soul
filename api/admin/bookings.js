@@ -1,13 +1,46 @@
 /**
  * Admin Bookings Management Endpoint
  * /api/admin/bookings — View and manage all bookings
- * Solo Soul Experiences — 2026-07-16
+ * Solo Soul Experiences
  */
 
 import { createClient } from '@supabase/supabase-js';
 import jwt from 'jsonwebtoken';
 import pg from 'pg';
 import { runDailyPost } from '../../lib/social.js';
+
+const HARDEN_RLS_SQL = `
+alter table public.users enable row level security;
+drop policy if exists "users_can_crud_own" on public.users;
+drop policy if exists "users_select_own" on public.users;
+drop policy if exists "users_insert_own" on public.users;
+drop policy if exists "users_update_own" on public.users;
+create policy "users_select_own" on public.users for select using (auth.uid() = id);
+create policy "users_insert_own" on public.users for insert with check (auth.uid() = id and lower(email) = lower(coalesce(auth.jwt() ->> 'email', '')));
+create policy "users_update_own" on public.users for update using (auth.uid() = id) with check (auth.uid() = id and lower(email) = lower(coalesce(auth.jwt() ->> 'email', '')));
+
+alter table public.events enable row level security;
+drop policy if exists "events_admin_write" on public.events;
+drop policy if exists "events_public_read" on public.events;
+create policy "events_public_read" on public.events for select using (active = true);
+
+alter table public.bookings enable row level security;
+drop policy if exists "bookings_own_only" on public.bookings;
+drop policy if exists "bookings_select_own" on public.bookings;
+create policy "bookings_select_own" on public.bookings for select using (auth.uid() = user_id);
+
+alter table public.booking_reservations enable row level security;
+drop policy if exists "reservations_own_only" on public.booking_reservations;
+drop policy if exists "reservations_select_own" on public.booking_reservations;
+create policy "reservations_select_own" on public.booking_reservations for select using (auth.uid() = user_id);
+
+alter table public.admin_users enable row level security;
+drop policy if exists "admin_users_self_only" on public.admin_users;
+
+alter table public.ticket_verifications enable row level security;
+drop policy if exists "ticket_verifications_public_read" on public.ticket_verifications;
+create policy "ticket_verifications_public_read" on public.ticket_verifications for select using (true);
+`;
 
 const SUPABASE_URL = process.env.SUPABASE_URL || '';
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
@@ -17,7 +50,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
 function verifyToken(token) {
   if (!JWT_SECRET) return null;
-  try { return jwt.verify(token, JWT_SECRET); } catch { return null; }
+  try { return jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] }); } catch { return null; }
 }
 
 function requireAdmin(req, res) {
@@ -26,14 +59,19 @@ function requireAdmin(req, res) {
   if (!auth || !auth.startsWith('Bearer ')) { res.status(401).json({ error: 'Unauthorized' }); return null; }
   const decoded = verifyToken(auth.slice(7));
   if (!decoded) { res.status(401).json({ error: 'Invalid or expired token' }); return null; }
-  if (decoded.role !== 'admin') { res.status(403).json({ error: 'Admin role required' }); return null; }
+  if (!['admin', 'superadmin'].includes(decoded.role)) { res.status(403).json({ error: 'Admin role required' }); return null; }
   return decoded;
 }
 
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   res.setHeader('X-Content-Type-Options', 'nosniff');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  const allowedOrigin = process.env.APP_ORIGIN || 'https://ssoul.co.za';
+  if (req.headers.origin && req.headers.origin === allowedOrigin) {
+    res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
+    res.setHeader('Vary', 'Origin');
+  }
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
@@ -52,7 +90,7 @@ export default async function handler(req, res) {
         let query = supabase.from('bookings').select('*');
         if (filter) query = query.eq('status', filter);
         if (search) {
-          const safe = String(search).replace(/[(),]/g, ' ').slice(0, 80);
+          const safe = String(search).replace(/["(),\\]/g, ' ').slice(0, 80);
           query = query.or(`booking_ref.ilike.%${safe}%,user_email.ilike.%${safe}%,event_name.ilike.%${safe}%`);
         }
         const { data, error } = await query.order('created_at', { ascending: false }).limit(200);
@@ -70,7 +108,6 @@ export default async function handler(req, res) {
         if (error) throw error;
         return res.json({ booking: data });
       }
-
 
       case 'payments': {
         const { data: payments, error } = await supabase.from('payments').select('*').order('created_at', { ascending: false }).limit(200);
@@ -153,6 +190,19 @@ export default async function handler(req, res) {
         return res.json({ result });
       }
 
+      case 'hardenRls': {
+        const conn = process.env.POSTGRES_URL_NON_POOLING || process.env.DATABASE_URL || process.env.POSTGRES_URL;
+        if (!conn) return res.status(503).json({ error: 'Database connection string not configured in environment' });
+        const client = new pg.Client({ connectionString: conn, ssl: { rejectUnauthorized: false }, connectionTimeoutMillis: 10000 });
+        try {
+          await client.connect();
+          await client.query(HARDEN_RLS_SQL);
+          return res.json({ ok: true, message: 'Hardened RLS policies applied' });
+        } finally {
+          await client.end().catch(() => {});
+        }
+      }
+
       case 'settlementAudit': {
         const { data, error } = await supabase.from('settlement_audit').select('*').order('created_at', { ascending: false }).limit(200);
         if (error) throw error;
@@ -178,7 +228,6 @@ export default async function handler(req, res) {
         });
         return res.json({ settlement: data });
       }
-
 
       case 'emails': {
         const { data, error } = await supabase.from('email_log').select('*').order('created_at', { ascending: false }).limit(200);
@@ -209,6 +258,6 @@ export default async function handler(req, res) {
     }
   } catch (err) {
     console.error('Bookings error:', err);
-    return res.status(500).json({ error: err.message || 'Internal error' });
+    return res.status(500).json({ error: 'Internal error' });
   }
 }

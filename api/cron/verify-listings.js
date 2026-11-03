@@ -2,18 +2,28 @@
  * Cron Job: Verify ticket listings and publish the daily event.
  * /api/cron/verify-listings — Runs daily at 06:00 UTC via Vercel Cron.
  *
- * The social post starts first and the link checks run alongside it, so a
- * slow provider cannot consume the whole function invocation before publishing.
+ * Requires Authorization: Bearer <CRON_SECRET> (automatically sent by Vercel Cron).
  */
 
+import crypto from 'crypto';
 import { createClient } from '@supabase/supabase-js';
 import { runDailyPost } from '../../lib/social.js';
 
 const SUPABASE_URL = process.env.SUPABASE_URL || '';
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
-const CRON_SECRET = process.env.CRON_SECRET || 'solo-soul-cron-secret-2026';
+const CRON_SECRET = process.env.CRON_SECRET || '';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+
+function verifyCronAuth(req) {
+  if (!CRON_SECRET) return false;
+  const auth = String(req.headers['authorization'] || '');
+  const expected = `Bearer ${CRON_SECRET}`;
+  const a = Buffer.from(auth);
+  const b = Buffer.from(expected);
+  if (a.length !== b.length) return false;
+  return crypto.timingSafeEqual(a, b);
+}
 
 const CITY_EVENTS = [
   { title: 'Disney On Ice',                 url: 'https://www.webtickets.co.za/v2/search.aspx?search=Disney+On+Ice' },
@@ -36,7 +46,6 @@ async function checkUrl(url) {
     const timeout = setTimeout(() => controller.abort(), 7000);
     const resp = await fetch(url, { method: 'HEAD', signal: controller.signal, redirect: 'follow' });
     clearTimeout(timeout);
-    // 401/403/405/406/429 usually mean bot protection, not a dead event.
     const reachable = resp.ok || [401, 403, 405, 406, 429].includes(resp.status);
     return { reachable, status: resp.status, redirected: resp.redirected, finalUrl: resp.url };
   } catch {
@@ -66,20 +75,23 @@ async function cacheResult(title, url, status, suggestedUrl) {
 }
 
 export default async function handler(req, res) {
-  // Verify cron secret
-  const auth = req.headers['authorization'];
-  const isVercelCron = Boolean(req.headers['x-vercel-cron']) || /vercel-cron/i.test(req.headers['user-agent'] || '');
-  if (!isVercelCron && (!auth || auth !== `Bearer ${CRON_SECRET}`)) {
-    if (req.query?.secret !== CRON_SECRET) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
+  res.setHeader('Cache-Control', 'no-store');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+
+  if (!verifyCronAuth(req)) {
+    return res.status(401).json({ error: 'Unauthorized' });
   }
 
   console.log('🔍 Cron: Starting daily social post and ticket verification...');
   const start = Date.now();
 
-  // Start social publishing immediately, then verify the static links alongside it.
-  const socialPromise = runDailyPost();
+  // Start social publishing alongside link verification; never let one failure abort the other.
+  const socialPromise = Promise.resolve()
+    .then(() => runDailyPost())
+    .catch(err => {
+      console.error('Cron social post error:', err.message);
+      return { ok: false, error: err.message };
+    });
   const results = (await Promise.all(CITY_EVENTS.map(async event => {
     try {
       const check = await checkUrl(event.url);

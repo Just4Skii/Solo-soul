@@ -59,13 +59,18 @@ create table if not exists public.bookings (
   status text not null check (status in ('Pending', 'Paid', 'Free', 'Cancelled', 'Refunded')),
   notes text,
   created_at timestamp with time zone default timezone('utc'::text, now()),
-  payment_intent_id text -- For PayFast/Stripe integration
+  payment_intent_id text -- For Paystack integration
 );
 
 -- Trigger to update spots when booking is confirmed
-create or replace function update_event_spots() returns trigger as $$
+create or replace function public.update_event_spots() returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
 begin
-  if NEW.status = 'Paid' or NEW.status = 'Free' then
+  if (TG_OP = 'INSERT' and NEW.status in ('Paid', 'Free'))
+     or (TG_OP = 'UPDATE' and OLD.status not in ('Paid', 'Free') and NEW.status in ('Paid', 'Free')) then
     update public.events
     set spots_left = spots_left - NEW.guests,
         updated_at = timezone('utc'::text, now())
@@ -76,23 +81,25 @@ begin
     if not found then
       raise exception 'Not enough spots available for event %', NEW.event_id;
     end if;
-  elsif NEW.status = 'Cancelled' or NEW.status = 'Refunded' then
+  elsif TG_OP = 'UPDATE'
+        and OLD.status in ('Paid', 'Free')
+        and NEW.status in ('Cancelled', 'Refunded') then
     update public.events
-    set spots_left = spots_left + NEW.guests,
+    set spots_left = least(spots_total, spots_left + NEW.guests),
         updated_at = timezone('utc'::text, now())
     where id = NEW.event_id;
   end if;
   return NEW;
 end;
-$$ language plpgsql;
+$$;
 
 -- Create trigger
+drop trigger if exists trigger_update_spots on public.bookings;
 create trigger trigger_update_spots
   after insert or update on public.bookings
-  for each row execute procedure update_event_spots();
+  for each row execute procedure public.update_event_spots();
 
 -- Reservation expiry cleanup (run via cron or manually)
--- This should run every 5 minutes
 create or replace function cleanup_expired_reservations() returns void as $$
 begin
   delete from public.booking_reservations
@@ -114,27 +121,44 @@ alter table public.events enable row level security;
 alter table public.bookings enable row level security;
 alter table public.booking_reservations enable row level security;
 
--- RLS Policies (basic - adjust as needed)
+-- RLS Policies (Hardened: all privileged mutations run through service-role APIs)
 
--- Users: Can read/write own profile
-create policy "users_can_crud_own" on public.users
-  for all using (auth.uid() = id);
+-- Users: Can read and update only their own profile with their verified auth email
+drop policy if exists "users_can_crud_own" on public.users;
+drop policy if exists "users_select_own" on public.users;
+drop policy if exists "users_insert_own" on public.users;
+drop policy if exists "users_update_own" on public.users;
+create policy "users_select_own" on public.users
+  for select using (auth.uid() = id);
+create policy "users_insert_own" on public.users
+  for insert with check (
+    auth.uid() = id
+    and lower(email) = lower(coalesce(auth.jwt() ->> 'email', ''))
+  );
+create policy "users_update_own" on public.users
+  for update using (auth.uid() = id)
+  with check (
+    auth.uid() = id
+    and lower(email) = lower(coalesce(auth.jwt() ->> 'email', ''))
+  );
 
--- Events: Public read access
+-- Events: Public read access for active events only; writes restricted to service_role
+drop policy if exists "events_public_read" on public.events;
+drop policy if exists "events_admin_write" on public.events;
 create policy "events_public_read" on public.events
-  for select using (true);
+  for select using (active = true);
 
--- Events: Only admins can write (adjust policy for your admin setup)
-create policy "events_admin_write" on public.events
-  for all using (auth.uid() in (select id from public.users where email in ('admin@youremmail.com')));
+-- Bookings: Users can read their own bookings; all inserts/updates happen server-side via service_role
+drop policy if exists "bookings_own_only" on public.bookings;
+drop policy if exists "bookings_select_own" on public.bookings;
+create policy "bookings_select_own" on public.bookings
+  for select using (auth.uid() = user_id);
 
--- Bookings: Users can read/write own bookings
-create policy "bookings_own_only" on public.bookings
-  for all using (auth.uid() = user_id);
-
--- Reservations: Users can manage own reservations
-create policy "reservations_own_only" on public.booking_reservations
-  for all using (auth.uid() = user_id);
+-- Reservations: Users can read their own reservations
+drop policy if exists "reservations_own_only" on public.booking_reservations;
+drop policy if exists "reservations_select_own" on public.booking_reservations;
+create policy "reservations_select_own" on public.booking_reservations
+  for select using (auth.uid() = user_id);
 
 -- ============================================================
 -- ADMIN SYSTEM
@@ -151,12 +175,9 @@ create table if not exists public.admin_users (
   last_login timestamp with time zone
 );
 
--- Enable RLS on admin_users
+-- Enable RLS on admin_users (no public/client policies — service_role only)
 alter table public.admin_users enable row level security;
-
--- Only allow select from admin_users if you're an admin (prevents enumeration)
-create policy "admin_users_self_only" on public.admin_users
-  for select using (auth.uid() = id);
+drop policy if exists "admin_users_self_only" on public.admin_users;
 
 -- ============================================================
 -- TICKET VERIFICATION SYSTEM (Gemini-powered)
@@ -171,6 +192,11 @@ create table if not exists public.ticket_verifications (
   suggested_url text,
   checked_at timestamp with time zone default timezone('utc'::text, now())
 );
+
+alter table public.ticket_verifications enable row level security;
+drop policy if exists "ticket_verifications_public_read" on public.ticket_verifications;
+create policy "ticket_verifications_public_read" on public.ticket_verifications
+  for select using (true);
 
 -- Index for quick lookups
 create index if not exists idx_ticket_verifications_title on public.ticket_verifications(event_title);

@@ -1,28 +1,21 @@
 /**
  * Gemini Ticket Link Verification
- * /api/tickets/verify — Check if external ticket links are still valid
- * Solo Soul Experiences — 2026-07-16
- *
- * Uses Gemini AI to verify ticket URLs and suggest replacements for dead links.
- * Results cached in Supabase ticket_verifications table (24h TTL).
+ * /api/tickets/verify — Public GET returns cached verifications from Supabase.
+ * Live outbound checks + Gemini AI + DB cache writes require Admin JWT or CRON_SECRET.
  */
 
+import crypto from 'crypto';
+import jwt from 'jsonwebtoken';
 import { generateText, geminiConfigured } from '../../lib/ai.js';
 import { createClient } from '@supabase/supabase-js';
 
 const SUPABASE_URL = process.env.SUPABASE_URL || '';
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
-
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-
-if (!GEMINI_API_KEY) {
-  console.error('❌ GEMINI_API_KEY environment variable not set');
-}
+const JWT_SECRET = process.env.JWT_ADMIN_SECRET || '';
+const CRON_SECRET = process.env.CRON_SECRET || '';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
-
-// ── City events that need verification ───────────────────
 const CITY_EVENTS = [
   { title: 'Disney On Ice',                 url: 'https://www.webtickets.co.za/v2/search.aspx?search=Disney+On+Ice' },
   { title: "Totalsports Women's Race",      url: 'https://www.totalsportswomensrace.co.za/durban-event/' },
@@ -38,7 +31,24 @@ const CITY_EVENTS = [
   { title: 'Hilton Arts Festival 2026',     url: 'https://tickets.computicket.com/search?q=Hilton+Arts+Festival' },
 ];
 
-// ── Check if a URL is actually reachable ─────────────────
+function isAuthorizedVerifier(req) {
+  const auth = String(req.headers['authorization'] || '');
+  if (!auth.startsWith('Bearer ')) return false;
+  const token = auth.slice(7);
+  if (CRON_SECRET) {
+    const a = Buffer.from(token);
+    const b = Buffer.from(CRON_SECRET);
+    if (a.length === b.length && crypto.timingSafeEqual(a, b)) return true;
+  }
+  if (JWT_SECRET) {
+    try {
+      const decoded = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] });
+      if (decoded && ['admin', 'superadmin'].includes(decoded.role)) return true;
+    } catch { /* ignore */ }
+  }
+  return false;
+}
+
 async function checkUrl(url) {
   try {
     const controller = new AbortController();
@@ -51,7 +61,6 @@ async function checkUrl(url) {
   }
 }
 
-// ── Use Gemini to verify and search for a replacement ────
 async function geminiVerify(title, url) {
   if (!geminiConfigured()) return { status: 'uncertain', suggestedUrl: null, notes: 'Gemini API key not configured', confidence: 0 };
   const prompt = `You are a ticket verification assistant for Solo Soul Experiences in Durban, South Africa.
@@ -73,7 +82,6 @@ URL: ${url}
 
   try {
     const { text } = await generateText(prompt, { temperature: 0.2, maxOutputTokens: 300 });
-    // Strip markdown code blocks if present
     const json = JSON.parse(text.replace(/```json\s*/i, '').replace(/```\s*$/, '').trim());
     return {
       status: json.status || 'uncertain',
@@ -87,10 +95,8 @@ URL: ${url}
   }
 }
 
-// ── Cache verification in Supabase ───────────────────────
 async function cacheVerification(title, url, status, suggestedUrl) {
   try {
-    // Upsert — replace if same event+url combo exists
     const existing = await supabase
       .from('ticket_verifications')
       .select('id')
@@ -110,27 +116,56 @@ async function cacheVerification(title, url, status, suggestedUrl) {
   }
 }
 
-// ── Main handler ─────────────────────────────────────────
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  const allowedOrigin = process.env.APP_ORIGIN || 'https://ssoul.co.za';
+  if (req.headers.origin && req.headers.origin === allowedOrigin) {
+    res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
+    res.setHeader('Vary', 'Origin');
+  }
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'GET' && req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
+    // Public GET requests return cached verification records without running live HTTP/Gemini checks
+    if (req.method === 'GET' && !isAuthorizedVerifier(req)) {
+      res.setHeader('Cache-Control', 'public, max-age=300, s-maxage=900');
+      const { data: cached } = await supabase
+        .from('ticket_verifications')
+        .select('event_title, source_url, status, suggested_url, checked_at')
+        .order('checked_at', { ascending: false });
+
+      const byTitle = new Map((cached || []).map(row => [row.event_title, row]));
+      const results = CITY_EVENTS.map(ev => {
+        const row = byTitle.get(ev.title);
+        return {
+          title: ev.title,
+          originalUrl: ev.url,
+          status: row?.status || 'verified',
+          effectiveUrl: row?.suggested_url || ev.url,
+          notes: row ? `Checked ${row.checked_at}` : 'Cached listing',
+        };
+      });
+      return res.json({ verified: true, cached: true, timestamp: new Date().toISOString(), results });
+    }
+
+    // Active verification requires admin JWT or CRON_SECRET
+    if (!isAuthorizedVerifier(req)) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    res.setHeader('Cache-Control', 'no-store');
     const results = [];
 
     for (const event of CITY_EVENTS) {
-      // Step 1: Check if URL is reachable
       const check = await checkUrl(event.url);
-
       let status = 'verified';
       let suggestedUrl = null;
       let notes = '';
 
       if (!check.reachable) {
-        // Step 2: If dead, use Gemini to find replacement
         const ai = await geminiVerify(event.title, event.url);
         status = ai.status === 'verified' ? 'verified' : 'dead';
         suggestedUrl = ai.suggestedUrl;
@@ -141,7 +176,6 @@ export default async function handler(req, res) {
         notes = `Redirected to ${check.finalUrl}`;
       }
 
-      // Cache result
       await cacheVerification(event.title, event.url, status, suggestedUrl);
 
       results.push({
@@ -153,9 +187,9 @@ export default async function handler(req, res) {
       });
     }
 
-    return res.json({ verified: true, timestamp: new Date().toISOString(), results });
+    return res.json({ verified: true, cached: false, timestamp: new Date().toISOString(), results });
   } catch (err) {
     console.error('Verify error:', err);
-    return res.status(500).json({ error: err.message || 'Verification failed' });
+    return res.status(500).json({ error: 'Verification failed' });
   }
 }

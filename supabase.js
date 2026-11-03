@@ -2,9 +2,6 @@
    SOLO SOUL EXPERIENCES — Supabase Client Configuration
    ============================================================ */
 
-// Supabase client initialization
-// Uses window.supabase from CDN (loaded in HTML) or creates fallback
-
 // Runtime configuration comes from the server so no keys are baked into the bundle.
 // Falls back to local-only mode when the API is unavailable.
 let supabaseClient = null;
@@ -65,92 +62,53 @@ async function fetchEvents() {
   }
 }
 
-// Fallback to local events
 function getLocalEvents() {
-  // Return hardcoded events as fallback (same as current soloEvents)
   return typeof soloEvents !== 'undefined' ? soloEvents : [];
 }
 
-// Reserve spots for 10 minutes (prevents race conditions)
-async function reserveSpots(eventId, guests, userId) {
-  if (!supabaseClient || !userId) return false;
-
+async function reserveSpots(eventId, guests) {
+  if (!supabaseClient) return false;
   try {
-    // Check if spots are available
     const { data: event, error: fetchError } = await supabaseClient
       .from('events')
       .select('spots_left, spots_total')
       .eq('id', eventId)
       .single();
 
-    if (fetchError || !event || event.spots_left < guests) {
-      return false;
-    }
-
-    // Create reservation that expires in 10 minutes
-    const expiresAt = new Date(Date.now() + 10 * 60000).toISOString();
-
-    const { error: insertError } = await supabaseClient
-      .from('booking_reservations')
-      .insert({
-        user_id: userId,
-        event_id: eventId,
-        guests: guests,
-        expires_at: expiresAt
-      });
-
-    if (insertError) {
-      console.error('Reservation error:', insertError);
-      return false;
-    }
-
-    return true;
-  } catch (err) {
-    console.error('Reserve spots error:', err);
+    return !(fetchError || !event || event.spots_left < guests);
+  } catch {
     return false;
   }
 }
 
 // ============================================================
-// DATABASE OPERATIONS - Bookings
+// DATABASE OPERATIONS - Bookings (Server-Side API Only)
 // ============================================================
 async function createBooking(bookingData) {
-  if (!supabaseClient) return createLocalBooking(bookingData);
-
-  try {
-    const { data, error } = await supabaseClient
-      .from('bookings')
-      .insert({
-        booking_ref: bookingData.bookingRef,
-        user_id: bookingData.userId,
-        user_email: bookingData.userEmail,
-        event_id: bookingData.eventId,
-        event_name: bookingData.experience,
-        event_date: bookingData.date,
-        event_location: bookingData.location,
-        guests: bookingData.guests,
-        total: bookingData.total,
-        price_per_guest: bookingData.price,
-        status: bookingData.status,
-        notes: bookingData.notes,
-        payment_intent_id: bookingData.paymentIntentId || null
-      })
-      .select()
-      .single();
-
-    if (error) {
-      console.error('Booking creation error:', error);
-      return createLocalBooking(bookingData);
+  // All database booking mutations must go through server-side /api/app or /api/paystack/initialize
+  if (bookingData && bookingData.eventId && Number(bookingData.total || 0) === 0) {
+    try {
+      const res = await fetch('/api/app', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create-free',
+          eventId: bookingData.eventId,
+          name: bookingData.customerName || bookingData.userEmail,
+          email: bookingData.userEmail,
+          guests: bookingData.guests || 1,
+          notes: bookingData.notes || '',
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.booking) return data.booking;
+    } catch (err) {
+      console.error('Server booking creation error:', err);
     }
-
-    return data;
-  } catch (err) {
-    console.error('Create booking error:', err);
-    return createLocalBooking(bookingData);
   }
+  return createLocalBooking(bookingData);
 }
 
-// Fallback to localStorage
 function createLocalBooking(bookingData) {
   const bookings = JSON.parse(localStorage.getItem('bookings') || '[]');
   bookings.push({
@@ -170,7 +128,6 @@ function createLocalBooking(bookingData) {
   return bookings[bookings.length - 1];
 }
 
-// Get user bookings
 async function getUserBookings(userEmail) {
   if (!supabaseClient || !userEmail) {
     return JSON.parse(localStorage.getItem('bookings') || '[]')
@@ -178,14 +135,18 @@ async function getUserBookings(userEmail) {
   }
 
   try {
-    const { data, error } = await supabaseClient
-      .from('bookings')
-      .select('*')
-      .eq('user_email', userEmail)
-      .order('created_at', { ascending: false });
-
-    if (error) return [];
-    return data || [];
+    const { data: sessionData } = await supabaseClient.auth.getSession();
+    const token = sessionData?.session?.access_token;
+    if (token) {
+      const res = await fetch('/api/app', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ action: 'my-bookings' }),
+      });
+      const payload = await res.json();
+      if (res.ok && Array.isArray(payload.bookings)) return payload.bookings;
+    }
+    return [];
   } catch (err) {
     console.error('Get user bookings error:', err);
     return [];
@@ -208,7 +169,6 @@ async function authenticateUser(email, password) {
       return null;
     }
 
-    // Get or create user profile
     const { data: profile } = await supabaseClient
       .from('users')
       .select('*')
@@ -216,10 +176,9 @@ async function authenticateUser(email, password) {
       .single();
 
     if (!profile) {
-      // Create profile if doesn't exist
       await supabaseClient.from('users').insert({
         id: data.user.id,
-        email: email,
+        email: String(data.user.email || email).toLowerCase(),
         name: data.user.user_metadata?.name || email.split('@')[0],
         phone: data.user.user_metadata?.phone || ''
       });
@@ -227,7 +186,7 @@ async function authenticateUser(email, password) {
 
     return {
       id: data.user.id,
-      email: email,
+      email: data.user.email || email,
       name: profile?.name || data.user.user_metadata?.name || email.split('@')[0],
       phone: profile?.phone || ''
     };
@@ -237,13 +196,11 @@ async function authenticateUser(email, password) {
   }
 }
 
-// Fallback to localStorage auth
 function authenticateLocal(email, password) {
   const users = JSON.parse(localStorage.getItem('users') || '[]');
   return users.find(u => u.email === email && u.password === password) || null;
 }
 
-// Register user
 async function registerUser(userData) {
   if (!supabaseClient) return registerLocal(userData);
 
@@ -271,7 +228,6 @@ async function registerUser(userData) {
     };
   } catch (err) {
     console.error('Registration error:', err);
-    // Fallback to local if Supabase fails
     return registerLocal(userData);
   }
 }

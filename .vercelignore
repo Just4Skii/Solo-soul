@@ -8,4 +8,14 @@ apply-phase1-security-fix.js
 apply_fixes.py
 test_suite.html
 scripts/
+migrations/
+migrations-002.js
+database-schema.sql
+*.sql
+*.md
 *.log
+web/src/
+web/package.json
+web/package-lock.json
+web/vite.config.js
+web/index.html

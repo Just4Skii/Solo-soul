@@ -3,6 +3,10 @@
   let session = null;
   const $ = id => document.getElementById(id);
 
+  function escapeHtml(value) {
+    return String(value == null ? '' : value).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
   async function init() {
     const cfg = await fetch('/api/public-config').then(r => r.json()).catch(() => ({}));
     if (cfg.supabaseUrl && window.supabase) {
@@ -43,7 +47,8 @@
       const res = await fetch('/api/app', { method: 'POST', headers, body: JSON.stringify(body) });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Could not send');
-      status.innerHTML = 'Ticket created — reference <strong>' + data.ticket.id.slice(0, 8) + '</strong>. We reply within one business day. <a href="account.html">Track it in My Solo Soul</a>.';
+      const shortId = escapeHtml(String(data.ticket?.id || '').slice(0, 8));
+      status.innerHTML = 'Ticket created — reference <strong>' + shortId + '</strong>. We reply within one business day. <a href="account.html">Track it in My Solo Soul</a>.';
       $('help-form').reset();
     } catch (error) {
       status.textContent = error.message;

@@ -1,7 +1,7 @@
 /**
  * Admin Stats Endpoint
  * /api/admin/stats — Dashboard statistics
- * Solo Soul Experiences — 2026-07-16
+ * Solo Soul Experiences
  *
  * Requires Bearer JWT token. Returns aggregated booking/event stats.
  */
@@ -18,7 +18,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
 function verifyToken(token) {
   if (!JWT_SECRET) return null;
-  try { return jwt.verify(token, JWT_SECRET); } catch { return null; }
+  try { return jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] }); } catch { return null; }
 }
 
 function requireAdmin(req, res) {
@@ -27,13 +27,19 @@ function requireAdmin(req, res) {
   if (!auth || !auth.startsWith('Bearer ')) { res.status(401).json({ error: 'Unauthorized' }); return null; }
   const decoded = verifyToken(auth.slice(7));
   if (!decoded) { res.status(401).json({ error: 'Invalid or expired token' }); return null; }
+  if (!['admin', 'superadmin'].includes(decoded.role)) { res.status(403).json({ error: 'Admin role required' }); return null; }
   return decoded;
 }
 
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   res.setHeader('X-Content-Type-Options', 'nosniff');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  const allowedOrigin = process.env.APP_ORIGIN || 'https://ssoul.co.za';
+  if (req.headers.origin && req.headers.origin === allowedOrigin) {
+    res.setHeader('Access-Control-Allow-Origin', allowedOrigin);
+    res.setHeader('Vary', 'Origin');
+  }
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
@@ -109,6 +115,6 @@ export default async function handler(req, res) {
     });
   } catch (err) {
     console.error('Stats error:', err);
-    return res.status(500).json({ error: err.message || 'Stats fetch failed' });
+    return res.status(500).json({ error: 'Stats fetch failed' });
   }
 }

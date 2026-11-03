@@ -169,7 +169,7 @@ function getTicketStatus(title) {
   if (!v) return { badge: '', text: 'Check tickets', link: null };
   if (v.status === 'dead') {
     return {
-      badge: '<span class="verify-badge dead" title="' + (v.notes || 'Link may be dead') + '">⚠️ Verify</span>',
+      badge: '<span class="verify-badge dead" title="' + escapeHtml(v.notes || 'Link may be dead') + '">⚠️ Verify</span>',
       text: 'Find Tickets',
       link: v.effectiveUrl || null,
     };
@@ -223,7 +223,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const ref = params.get('ref');
     const banner = document.createElement('div');
     banner.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);z-index:99999;background:#0B3C49;color:#fff;padding:14px 22px;border-radius:12px;font-size:14px;box-shadow:0 12px 34px rgba(0,0,0,.25);max-width:90vw;text-align:center;';
-    banner.innerHTML = 'Payment received' + (ref ? ' — ref <strong>' + ref + '</strong>' : '') + '. Your booking will show as paid once Paystack confirms it.';
+    banner.innerHTML = 'Payment received' + (ref ? ' — ref <strong>' + escapeHtml(ref) + '</strong>' : '') + '. Your booking will show as paid once Paystack confirms it.';
     document.body.appendChild(banner);
     setTimeout(() => banner.remove(), 9000);
     history.replaceState({}, '', window.location.pathname);
@@ -442,7 +442,7 @@ function populateBookingExperiences() {
   select.innerHTML = '<option value="">' + (names.length ? 'Choose an experience...' : 'No experiences scheduled yet') + '</option>' +
     names.map(name => {
       const evt = soloEvents.find(e => e.exp === name);
-      return '<option value="' + name.replace(/"/g, '&quot;') + '">' + name + ' — ' + (evt.isFree ? 'FREE' : evt.price) + '</option>';
+      return '<option value="' + escapeHtml(name) + '">' + escapeHtml(name) + ' — ' + (evt.isFree ? 'FREE' : escapeHtml(evt.price)) + '</option>';
     }).join('');
   select.disabled = names.length === 0;
 }
@@ -507,7 +507,7 @@ function initEventsTable() {
         : `<span class="spots-pill ${spotsClass}">${evt.spotsLeft} spots</span>`);
     const priceDisplay = evt.isFree
       ? '<span style="color:#27ae60;font-weight:700;font-size:15px;">FREE</span>'
-      : `<span class="event-price">${evt.price}</span>`;
+      : `<span class="event-price">${escapeHtml(evt.price)}</span>`;
     const btnLabel = evt.spotsLeft <= 0 ? 'Sold Out' : (evt.isFree ? 'Reserve Spot' : 'Book Now');
     const btnDisabled = evt.spotsLeft <= 0 ? 'disabled style="opacity:0.4;cursor:not-allowed"' : '';
 
@@ -528,17 +528,17 @@ function initEventsTable() {
     tr.dataset.expName   = evt.exp;
     tr.dataset.isFree    = evt.isFree ? '1' : '0';
     tr.innerHTML = `
-      <td><strong>${evt.date}</strong></td>
+      <td><strong>${escapeHtml(evt.date)}</strong></td>
       <td>
-        <span class="event-name">${evt.exp}</span>
-        <span class="event-cat-badge">${evt.category}</span>
+        <span class="event-name">${escapeHtml(evt.exp)}</span>
+        <span class="event-cat-badge">${escapeHtml(evt.category)}</span>
         ${matchBadge}
       </td>
-      <td><i class="fas fa-map-marker-alt" style="color:var(--sage);margin-right:6px;font-size:12px;"></i>${evt.location}</td>
-      <td>${evt.duration}</td>
+      <td><i class="fas fa-map-marker-alt" style="color:var(--sage);margin-right:6px;font-size:12px;"></i>${escapeHtml(evt.location)}</td>
+      <td>${escapeHtml(evt.duration)}</td>
       <td>${priceDisplay}</td>
       <td>${spotsText}</td>
-      <td><button class="book-event-btn" ${btnDisabled} onclick="openBookingModal('${evt.exp.replace(/'/g, "\\'").replace(/&/g, '&amp;')}', ${evt.spotsLeft}, ${evt.isFree})">${btnLabel}</button></td>
+      <td><button class="book-event-btn" ${btnDisabled} onclick="openBookingModal('${escapeHtml(evt.exp).replace(/'/g, "\\'")}', ${Number(evt.spotsLeft) || 0}, ${Boolean(evt.isFree)})">${btnLabel}</button></td>
     `;
     tbody.appendChild(tr);
   });
@@ -1192,7 +1192,7 @@ window.handleBookingSubmit = function(e) {
       // Show success with reference
       const successMsg = document.getElementById('booking-success');
       if (successMsg) {
-        successMsg.innerHTML = `<div><i class="fas fa-check-circle"></i> Reserved! Ref: <strong>${bookingRef}</strong></div><div style="margin-top:12px;color:#5f6b64;font-size:13px;">A confirmation has been recorded for ${guestEmail}.</div><button type="button" class="btn btn-primary" style="margin-top:16px;" onclick="closeBookingModal()">Done</button>`;
+        successMsg.innerHTML = `<div><i class="fas fa-check-circle"></i> Reserved! Ref: <strong>${escapeHtml(bookingRef)}</strong></div><div style="margin-top:12px;color:#5f6b64;font-size:13px;">A confirmation has been recorded for ${escapeHtml(guestEmail)}.</div><button type="button" class="btn btn-primary" style="margin-top:16px;" onclick="closeBookingModal()">Done</button>`;
       }
       form.classList.add('complete');
       success?.classList.add('show');
@@ -1571,7 +1571,7 @@ function updateNavbarLinks() {
   const mobileBtn = document.getElementById('mobile-portal-btn');
 
   if (currentUser) {
-    const firstName = currentUser.name.split(' ')[0];
+    const firstName = escapeHtml(String(currentUser.name || 'Guest').split(' ')[0]);
     const loggedInText = `<i class="fas fa-user-check"></i> Hi, ${firstName} ✦`;
     if (desktopBtn) desktopBtn.innerHTML = loggedInText;
     if (mobileBtn) mobileBtn.innerHTML = loggedInText;
@@ -1641,19 +1641,19 @@ function loadPortalDashboard() {
     html += `
       <div class="booking-card">
         <div class="booking-card-header">
-          <h5>${b.experience}</h5>
-          <span class="booking-status ${statusClass}">${b.status}</span>
+          <h5>${escapeHtml(b.experience)}</h5>
+          <span class="booking-status ${statusClass}">${escapeHtml(b.status)}</span>
         </div>
         <div class="booking-card-body">
           <div class="booking-details-list">
-            <p><i class="fas fa-calendar-day"></i> Date: <strong>${b.date}</strong></p>
-            <p><i class="fas fa-map-marker-alt"></i> Location: <span>${b.location}</span></p>
-            <p><i class="fas fa-users"></i> Spots: <strong>${b.guests} guest${b.guests > 1 ? 's' : ''}</strong></p>
-            <p><i class="fas fa-coins"></i> Total Paid: <strong>${b.total === 0 ? 'FREE' : 'R' + b.total}</strong></p>
+            <p><i class="fas fa-calendar-day"></i> Date: <strong>${escapeHtml(b.date)}</strong></p>
+            <p><i class="fas fa-map-marker-alt"></i> Location: <span>${escapeHtml(b.location)}</span></p>
+            <p><i class="fas fa-users"></i> Spots: <strong>${Number(b.guests) || 1} guest${b.guests > 1 ? 's' : ''}</strong></p>
+            <p><i class="fas fa-coins"></i> Total Paid: <strong>${b.total === 0 ? 'FREE' : 'R' + escapeHtml(b.total)}</strong></p>
           </div>
           <div class="booking-actions">
-            <button class="btn-ticket" onclick="openTicket('${b.id}')"><i class="fas fa-ticket-alt"></i> View Ticket</button>
-            <button class="btn-cancel" onclick="cancelBooking('${b.id}')"><i class="fas fa-times-circle"></i> Cancel</button>
+            <button class="btn-ticket" onclick="openTicket('${escapeHtml(b.id)}')"><i class="fas fa-ticket-alt"></i> View Ticket</button>
+            <button class="btn-cancel" onclick="cancelBooking('${escapeHtml(b.id)}')"><i class="fas fa-times-circle"></i> Cancel</button>
           </div>
         </div>
       </div>
@@ -1687,28 +1687,28 @@ function openTicket(bookingId) {
         <p>Guest Admission Ticket</p>
       </div>
       <div class="ticket-body">
-        <h3 class="ticket-title">${booking.experience}</h3>
+        <h3 class="ticket-title">${escapeHtml(booking.experience)}</h3>
         <div class="ticket-info-grid">
           <div class="ticket-info-item">
             <span>Attendee</span>
-            <strong>${currentUser ? currentUser.name : 'Guest'}</strong>
+            <strong>${escapeHtml(currentUser ? currentUser.name : 'Guest')}</strong>
           </div>
           <div class="ticket-info-item">
             <span>Booking ID</span>
-            <strong>${booking.id}</strong>
+            <strong>${escapeHtml(booking.id)}</strong>
           </div>
           <div class="ticket-info-item">
             <span>Date</span>
-            <strong>${booking.date}</strong>
+            <strong>${escapeHtml(booking.date)}</strong>
           </div>
           <div class="ticket-info-item">
             <span>Spots Reserved</span>
-            <strong>${booking.guests}</strong>
+            <strong>${Number(booking.guests) || 1}</strong>
           </div>
         </div>
         <div class="ticket-venue">
           <span>Location & Directions</span>
-          <strong>${booking.location}</strong>
+          <strong>${escapeHtml(booking.location)}</strong>
         </div>
         <p class="ticket-footer-msg">Please present this secure digital barcode on arrival. Wear comfortable clothes, bring your journal, and look forward to connecting with your own company. 💚</p>
       </div>
@@ -1721,7 +1721,7 @@ function openTicket(bookingId) {
         <div class="ticket-barcode">
           ${barcodeHtml}
         </div>
-        <div class="ticket-ref">REF-${booking.id}</div>
+        <div class="ticket-ref">REF-${escapeHtml(booking.id)}</div>
       </div>
     </div>
   `;

@@ -2,14 +2,40 @@
  * Create a Paystack transaction for a real booking.
  * The amount is derived server-side from the event row — never trusted from the browser.
  */
+import crypto from 'crypto';
 import { createClient } from '@supabase/supabase-js';
 import { trackServer } from '../../lib/analytics.js';
 
 const supabase = createClient(process.env.SUPABASE_URL || '', process.env.SUPABASE_SERVICE_ROLE_KEY || '');
 const SECRET = process.env.PAYSTACK_SECRET_KEY || '';
+const checkoutRateLimits = new Map();
+const WINDOW_MS = 10 * 60 * 1000;
+const MAX_CHECKOUTS_PER_IP = 10;
+
+function clientIp(req) {
+  return String(
+    req.headers['x-real-ip'] ||
+    (req.headers['x-forwarded-for'] || '').split(',').pop().trim() ||
+    req.socket?.remoteAddress ||
+    'unknown'
+  );
+}
+
+function allowCheckout(req) {
+  const ip = clientIp(req);
+  const now = Date.now();
+  const entry = checkoutRateLimits.get(ip);
+  if (!entry || now - entry.start >= WINDOW_MS) {
+    checkoutRateLimits.set(ip, { count: 1, start: now });
+    return true;
+  }
+  if (entry.count >= MAX_CHECKOUTS_PER_IP) return false;
+  entry.count += 1;
+  return true;
+}
 
 function reference() {
-  return 'SS-' + Date.now().toString(36).toUpperCase().slice(-5) + Math.floor(1000 + Math.random() * 9000);
+  return 'SS-' + crypto.randomBytes(5).toString('hex').toUpperCase();
 }
 
 function amountFromPrice(price, guests) {
@@ -23,6 +49,7 @@ export default async function handler(req, res) {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   if (req.method !== 'POST') { res.setHeader('Allow', 'POST'); return res.status(405).json({ error: 'Method not allowed' }); }
   if (!SECRET) return res.status(503).json({ error: 'Paystack is not configured' });
+  if (!allowCheckout(req)) return res.status(429).json({ error: 'Too many checkout requests. Please wait a few minutes.' });
 
   const { eventId, name, email, phone, guests = 1, notes = '' } = req.body || {};
   if (!eventId || !name || !email) return res.status(400).json({ error: 'eventId, name and email are required' });
@@ -44,9 +71,12 @@ export default async function handler(req, res) {
     if (total <= 0) return res.status(400).json({ error: 'Event has no valid price' });
 
     const bookingRef = reference();
+    const safeName = String(name).trim().slice(0, 120);
+    const safeEmail = String(email).toLowerCase().trim();
     const { error: insertError } = await supabase.from('bookings').insert({
       booking_ref: bookingRef,
-      user_email: String(email).toLowerCase().trim(),
+      user_email: safeEmail,
+      customer_name: safeName,
       event_id: event.id,
       event_name: event.event_name,
       event_date: event.date,
@@ -77,8 +107,9 @@ export default async function handler(req, res) {
       status: 'pending',
     });
 
-    const origin = process.env.APP_URL || (req.headers.origin && /^https?:\/\//.test(req.headers.origin) ? req.headers.origin : '');
-    const callback = origin ? `${origin.replace(/\/$/, '')}/index.html?payment=success&ref=${encodeURIComponent(bookingRef)}` : undefined;
+    // Strict canonical callback URL to prevent Origin header open-redirect
+    const canonicalOrigin = (process.env.APP_URL || 'https://ssoul.co.za').replace(/\/$/, '');
+    const callback = `${canonicalOrigin}/index.html?payment=success&ref=${encodeURIComponent(bookingRef)}`;
 
     const { data: bookingRow } = await supabase.from('bookings').select('id').eq('booking_ref', bookingRef).single();
     if (bookingRow) await supabase.from('payments').update({ booking_id: bookingRow.id }).eq('provider_reference', bookingRef);
@@ -87,12 +118,12 @@ export default async function handler(req, res) {
       method: 'POST',
       headers: { Authorization: `Bearer ${SECRET}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        email: String(email).toLowerCase().trim(),
+        email: safeEmail,
         amount: Math.round(total * 100),
         currency: 'ZAR',
         reference: bookingRef,
         callback_url: callback,
-        metadata: { booking_ref: bookingRef, event_id: event.id, event_name: event.event_name, guests: seats, customer_name: name, phone },
+        metadata: { booking_ref: bookingRef, event_id: event.id, event_name: event.event_name, guests: seats, customer_name: safeName, phone: String(phone || '').slice(0, 30) },
       }),
     });
     const data = await paystackRes.json();

@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════════════════════
-   Solo Soul Experiences — Admin Panel Logic v2.2.0
+   Solo Soul Experiences — Admin Panel Logic v2.2.1 (Hardened)
    ══════════════════════════════════════════════════════ */
 
 const API = {
@@ -19,6 +19,10 @@ let adminUser = null;
 const $ = id => document.getElementById(id);
 const show = el => el.style.display = '';
 const hide = el => el.style.display = 'none';
+
+function esc(value) {
+  return String(value == null ? '' : value).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
 
 function toast(msg, type = 'info') {
   const t = $('toast');
@@ -161,7 +165,7 @@ async function loadDashboard() {
     // Top experiences
     const topList = $('top-experiences');
     topList.innerHTML = topExperiences?.length
-      ? topExperiences.map(e => `<li><span>${e.name}</span><span class="count">${e.bookings_count} bookings</span></li>`).join('')
+      ? topExperiences.map(e => `<li><span>${esc(e.name)}</span><span class="count">${Number(e.bookings_count) || 0} bookings</span></li>`).join('')
       : '<li style="color:var(--text-muted)">No bookings yet</li>';
 
     // Recent bookings
@@ -169,8 +173,8 @@ async function loadDashboard() {
     recent.innerHTML = recentBookings?.length
       ? recentBookings.slice(0, 5).map(b =>
           `<div class="recent-item">
-            <span><strong>${b.booking_ref}</strong> — ${b.event_name} (${b.guests} guests)</span>
-            <span class="status-badge ${(b.status || '').toLowerCase()}">${b.status}</span>
+            <span><strong>${esc(b.booking_ref)}</strong> — ${esc(b.event_name)} (${Number(b.guests) || 1} guests)</span>
+            <span class="status-badge ${esc((b.status || '').toLowerCase())}">${esc(b.status)}</span>
           </div>`).join('')
       : '<p style="color:var(--text-muted);font-size:13px;">No recent bookings</p>';
 
@@ -187,12 +191,13 @@ function renderChart(monthly) {
     container.innerHTML = '<p style="color:var(--text-muted);font-size:13px;">No booking data yet</p>';
     return;
   }
-  const max = Math.max(...monthly.map(m => m.count), 1);
+  const max = Math.max(...monthly.map(m => Number(m.count) || 0), 1);
   container.innerHTML = monthly.map(m => {
-    const h = Math.max(4, (m.count / max) * 120);
+    const count = Number(m.count) || 0;
+    const h = Math.max(4, (count / max) * 120);
     return `<div class="chart-bar" style="height:${h}px;">
-      <span class="bar-value">${m.count}</span>
-      <span class="bar-label">${m.month}</span>
+      <span class="bar-value">${count}</span>
+      <span class="bar-label">${esc(m.month)}</span>
     </div>`;
   }).join('');
 }
@@ -217,26 +222,22 @@ async function loadRevenue() {
 
     const tbody = $('revenue-tbody');
     tbody.innerHTML = perEvent?.length ? perEvent.map(e =>
-      '<tr><td><strong>' + e.name + '</strong></td><td>' + formatDate(e.date) + '</td><td>' + (e.price || '-') +
-      '</td><td>' + e.seatsSold + '/' + e.spotsTotal + '</td><td>' + e.occupancy + '%</td><td>' + e.bookings +
+      '<tr><td><strong>' + esc(e.name) + '</strong></td><td>' + esc(formatDate(e.date)) + '</td><td>' + esc(e.price || '-') +
+      '</td><td>' + (Number(e.seatsSold) || 0) + '/' + (Number(e.spotsTotal) || 0) + '</td><td>' + (Number(e.occupancy) || 0) + '%</td><td>' + (Number(e.bookings) || 0) +
       '</td><td>' + money(e.gross) + '</td><td>' + money(e.fees) + '</td><td><strong>' + money(e.net) + '</strong></td></tr>'
     ).join('') : '<tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:26px;">No events yet — add an experience to start tracking revenue.</td></tr>';
 
     $('revenue-monthly').innerHTML = monthly?.length ? monthly.map(m =>
-      '<div class="recent-item"><span><strong>' + m.month + '</strong> — ' + m.bookings + ' paid bookings</span><span>' + money(m.gross) + ' gross / ' + money(m.net) + ' net</span></div>'
+      '<div class="recent-item"><span><strong>' + esc(m.month) + '</strong> — ' + (Number(m.bookings) || 0) + ' paid bookings</span><span>' + money(m.gross) + ' gross / ' + money(m.net) + ' net</span></div>'
     ).join('') : '<p style="color:var(--text-muted);font-size:13px;">No paid bookings yet.</p>';
 
     $('revenue-pipeline').innerHTML =
-      '<div class="recent-item"><span>Pending bookings</span><span>' + totals.pendingBookings + ' · ' + money(totals.pendingValue) + '</span></div>' +
-      '<div class="recent-item"><span>Refunded</span><span>' + totals.refundedBookings + ' · ' + money(totals.refundedValue) + '</span></div>' +
-      '<div class="recent-item"><span>Free bookings</span><span>' + totals.freeBookings + ' · ' + totals.seatsFree + ' seats</span></div>';
+      '<div class="recent-item"><span>Pending bookings</span><span>' + (Number(totals.pendingBookings) || 0) + ' · ' + money(totals.pendingValue) + '</span></div>' +
+      '<div class="recent-item"><span>Refunded</span><span>' + (Number(totals.refundedBookings) || 0) + ' · ' + money(totals.refundedValue) + '</span></div>' +
+      '<div class="recent-item"><span>Free bookings</span><span>' + (Number(totals.freeBookings) || 0) + ' · ' + (Number(totals.seatsFree) || 0) + ' seats</span></div>';
   } catch (err) {
     toast('Failed to load revenue', 'error');
   }
-}
-
-function esc(value) {
-  return String(value == null ? '' : value).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
 async function loadOperations() {
@@ -256,32 +257,32 @@ async function loadOperations() {
       <td>R${Number(r.amount || 0).toFixed(2)}</td>
       <td style="max-width:260px">${esc(r.reason)}</td>
       <td><span class="status-badge ${esc(r.status)}">${esc(r.status)}</span></td>
-      <td>${r.status === 'requested' ? `<button class="btn-primary" onclick="adminRefund('${r.id}','approve')">Approve</button> <button class="btn-secondary" onclick="adminRefund('${r.id}','reject')">Reject</button>` : '-'}</td>
+      <td>${r.status === 'requested' ? `<button class="btn-primary" onclick="adminRefund('${esc(r.id)}','approve')">Approve</button> <button class="btn-secondary" onclick="adminRefund('${esc(r.id)}','reject')">Reject</button>` : '-'}</td>
     </tr>`).join('') : '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted)">No refund requests.</td></tr>';
 
     $('support-tbody').innerHTML = (support.tickets || []).length ? support.tickets.map(t => `<tr>
       <td><strong>${esc(t.subject)}</strong><br><span style="font-size:11px;color:var(--text-muted)">${esc(t.booking_ref || '')}</span></td>
       <td>${esc(t.email)}</td><td>${esc(t.category)}</td>
       <td><span class="status-badge ${esc(t.status)}">${esc(t.status)}</span></td>
-      <td>${formatDate(t.created_at)}</td>
-      <td><button class="btn-secondary" onclick="adminSupportOpen('${t.id}')">Open</button></td>
+      <td>${esc(formatDate(t.created_at))}</td>
+      <td><button class="btn-secondary" onclick="adminSupportOpen('${esc(t.id)}')">Open</button></td>
     </tr>`).join('') : '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-muted)">No support tickets.</td></tr>';
 
     $('payments-tbody').innerHTML = (payments.payments || []).length ? payments.payments.map(p => `<tr>
       <td>${esc(p.provider_reference || '-')}</td><td>${esc(p.booking?.booking_ref || '-')}<br><span style="font-size:11px;color:var(--text-muted)">${esc(p.booking?.event_name || '')}</span></td>
-      <td>R${Number(p.amount || 0).toFixed(2)}</td><td><span class="status-badge ${esc(p.status)}">${esc(p.status)}</span></td><td>${p.paid_at ? formatDate(p.paid_at) : '-'}</td>
+      <td>R${Number(p.amount || 0).toFixed(2)}</td><td><span class="status-badge ${esc(p.status)}">${esc(p.status)}</span></td><td>${p.paid_at ? esc(formatDate(p.paid_at)) : '-'}</td>
     </tr>`).join('') : '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text-muted)">No payments yet.</td></tr>';
 
     $('settlements-tbody').innerHTML = (settlements.settlements || []).length ? settlements.settlements.map(x => `<tr>
       <td>${esc(x.reference || '-')}</td><td>${esc(x.provider_name)}</td><td>R${Number(x.gross || 0).toFixed(2)}</td>
       <td>R${Number(x.platform_fee || 0).toFixed(2)}</td><td>R${Number(x.provider_amount || 0).toFixed(2)}</td>
       <td><span class="status-badge ${esc(x.status)}">${esc(x.status)}</span></td>
-      <td>${x.status === 'pending' ? `<button class="btn-secondary" onclick="markSettled('${x.id}')">Mark paid</button>` : '-'}</td>
+      <td>${x.status === 'pending' ? `<button class="btn-secondary" onclick="markSettled('${esc(x.id)}')">Mark paid</button>` : '-'}</td>
     </tr>`).join('') : '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text-muted)">No settlements yet.</td></tr>';
 
-    $('emails-tbody').innerHTML = (emails.emails || []).length ? emails.emails.map(e => `<tr><td>${esc(e.template)}</td><td>${esc(e.recipient)}</td><td><span class="status-badge ${esc(e.status)}">${esc(e.status)}</span></td><td style="max-width:260px">${esc(e.error || '-')}</td><td>${e.created_at ? formatDate(e.created_at) : '-'}</td></tr>`).join('') : '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text-muted)">No email attempts yet.</td></tr>';
+    $('emails-tbody').innerHTML = (emails.emails || []).length ? emails.emails.map(e => `<tr><td>${esc(e.template)}</td><td>${esc(e.recipient)}</td><td><span class="status-badge ${esc(e.status)}">${esc(e.status)}</span></td><td style="max-width:260px">${esc(e.error || '-')}</td><td>${e.created_at ? esc(formatDate(e.created_at)) : '-'}</td></tr>`).join('') : '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text-muted)">No email attempts yet.</td></tr>';
     const auditBox = $('settlement-audit');
-    if (auditBox) auditBox.innerHTML = (audit.audit || []).length ? audit.audit.map(x => `<div class="recent-item"><span><strong>${esc(x.action)}</strong> · ${esc(x.provider || '')} ${x.reference ? '· ' + esc(x.reference) : ''}</span><span>${x.previous_status || '—'} → ${x.new_status || '—'} · R${Number(x.amount || 0).toFixed(2)} · ${esc(x.actor_email || x.actor_id || 'system')}</span></div>`).join('') : '<p style="color:var(--text-muted);font-size:13px">No settlement audit entries yet.</p>';
+    if (auditBox) auditBox.innerHTML = (audit.audit || []).length ? audit.audit.map(x => `<div class="recent-item"><span><strong>${esc(x.action)}</strong> · ${esc(x.provider || '')} ${x.reference ? '· ' + esc(x.reference) : ''}</span><span>${esc(x.previous_status || '—')} → ${esc(x.new_status || '—')} · R${Number(x.amount || 0).toFixed(2)} · ${esc(x.actor_email || x.actor_id || 'system')}</span></div>`).join('') : '<p style="color:var(--text-muted);font-size:13px">No settlement audit entries yet.</p>';
     $('reconcile-btn').onclick = runReconcile;
     $('social-post-btn').onclick = async () => {
       const box = $('social-result'); box.innerHTML = '<p style="font-size:13px">Posting…</p>';
@@ -298,10 +299,10 @@ window.runReconcile = async function() {
   box.innerHTML = '<p style="font-size:13px">Checking Paystack…</p>';
   const res = await api('POST', API.bookings, { action: 'reconcile' });
   if (res.error) { box.innerHTML = '<p class="auth-message">' + esc(res.error) + '</p>'; return; }
-  box.innerHTML = `<div class="recent-item"><span>Paystack transactions</span><span>${res.summary.paystackTransactions}</span></div>` +
-    `<div class="recent-item"><span>Internal payments</span><span>${res.summary.internalPayments}</span></div>` +
-    `<div class="recent-item"><span>Missing internally</span><span>${res.summary.missingInternal}</span></div>` +
-    `<div class="recent-item"><span>Missing on Paystack</span><span>${res.summary.missingProvider}</span></div>`;
+  box.innerHTML = `<div class="recent-item"><span>Paystack transactions</span><span>${Number(res.summary.paystackTransactions) || 0}</span></div>` +
+    `<div class="recent-item"><span>Internal payments</span><span>${Number(res.summary.internalPayments) || 0}</span></div>` +
+    `<div class="recent-item"><span>Missing internally</span><span>${Number(res.summary.missingInternal) || 0}</span></div>` +
+    `<div class="recent-item"><span>Missing on Paystack</span><span>${Number(res.summary.missingProvider) || 0}</span></div>`;
 };
 
 window.adminRefund = async function(id, decision) {
@@ -322,8 +323,8 @@ window.adminSupportOpen = async function(id) {
     <div style="margin:14px 0">${(res.messages || []).map(m => `<div style="padding:10px 0;border-bottom:1px solid var(--border)"><strong>${esc(m.author_name || m.author_type)}</strong><div style="font-size:13px;margin-top:4px">${esc(m.message)}</div></div>`).join('')}</div>
     <textarea id="admin-reply" rows="3" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px" placeholder="Reply to customer..."></textarea>
     <div style="margin-top:10px;display:flex;gap:8px">
-      <button class="btn-primary" onclick="adminSupportReply('${t.id}','in_progress')">Send reply</button>
-      <button class="btn-secondary" onclick="adminSupportReply('${t.id}','resolved')">Resolve</button>
+      <button class="btn-primary" onclick="adminSupportReply('${esc(t.id)}','in_progress')">Send reply</button>
+      <button class="btn-secondary" onclick="adminSupportReply('${esc(t.id)}','resolved')">Resolve</button>
     </div>
   </div>`;
 };
@@ -368,16 +369,16 @@ async function loadEvents() {
 
     tbody.innerHTML = events.map(e => `
       <tr>
-        <td><strong>${e.event_name}</strong></td>
-        <td>${formatDate(e.date)}</td>
-        <td>${e.location}</td>
-        <td>${e.is_free ? 'FREE' : (e.price || '-')}</td>
-        <td>${e.spots_left || 0}/${e.spots_total || 0}</td>
-        <td><span class="status-badge ${e.active ? 'active' : 'inactive'}">${e.category || '-'}</span></td>
+        <td><strong>${esc(e.event_name)}</strong></td>
+        <td>${esc(formatDate(e.date))}</td>
+        <td>${esc(e.location)}</td>
+        <td>${e.is_free ? 'FREE' : esc(e.price || '-')}</td>
+        <td>${Number(e.spots_left) || 0}/${Number(e.spots_total) || 0}</td>
+        <td><span class="status-badge ${e.active ? 'active' : 'inactive'}">${esc(e.category || '-')}</span></td>
         <td><span class="status-badge ${e.active ? 'active' : 'inactive'}">${e.active ? 'Active' : 'Inactive'}</span></td>
         <td>
-          <button class="btn-sm btn-edit" onclick="editEvent('${e.id}')"><i class="fas fa-edit"></i></button>
-          <button class="btn-sm btn-delete" onclick="deleteEvent('${e.id}')"><i class="fas fa-trash"></i></button>
+          <button class="btn-sm btn-edit" onclick="editEvent('${esc(e.id)}')"><i class="fas fa-edit"></i></button>
+          <button class="btn-sm btn-delete" onclick="deleteEvent('${esc(e.id)}')"><i class="fas fa-trash"></i></button>
         </td>
       </tr>
     `).join('');
@@ -405,7 +406,6 @@ function showEventForm(eventData) {
   $('ef-free').checked = eventData?.is_free || false;
   $('ef-featured').checked = eventData?.is_featured || false;
 
-  // Scroll to form
   setTimeout(() => container.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
 }
 
@@ -540,15 +540,15 @@ function renderBookings() {
 
   tbody.innerHTML = bookingsData.map(b => `
     <tr>
-      <td><strong>${b.booking_ref || '-'}</strong></td>
-      <td>${b.user_email}</td>
-      <td>${b.event_name}</td>
-      <td>${formatDate(b.event_date)}</td>
-      <td>${b.guests}</td>
+      <td><strong>${esc(b.booking_ref || '-')}</strong></td>
+      <td>${esc(b.user_email)}</td>
+      <td>${esc(b.event_name)}</td>
+      <td>${esc(formatDate(b.event_date))}</td>
+      <td>${Number(b.guests) || 1}</td>
       <td>R${parseFloat(b.total || 0).toLocaleString()}</td>
-      <td><span class="status-badge ${(b.status || '').toLowerCase()}">${b.status}</span></td>
+      <td><span class="status-badge ${esc((b.status || '').toLowerCase())}">${esc(b.status)}</span></td>
       <td>
-        <select onchange="updateBookingStatus('${b.id}', this.value)" class="status-select">
+        <select onchange="updateBookingStatus('${esc(b.id)}', this.value)" class="status-select">
           <option value="Pending" ${b.status === 'Pending' ? 'selected' : ''}>Pending</option>
           <option value="Paid" ${b.status === 'Paid' ? 'selected' : ''}>Paid</option>
           <option value="Free" ${b.status === 'Free' ? 'selected' : ''}>Free</option>
@@ -579,32 +579,25 @@ async function updateBookingStatus(id, status) {
 // ══════════════════════════════════════════════════════════
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Login
   $('login-form').addEventListener('submit', handleLogin);
   $('login-password').addEventListener('keydown', e => { if (e.key === 'Enter') $('login-form').dispatchEvent(new Event('submit')); });
 
-  // Logout
   $('logout-btn').addEventListener('click', handleLogout);
 
-  // Navigation
   initNavigation();
 
-  // Events
   $('add-event-btn').addEventListener('click', () => showEventForm(null));
   $('event-cancel-btn').addEventListener('click', hideEventForm);
   $('event-form').addEventListener('submit', handleEventFormSubmit);
   $('events-search').addEventListener('input', loadEvents);
   $('show-inactive').addEventListener('change', loadEvents);
 
-  // Image upload
   $('ef-image-upload').addEventListener('change', e => {
     if (e.target.files[0]) handleImageUpload(e.target.files[0]);
   });
 
-  // Bookings
   $('bookings-search').addEventListener('input', loadBookings);
   $('bookings-filter').addEventListener('change', loadBookings);
 
-  // Init auth state
   verifySession();
 });

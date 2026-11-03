@@ -8,6 +8,30 @@
     {
       "source": "/api/(.*)",
       "destination": "/api/$1"
+    },
+    {
+      "source": "/lib/(.*)",
+      "destination": "/404.html"
+    },
+    {
+      "source": "/migrations/(.*)",
+      "destination": "/404.html"
+    },
+    {
+      "source": "/web/(.*)",
+      "destination": "/404.html"
+    },
+    {
+      "source": "/database-schema.sql",
+      "destination": "/404.html"
+    },
+    {
+      "source": "/(.*)\\.(sql|md)",
+      "destination": "/404.html"
+    },
+    {
+      "source": "/package(-lock)?\\.json",
+      "destination": "/404.html"
     }
   ],
   "crons": [
@@ -39,6 +63,10 @@
         {
           "key": "Strict-Transport-Security",
           "value": "max-age=31536000; includeSubDomains"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://unpkg.com https://cdnjs.cloudflare.com https://js.paystack.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com data:; img-src 'self' https: data: blob:; connect-src 'self' https://*.supabase.co https://api.paystack.co; frame-ancestors 'self'; object-src 'none'; base-uri 'self';"
         }
       ]
     },
