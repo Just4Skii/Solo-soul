@@ -15,6 +15,8 @@ const CRON_SECRET = process.env.CRON_SECRET || '';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
+export const config = { maxDuration: 60 };
+
 function verifyCronAuth(req) {
   if (!CRON_SECRET) return false;
   const auth = String(req.headers['authorization'] || '');
@@ -78,6 +80,10 @@ export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   res.setHeader('X-Content-Type-Options', 'nosniff');
 
+  if (!CRON_SECRET) {
+    console.error('CRON_SECRET is not configured');
+    return res.status(500).json({ error: 'CRON_SECRET not configured' });
+  }
   if (!verifyCronAuth(req)) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
@@ -87,7 +93,7 @@ export default async function handler(req, res) {
 
   // Start social publishing alongside link verification; never let one failure abort the other.
   const socialPromise = Promise.resolve()
-    .then(() => runDailyPost())
+    .then(() => runDailyPost({ dryRun: /^(1|true)$/i.test(String(req.headers['x-social-dry-run'] || '')) }))
     .catch(err => {
       console.error('Cron social post error:', err.message);
       return { ok: false, error: err.message };

@@ -74,5 +74,10 @@
     }
   ],
   "cleanUrls": true,
-  "trailingSlash": false
+  "trailingSlash": false,
+  "functions": {
+    "api/cron/verify-listings.js": {
+      "maxDuration": 60
+    }
+  }
 }
