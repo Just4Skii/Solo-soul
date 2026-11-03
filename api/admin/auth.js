@@ -114,10 +114,53 @@ export default async function handler(req, res) {
         { algorithm: 'HS256', expiresIn: '2h' }
       );
 
+      const oneTimeHash = process.env.ADMIN_ONE_TIME_HASH || '';
+      const mustChangePassword = Boolean(oneTimeHash && admin.password_hash === oneTimeHash);
       return res.json({
         token,
+        mustChangePassword,
         admin: { id: admin.id, name: admin.name, email: admin.email, role: admin.role },
       });
+    }
+
+    // ── CHANGE PASSWORD ─────────────────────────────────────
+    case 'change-password': {
+      const authHeader = req.headers['authorization'];
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: 'No token' });
+      }
+      const decoded = verifyToken(authHeader.slice(7));
+      if (!decoded) return res.status(401).json({ error: 'Invalid or expired token' });
+
+      const { currentPassword, newPassword } = body;
+      if (!currentPassword || !newPassword) {
+        return res.status(400).json({ error: 'Current and new password required' });
+      }
+      if (String(newPassword).length < 12) {
+        return res.status(400).json({ error: 'New password must be at least 12 characters' });
+      }
+
+      const { data: admin, error } = await supabase
+        .from('admin_users')
+        .select('id,password_hash')
+        .eq('id', decoded.id)
+        .single();
+      if (error || !admin) return res.status(404).json({ error: 'Admin not found' });
+
+      const valid = await bcrypt.compare(String(currentPassword), admin.password_hash);
+      if (!valid) return res.status(401).json({ error: 'Current password is incorrect' });
+
+      const same = await bcrypt.compare(String(newPassword), admin.password_hash);
+      if (same) return res.status(400).json({ error: 'Choose a password you have not used here before' });
+
+      const salt = await bcrypt.genSalt(12);
+      const passwordHash = await bcrypt.hash(String(newPassword), salt);
+      const { error: updateError } = await supabase
+        .from('admin_users')
+        .update({ password_hash: passwordHash })
+        .eq('id', decoded.id);
+      if (updateError) return res.status(500).json({ error: 'Could not update password' });
+      return res.json({ ok: true });
     }
 
     // ── VERIFY TOKEN ────────────────────────────────────────
@@ -130,8 +173,19 @@ export default async function handler(req, res) {
       if (!decoded) {
         return res.status(401).json({ valid: false, error: 'Invalid or expired token' });
       }
+      const oneTimeHash = process.env.ADMIN_ONE_TIME_HASH || '';
+      let mustChangePassword = false;
+      if (oneTimeHash) {
+        const { data: adminRow } = await supabase
+          .from('admin_users')
+          .select('password_hash')
+          .eq('id', decoded.id)
+          .single();
+        mustChangePassword = Boolean(adminRow && adminRow.password_hash === oneTimeHash);
+      }
       return res.json({
         valid: true,
+        mustChangePassword,
         admin: { id: decoded.id, name: decoded.name, email: decoded.email, role: decoded.role },
       });
     }

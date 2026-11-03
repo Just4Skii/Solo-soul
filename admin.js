@@ -72,6 +72,7 @@ async function handleLogin(e) {
     localStorage.setItem('adminUser', JSON.stringify(adminUser));
     showAdminApp();
     toast('Welcome back, ' + adminUser.name + '!', 'success');
+    if (res.mustChangePassword) openPasswordModal(true);
   } catch (err) {
     errorEl.textContent = 'Network error. Check connection.';
     btn.disabled = false;
@@ -95,6 +96,56 @@ function showLoginScreen() {
   $('login-btn').innerHTML = '<i class="fas fa-shield-alt"></i> Sign In';
 }
 
+function openPasswordModal(forced) {
+  const modal = $('password-modal');
+  if (!modal) return;
+  modal.dataset.forced = forced ? '1' : '';
+  $('password-modal-title').textContent = forced ? 'Set your own password' : 'Change your password';
+  $('password-modal-copy').textContent = forced
+    ? 'You are signed in with a one time password. Choose a new password now to keep the account secure.'
+    : 'Choose a password only you know. Use at least 12 characters.';
+  $('password-cancel').textContent = forced ? 'Sign out' : 'Cancel';
+  $('password-error').textContent = '';
+  $('password-form').reset();
+  modal.style.display = 'flex';
+  setTimeout(() => $('password-current').focus(), 30);
+}
+
+function closePasswordModal() {
+  const modal = $('password-modal');
+  if (modal) modal.style.display = 'none';
+}
+
+async function handlePasswordChange(e) {
+  e.preventDefault();
+  const currentPassword = $('password-current').value;
+  const newPassword = $('password-new').value;
+  const confirm = $('password-confirm').value;
+  const errorEl = $('password-error');
+  errorEl.textContent = '';
+
+  if (newPassword.length < 12) { errorEl.textContent = 'Use at least 12 characters.'; return; }
+  if (newPassword !== confirm) { errorEl.textContent = 'The new passwords do not match.'; return; }
+
+  const btn = $('password-save');
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+  try {
+    const res = await api('POST', API.auth, { action: 'change-password', currentPassword, newPassword });
+    if (res.error) {
+      errorEl.textContent = res.error;
+      return;
+    }
+    closePasswordModal();
+    toast('Password changed. Keep it somewhere safe.', 'success');
+  } catch {
+    errorEl.textContent = 'Network error. Try again.';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Save new password';
+  }
+}
+
 function showAdminApp() {
   hide($('login-screen'));
   show($('admin-app'));
@@ -114,6 +165,7 @@ async function verifySession() {
     if (res.valid) {
       adminUser = res.admin;
       showAdminApp();
+      if (res.mustChangePassword) openPasswordModal(true);
     } else {
       showLoginScreen();
     }
@@ -583,6 +635,17 @@ document.addEventListener('DOMContentLoaded', () => {
   $('login-password').addEventListener('keydown', e => { if (e.key === 'Enter') $('login-form').dispatchEvent(new Event('submit')); });
 
   $('logout-btn').addEventListener('click', handleLogout);
+
+  $('password-form').addEventListener('submit', handlePasswordChange);
+  $('change-password-btn').addEventListener('click', () => openPasswordModal(false));
+  $('password-cancel').addEventListener('click', () => {
+    if ($('password-modal').dataset.forced === '1') {
+      closePasswordModal();
+      handleLogout();
+    } else {
+      closePasswordModal();
+    }
+  });
 
   initNavigation();
 
