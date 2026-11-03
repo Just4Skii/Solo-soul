@@ -262,9 +262,12 @@ async function fetchWebtickets() {
         const place = (venue ? venue[1] : '').replace(/&amp;/g, '&').trim() || 'Durban';
         if (!AREA.test(place)) continue;
         const imagePath = card.match(/<img\s+src="([^"]+)"/i)?.[1] || '';
-        const image = imagePath
+        let image = imagePath
           ? (imagePath.startsWith('http') ? imagePath : imagePath.startsWith('//') ? `https:${imagePath}` : `https://www.webtickets.co.za/v2/${imagePath.replace(/^\/+/, '')}`)
           : '';
+        // Webtickets list cards use 528px panel crops. The detail banner is
+        // 750px and looks materially cleaner on the event page.
+        if (image.includes('/panel_')) image = image.replace('/panel_', '/banner_');
         events.push({
           id: `ext-webtickets-${link[1].match(/\d+/)[0]}`,
           title,
