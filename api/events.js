@@ -5,6 +5,7 @@
  * Nothing is invented: failed/empty sources are reported in `sources`.
  */
 import { eventSlug } from '../lib/slug.js';
+import { annotateEvents } from '../lib/editorial.js';
 
 const CACHE_TTL_MS = 15 * 60 * 1000;
 let cache = { at: 0, payload: null };
@@ -323,13 +324,31 @@ async function fetchFacebook() {
   } catch { return { name: 'Facebook', ok: false, events: [] }; }
 }
 
+function publicPayload(payload, req) {
+  const full = String(req.query?.full || '') === '1' || String(req.query?.full || '').toLowerCase() === 'true';
+  const all = payload.events || [];
+  const included = all.filter(event => event.curation?.included);
+  const visible = full ? all : included;
+  return {
+    ...payload,
+    events: visible.slice(0, 80),
+    curation: {
+      total: all.length,
+      included: included.length,
+      excluded: all.length - included.length,
+      mode: full ? 'full' : 'curated',
+    },
+    full,
+  };
+}
+
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'public, s-maxage=900, stale-while-revalidate=1800');
   res.setHeader('X-Content-Type-Options', 'nosniff');
   if (req.method !== 'GET') { res.setHeader('Allow', 'GET'); return res.status(405).json({ error: 'Method not allowed' }); }
 
   if (cache.payload && Date.now() - cache.at < CACHE_TTL_MS) {
-    return res.status(200).json({ ...cache.payload, cached: true });
+    return res.status(200).json({ ...publicPayload(cache.payload, req), cached: true });
   }
 
   const sources = await Promise.all([
@@ -369,9 +388,9 @@ export default async function handler(req, res) {
 
   const payload = {
     updatedAt: new Date().toISOString(),
-    events: events.slice(0, 80),
+    events: annotateEvents(events),
     sources: sources.map(s => ({ name: s.name, ok: Boolean(s.ok), count: (s.events || []).length, skipped: Boolean(s.skipped), error: s.error || null })),
   };
   cache = { at: Date.now(), payload };
-  return res.status(200).json(payload);
+  return res.status(200).json(publicPayload(payload, req));
 }
