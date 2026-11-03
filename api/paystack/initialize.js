@@ -3,6 +3,7 @@
  * The amount is derived server-side from the event row — never trusted from the browser.
  */
 import { createClient } from '@supabase/supabase-js';
+import { trackServer } from '../../lib/analytics.js';
 
 const supabase = createClient(process.env.SUPABASE_URL || '', process.env.SUPABASE_SERVICE_ROLE_KEY || '');
 const SECRET = process.env.PAYSTACK_SECRET_KEY || '';
@@ -57,6 +58,15 @@ export default async function handler(req, res) {
       notes: String(notes || '').slice(0, 500),
     });
     if (insertError) return res.status(500).json({ error: 'Could not create booking' });
+
+    await trackServer('booking_start', {
+      path: '/portal/',
+      eventId: event.id,
+      eventName: event.event_name,
+      source: 'ssoul',
+      medium: 'paystack',
+      metadata: { booking_ref: bookingRef, guests: seats, total },
+    });
 
     await supabase.from('payments').insert({
       booking_id: null,

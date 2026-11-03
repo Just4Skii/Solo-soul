@@ -105,7 +105,10 @@ function App() {
       options: { data: { full_name: e.target.name.value } },
     });
     if (error) setError(error.message);
-    else if (!data.session) setError('Check your email to confirm the account, then sign in.');
+    else {
+      window.ssoulTrack?.('registration', { metadata: { method: 'email' } });
+      if (!data.session) setError('Check your email to confirm the account, then sign in.');
+    }
     setLoading(false);
   }
 
@@ -381,6 +384,13 @@ function EventDetail({ event }) {
   const image = event.image || event.image_url || fallback;
   const key = event.slug || event.id || '';
   const url = 'https://ssoul.co.za/portal/?event=' + encodeURIComponent(key);
+  useEffect(() => {
+    window.ssoulTrack?.('event_view', {
+      eventId: key,
+      eventName: title,
+      metadata: { provider: event.source || '', category: event.category || '' },
+    });
+  }, [key]);
   return (
     <div className="portal-event-page">
       <nav className="portal-breadcrumb"><a href="/events">Events</a><span>/</span><span>Durban</span></nav>
@@ -411,7 +421,7 @@ function EventDetail({ event }) {
             <strong className={/^[R\d]/.test(String(price)) ? "portal-total" : "portal-price-note"}>{price}</strong>
             <p>{date}<br />{venue}</p>
             {external
-              ? <a className="portal-btn" href={event.url} target="_blank" rel="noreferrer">Get tickets ↗</a>
+              ? <a className="portal-btn" href={event.url} target="_blank" rel="noreferrer" onClick={() => window.ssoulTrack?.('outbound_click', { eventId: key, eventName: title, metadata: { url: event.url, provider: event.source || '' } })}>Get tickets ↗</a>
               : <a className="portal-btn" href={'/portal/?book=' + event.id}>Book this experience</a>}
             <a className="portal-btn ghost" href="/events" style={{ marginTop: 8 }}>Back to events</a>
             <div className="portal-aside-note">

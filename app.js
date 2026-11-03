@@ -495,7 +495,7 @@ function initEventsTable() {
         '<td><i class="fas fa-map-marker-alt" style="color:var(--sage);margin-right:6px;font-size:12px;"></i>' + escapeHtml(evt.location) + '</td>' +
         '<td>—</td><td><span class="event-price">' + escapeHtml(evt.price) + '</span></td>' +
         '<td><span class="spots-pill spots-ok">Live listing</span></td>' +
-        '<td><a class="book-event-btn" href="/portal/?event=' + encodeURIComponent(evt.id) + '">Details</a> ' + (evt.url ? '<a href="' + escapeHtml(evt.url) + '" target="_blank" rel="noopener noreferrer" style="font-size:11px;margin-left:8px;">Tickets ↗</a>' : '') + '</td>';
+        '<td><a class="book-event-btn" href="/portal/?event=' + encodeURIComponent(evt.id) + '">Details</a> ' + (evt.url ? '<a href="' + escapeHtml(evt.url) + '" data-track-outbound data-event-id="' + escapeHtml(evt.id || '') + '" data-event-name="' + escapeHtml(evt.exp || '') + '" data-provider="' + escapeHtml(evt.source || '') + '" target="_blank" rel="noopener noreferrer" style="font-size:11px;margin-left:8px;">Tickets ↗</a>' : '') + '</td>';
       tbody.appendChild(tr);
       return;
     }
@@ -569,7 +569,7 @@ function renderEventCards(list) {
     const source = external ? evt.source : 'Solo Soul';
     const area = evt.area || (evt.location || '').match(/durban|umhlanga|kloof|westville|hillcrest|pinetown|berea|ballito/i)?.[0] || 'Durban';
     const details = external ? '/portal/?event=' + encodeURIComponent(evt.slug || evt.id) : '/portal/?experience=' + encodeURIComponent(evt.id);
-    const ticket = external && evt.url ? '<a class="event-ticket" href="' + escapeHtml(evt.url) + '" target="_blank" rel="noopener noreferrer">Tickets ↗</a>' : '';
+    const ticket = external && evt.url ? '<a class="event-ticket" data-track-outbound data-event-id="' + escapeHtml(evt.id || '') + '" data-event-name="' + escapeHtml(title) + '" data-provider="' + escapeHtml(evt.source || '') + '" href="' + escapeHtml(evt.url) + '" target="_blank" rel="noopener noreferrer">Tickets ↗</a>' : '';
     return '<article class="event-card" data-event data-category="' + escapeHtml(category) + '" data-source="' + escapeHtml(source) + '" data-area="' + escapeHtml(area) + '" data-free="' + (evt.isFree ? '1' : '0') + '" data-date="' + escapeHtml(external ? evt.start : (Number.isNaN(date.getTime()) ? '' : date.toISOString())) + '" data-search="' + escapeHtml((title + ' ' + (evt.location || '')).toLowerCase()) + '">' +
       '<div class="event-date"><strong>' + day + '</strong><span>' + month + '</span></div>' +
       '<div class="event-main"><div class="event-tags"><span class="event-cat">' + escapeHtml(category) + '</span><span class="event-src">' + escapeHtml(source) + '</span></div>' +

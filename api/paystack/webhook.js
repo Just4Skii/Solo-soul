@@ -5,6 +5,7 @@
 import crypto from 'crypto';
 import { createClient } from '@supabase/supabase-js';
 import { sendEmail, ticketEmail, receiptEmail } from '../../lib/email.js';
+import { trackServer } from '../../lib/analytics.js';
 
 const SECRET = process.env.PAYSTACK_SECRET_KEY || '';
 const supabase = createClient(process.env.SUPABASE_URL || '', process.env.SUPABASE_SERVICE_ROLE_KEY || '');
@@ -40,6 +41,15 @@ async function confirmBooking(res, data) {
     ticket_code: ticket,
   }).eq('id', booking.id).in('status', ['Pending', 'Cancelled']);
   if (updateError) return json(res, 500, { error: 'Failed to confirm booking' });
+
+  await trackServer('booking_completed', {
+    path: '/portal/',
+    eventId: booking.event_id,
+    eventName: booking.event_name,
+    source: 'ssoul',
+    medium: 'paystack',
+    metadata: { booking_ref: booking.booking_ref, guests: booking.guests, total: Number(booking.total), status: 'Paid' },
+  });
 
   const fee = Math.round(Number(booking.total) * (FEE_PERCENT / 100) * 100) / 100;
   const net = Math.round((Number(booking.total) - fee) * 100) / 100;

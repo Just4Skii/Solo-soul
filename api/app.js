@@ -7,10 +7,23 @@ import crypto from 'crypto';
 import { createClient } from '@supabase/supabase-js';
 import { sendEmail, ticketEmail } from '../lib/email.js';
 import { sharePage } from '../lib/share-page.js';
+import { trackServer } from '../lib/analytics.js';
 
 const supabase = createClient(process.env.SUPABASE_URL || '', process.env.SUPABASE_SERVICE_ROLE_KEY || '');
+const ANALYTICS_TYPES = new Set(['pageview', 'event_view', 'outbound_click', 'registration', 'booking_start', 'booking_completed']);
 
 function json(res, status, payload) { res.status(status).json(payload); }
+
+function analyticsMetadata(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+  const safe = {};
+  for (const [key, raw] of Object.entries(value).slice(0, 8)) {
+    const name = String(key).slice(0, 40);
+    if (typeof raw === 'string') safe[name] = raw.slice(0, 500);
+    else if (typeof raw === 'number' || typeof raw === 'boolean') safe[name] = raw;
+  }
+  return Object.keys(safe).length ? safe : null;
+}
 
 async function authUser(req) {
   const header = req.headers['authorization'] || '';
@@ -34,6 +47,31 @@ export default async function handler(req, res) {
 
   try {
     switch (action) {
+      case 'track': {
+        const eventType = String(body.eventType || '').trim();
+        if (!ANALYTICS_TYPES.has(eventType)) return res.status(204).end();
+        const userAgent = String(req.headers['user-agent'] || '');
+        if (/bot|crawler|spider|headless|lighthouse|facebookexternalhit/i.test(userAgent)) return res.status(204).end();
+
+        const visitorId = String(body.visitorId || '');
+        if (!/^[a-zA-Z0-9_-]{8,64}$/.test(visitorId)) return res.status(204).end();
+        const pathValue = String(body.path || '/');
+        await trackServer(eventType, {
+          visitorId,
+          path: pathValue.startsWith('/') ? pathValue.slice(0, 200) : '/',
+          eventId: body.eventId,
+          eventName: body.eventName,
+          source: body.source,
+          medium: body.medium,
+          campaign: body.campaign,
+          referrer: body.referrer,
+          device: body.device,
+          country: req.headers['x-vercel-ip-country'] || null,
+          metadata: analyticsMetadata(body.metadata),
+        });
+        return res.status(204).end();
+      }
+
       case 'experiences': {
         const { data, error } = await supabase.from('events').select('*').eq('active', true).order('date', { ascending: true });
         if (error) throw error;
@@ -117,6 +155,15 @@ export default async function handler(req, res) {
           ticket_code: code,
         }).select().single();
         if (insertError) throw insertError;
+
+        await trackServer('booking_completed', {
+          path: '/portal/',
+          eventId: event.id,
+          eventName: event.event_name,
+          source: 'ssoul',
+          medium: 'free',
+          metadata: { booking_ref: ref, guests: seats, total: 0 },
+        });
 
         const ticketUrl = `${process.env.APP_URL || 'https://ssoul.co.za'}/portal/?ticket=${encodeURIComponent(ref)}`;
         await sendEmail({ to: booking.user_email, subject: `Your ticket — ${booking.event_name}`, html: ticketEmail({ booking, ticketUrl }), bookingId: booking.id, template: 'ticket' });
