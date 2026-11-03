@@ -1,23 +1,16 @@
 /**
- * Cron Job: Verify All Ticket Listings
- * /api/cron/verify-listings — Runs every 12 hours via Vercel Cron
- * Solo Soul Experiences — 2026-07-16
+ * Cron Job: Verify ticket listings and publish the daily event.
+ * /api/cron/verify-listings — Runs daily at 06:00 UTC via Vercel Cron.
  *
- * This is triggered by a cron: "0 every-12-hours" schedule in vercel.json.
- * It checks all external ticket links and updates the database with results.
- *
- * CRON_SECRET must match the value in vercel.json to prevent unauthorized runs.
+ * The social post starts first and the link checks run alongside it, so a
+ * slow provider cannot consume the whole function invocation before publishing.
  */
 
 import { createClient } from '@supabase/supabase-js';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import { runDailyPost } from '../../lib/social.js';
 
 const SUPABASE_URL = process.env.SUPABASE_URL || '';
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-if (!GEMINI_API_KEY) console.error('❌ GEMINI_API_KEY not set in cron');
-const genAI = GEMINI_API_KEY ? new GoogleGenerativeAI(GEMINI_API_KEY) : null;
 const CRON_SECRET = process.env.CRON_SECRET || 'solo-soul-cron-secret-2026';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
@@ -40,36 +33,14 @@ const CITY_EVENTS = [
 async function checkUrl(url) {
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 10000);
+    const timeout = setTimeout(() => controller.abort(), 7000);
     const resp = await fetch(url, { method: 'HEAD', signal: controller.signal, redirect: 'follow' });
     clearTimeout(timeout);
-    return { reachable: resp.ok, status: resp.status, redirected: resp.redirected, finalUrl: resp.url };
+    // 401/403/405/406/429 usually mean bot protection, not a dead event.
+    const reachable = resp.ok || [401, 403, 405, 406, 429].includes(resp.status);
+    return { reachable, status: resp.status, redirected: resp.redirected, finalUrl: resp.url };
   } catch {
     return { reachable: false, status: 0, redirected: false, finalUrl: url };
-  }
-}
-
-async function geminiVerify(title, url) {
-  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-  const prompt = `You are a ticket verification assistant for Solo Soul Experiences in Durban, South Africa.
-
-Verify this event ticket link:
-Event: "${title}"
-URL: ${url}
-
-Respond ONLY with JSON:
-{
-  "status": "verified" or "dead" or "uncertain",
-  "suggestedUrl": "replacement URL or null",
-  "notes": "brief reason"
-}`;
-
-  try {
-    const result = await model.generateContent(prompt);
-    const text = result.response.text().trim();
-    return JSON.parse(text.replace(/```json?\s*/i, '').replace(/```\s*$/, '').trim());
-  } catch {
-    return { status: 'uncertain', suggestedUrl: null, notes: 'AI error' };
   }
 }
 
@@ -104,21 +75,20 @@ export default async function handler(req, res) {
     }
   }
 
-  console.log('🔍 Cron: Starting ticket verification run...');
+  console.log('🔍 Cron: Starting daily social post and ticket verification...');
   const start = Date.now();
-  const results = [];
 
-  for (const event of CITY_EVENTS) {
+  // Start social publishing immediately, then verify the static links alongside it.
+  const socialPromise = runDailyPost();
+  const results = (await Promise.all(CITY_EVENTS.map(async event => {
     try {
       const check = await checkUrl(event.url);
       let status = 'verified';
       let suggestedUrl = null;
 
       if (!check.reachable) {
-        const ai = await geminiVerify(event.title, event.url);
-        status = ai.status || 'dead';
-        suggestedUrl = ai.suggestedUrl || null;
-        console.log(`  ⚠️  "${event.title}" — DEAD → ${suggestedUrl || 'no replacement found'}`);
+        status = 'dead';
+        console.log(`  ⚠️  "${event.title}" — DEAD (${check.status || 'no response'})`);
       } else if (check.redirected) {
         status = 'redirected';
         suggestedUrl = check.finalUrl;
@@ -128,13 +98,14 @@ export default async function handler(req, res) {
       }
 
       await cacheResult(event.title, event.url, status, suggestedUrl);
-      results.push({ title: event.title, status, url: suggestedUrl || event.url });
+      return { title: event.title, status, url: suggestedUrl || event.url };
     } catch (err) {
       console.error(`  ❌ "${event.title}" — Error:`, err.message);
+      return null;
     }
-  }
+  }))).filter(Boolean);
 
-  const social = await runDailyPost();
+  const social = await socialPromise;
   const duration = ((Date.now() - start) / 1000).toFixed(1);
   const verified = results.filter(r => r.status === 'verified').length;
   const dead = results.filter(r => r.status === 'dead').length;
