@@ -59,7 +59,7 @@ function App() {
 
   async function loadExternalEvent(id) {
     try {
-      const data = await fetch('/api/events').then(r => r.json());
+      const data = await fetch('/api/events?full=1').then(r => r.json());
       const found = (data.events || []).find(e => e.id === id || e.slug === id);
       if (!found) throw new Error('Event not found');
       setEventDetail({ type: 'external', ...found });
@@ -185,6 +185,18 @@ function App() {
   if (bookExperience) return <Shell><BookingView experience={bookExperience} session={session} /></Shell>;
 
   if (eventDetail) return <Shell><EventDetail event={eventDetail} /></Shell>;
+
+  if (initialEvent) {
+    return (
+      <Shell>
+        <div className="portal-card portal-narrow">
+          <h1>{error ? 'Listing unavailable' : 'Loading listing'}</h1>
+          <p>{error || 'Opening this listing…'}</p>
+          {error ? <a className="portal-btn" href="/events">Browse current events</a> : null}
+        </div>
+      </Shell>
+    );
+  }
 
   if (!authed) {
     return (
