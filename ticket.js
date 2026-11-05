@@ -1,26 +1,36 @@
 /* Public ticket viewer */
 (() => {
   let session = null;
-  const ref = new URLSearchParams(window.location.search).get('ref') || '';
+  const query = new URLSearchParams(window.location.search);
+  const urlRef = query.get('ref') || query.get('ticket') || '';
   const $ = id => document.getElementById(id);
 
   async function init() {
-    if (!ref) { $('ticket-message').textContent = 'No booking reference supplied.'; return; }
     const cfg = await fetch('/api/public-config').then(r => r.json()).catch(() => ({}));
     if (cfg.supabaseUrl && window.supabase) {
       const sb = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
       const { data } = await sb.auth.getSession();
       session = data.session;
-      if (session) { $('ticket-email').value = session.user.email || ''; $('ticket-gate').hidden = true; fetchTicket(session.user.email); }
+      if (session) $('ticket-email').value = session.user.email || '';
     }
+    if (urlRef) $('ticket-ref-input').value = urlRef;
+
     $('ticket-unlock').addEventListener('click', () => {
+      const ref = urlRef || $('ticket-ref-input').value.trim();
       const email = $('ticket-email').value.trim();
+      if (!ref) return ($('ticket-message').textContent = 'Enter your booking reference.');
       if (!email) return ($('ticket-message').textContent = 'Enter your email.');
-      fetchTicket(email);
+      fetchTicket(email, ref);
     });
+
+    if (!urlRef) {
+      $('ticket-message').textContent = 'Enter your booking reference and email to unlock your ticket.';
+      return;
+    }
+    if (session) { $('ticket-gate').hidden = true; fetchTicket(session.user.email, urlRef); }
   }
 
-  async function fetchTicket(email) {
+  async function fetchTicket(email, ref) {
     const headers = { 'Content-Type': 'application/json' };
     if (session) headers.Authorization = 'Bearer ' + session.access_token;
     try {

@@ -20,10 +20,15 @@
     }
     $('help-search').addEventListener('input', e => {
       const q = e.target.value.toLowerCase().trim();
+      let visible = 0;
       document.querySelectorAll('#help-faq details').forEach(d => {
         const text = (d.textContent + ' ' + (d.dataset.tags || '')).toLowerCase();
-        d.hidden = q && !text.includes(q);
+        const show = !q || text.includes(q);
+        d.hidden = !show;
+        if (show) visible++;
       });
+      const empty = $('help-empty');
+      if (empty) empty.hidden = visible !== 0 || !q;
     });
     $('help-form').addEventListener('submit', submit);
   }

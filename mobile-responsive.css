@@ -296,3 +296,110 @@ textarea:focus {
   flex-wrap: wrap;
   gap: 4px;
 }
+/* ============================================================
+   MOBILE EXPERIENCE PASS — 2026-11-05
+   One rhythm: 60px nav, 76px top inset, 12px type floor.
+   ============================================================ */
+@media (max-width: 768px) {
+  .navbar {
+    background: rgba(7,42,53,.97) !important;
+    -webkit-backdrop-filter: blur(18px);
+    backdrop-filter: blur(18px);
+    box-shadow: 0 1px 0 rgba(248,239,228,.08);
+    height: 60px;
+    padding: 0 18px !important;
+    display: flex;
+    align-items: center;
+    overflow: visible !important;
+  }
+  .nav-container { height: auto; width: 100%; padding: 0; }
+
+  /* Remove the old 120–150px dead band under the fixed header. */
+  main > section:first-child:not(.hero),
+  .events-page,
+  .exp-page { padding-top: 76px !important; }
+  .section-padding { padding: 56px 0; }
+
+  /* Home hero: one job, one primary action, no decorative stats. */
+  .hero { min-height: auto !important; }
+  .hero-content { padding: 72px 18px 44px !important; }
+  .hero-headline { font-size: clamp(31px, 8.6vw, 40px) !important; line-height: 1.1 !important; }
+  .hero-subline { font-size: 15px !important; line-height: 1.55 !important; }
+  .hero-subline br { display: none; }
+  .hero-tagline, .hero-stats { display: none !important; }
+  .hero-actions { gap: 8px !important; }
+  .hero-actions .btn { width: 100% !important; }
+  .hero-actions .btn-hero-secondary {
+    width: auto !important;
+    align-self: center;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    color: var(--sand) !important;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    padding: 8px !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+  }
+
+  /* Events: chips wrap instead of clipping; one 44px action per card. */
+  .event-chips {
+    flex-wrap: wrap !important;
+    overflow: visible !important;
+    justify-content: flex-start !important;
+    gap: 7px !important;
+  }
+  .event-chips .filter-btn { padding: 8px 12px; font-size: 12px; min-height: 36px; }
+  .event-cat, .event-src { font-size: 11px !important; }
+  .event-details, .event-ticket {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 16px;
+    font-size: 12px !important;
+  }
+  .event-actions { gap: 0 !important; }
+
+  /* Contact: the form is the page's job; put it before the info list. */
+  .contact-grid { display: flex !important; flex-direction: column !important; gap: 24px !important; }
+  .contact-form-wrap { order: -1; }
+  .contact-info { order: 0; }
+
+  /* Stop the newsletter/QR block from creating horizontal overflow. */
+  .newsletter-content { grid-template-columns: 1fr !important; }
+  .newsletter-content > div { min-width: 0; }
+  .newsletter-content p, .newsletter-content li { overflow-wrap: anywhere; }
+
+  /* Gallery: larger tiles, no orphan, visible affordance on touch. */
+  .gallery-grid { grid-auto-rows: 160px !important; }
+  .gallery-item:last-child { grid-column: span 2 !important; }
+  .gallery-item-overlay {
+    opacity: 1 !important;
+    background: linear-gradient(180deg, transparent 55%, rgba(7,42,53,.42));
+  }
+  .gallery-item-overlay i { opacity: .9; }
+
+  .scroll-top-btn { display: none !important; }
+
+  .about-cta {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 18px 56px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+  }
+  .about-cta .btn { width: 100%; }
+}
+
+@media (max-width: 480px) {
+  .section-title { font-size: 27px !important; }
+  .events-hero h1, .exp-hero h1 { font-size: 34px !important; }
+  .event-card { padding: 12px !important; }
+  .event-main h3 { font-size: 18px !important; }
+  .event-where { font-size: 11px !important; }
+  .event-price { font-size: 12px !important; }
+}

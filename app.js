@@ -569,13 +569,12 @@ function renderEventCards(list) {
     const source = external ? evt.source : 'Solo Soul';
     const area = evt.area || (evt.location || '').match(/durban|umhlanga|kloof|westville|hillcrest|pinetown|berea|ballito/i)?.[0] || 'Durban';
     const details = external ? '/portal/?event=' + encodeURIComponent(evt.slug || evt.id) : '/portal/?experience=' + encodeURIComponent(evt.id);
-    const ticket = external && evt.url ? '<a class="event-ticket" data-track-outbound data-event-id="' + escapeHtml(evt.id || '') + '" data-event-name="' + escapeHtml(title) + '" data-provider="' + escapeHtml(evt.source || '') + '" href="' + escapeHtml(evt.url) + '" target="_blank" rel="noopener noreferrer">Tickets ↗</a>' : '';
     return '<article class="event-card" data-event data-category="' + escapeHtml(category) + '" data-source="' + escapeHtml(source) + '" data-area="' + escapeHtml(area) + '" data-free="' + (evt.isFree ? '1' : '0') + '" data-date="' + escapeHtml(external ? evt.start : (Number.isNaN(date.getTime()) ? '' : date.toISOString())) + '" data-search="' + escapeHtml((title + ' ' + (evt.location || '')).toLowerCase()) + '">' +
       '<div class="event-date"><strong>' + day + '</strong><span>' + month + '</span></div>' +
       '<div class="event-main"><div class="event-tags"><span class="event-cat">' + escapeHtml(category) + '</span><span class="event-src">' + escapeHtml(source) + '</span></div>' +
       '<h3><a href="' + details + '">' + escapeHtml(title) + '</a></h3>' +
       '<div class="event-where"><i class="fas fa-location-dot"></i> ' + escapeHtml(evt.location || '') + '</div></div>' +
-      '<div class="event-side"><div class="event-price">' + escapeHtml(evt.price || 'See listing') + '</div><div class="event-actions"><a class="event-details" href="' + details + '">Details</a>' + ticket + '</div></div>' +
+      '<div class="event-side"><div class="event-price">' + escapeHtml(evt.price || 'See listing') + '</div><div class="event-actions"><a class="event-details" href="' + details + '">' + (external ? 'View listing' : 'View details') + '</a></div></div>' +
       '</article>';
   }).join('');
   applyEventFilters();

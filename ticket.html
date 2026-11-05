@@ -32,8 +32,8 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" />
 
   <link rel="stylesheet" href="account.css?v=1" />
-  <link rel="stylesheet" href="style.css?v=20261103exp2" />
-  <link rel="stylesheet" href="mobile-responsive.css?v=20261103exp2" />
+  <link rel="stylesheet" href="style.css?v=20261105mobile22" />
+  <link rel="stylesheet" href="mobile-responsive.css?v=20261105mobile2" />
   <link rel="preload" as="image" href="assets/images/hero_ocean_sunrise.webp" fetchpriority="high" />
 
 <style id="page-nav-style">
@@ -109,9 +109,13 @@
 <section class="ticket-shell">
   <div id="ticket-gate" class="account-card ticket-gate">
     <h1>Your ticket</h1>
-    <p>Enter the email used for the booking to unlock your ticket.</p>
-    <input id="ticket-email" type="email" placeholder="you@example.com" />
+    <p>Enter the booking reference and the email used for the booking.</p>
+    <label for="ticket-ref-input">Booking reference</label>
+    <input id="ticket-ref-input" type="text" placeholder="e.g. SS-ABC123" autocomplete="off" />
+    <label for="ticket-email">Email address</label>
+    <input id="ticket-email" type="email" placeholder="you@example.com" autocomplete="email" />
     <button id="ticket-unlock" class="btn btn-primary">View ticket</button>
+    <p class="ticket-help"><a href="/portal/">Find a booking in My Solo Soul</a></p>
     <div id="ticket-message" class="auth-message"></div>
   </div>
   <div id="ticket-card" class="ticket-card" hidden>

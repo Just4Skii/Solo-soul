@@ -58,12 +58,16 @@ function App() {
 
 
   async function loadExternalEvent(id) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 8000);
     try {
-      const data = await fetch('/api/events?full=1').then(r => r.json());
+      const data = await fetch('/api/events?full=1', { signal: controller.signal }).then(r => r.json());
       const found = (data.events || []).find(e => e.id === id || e.slug === id);
-      if (!found) throw new Error('Event not found');
+      if (!found) throw new Error('This listing could not be found.');
       setEventDetail({ type: 'external', ...found });
-    } catch (e) { setError(e.message); }
+    } catch (e) {
+      setError(e.name === 'AbortError' ? 'The listing is taking too long to load.' : (e.message || 'The listing could not be loaded.'));
+    } finally { clearTimeout(timer); }
   }
 
   async function loadBookingExperience(id) {
@@ -472,6 +476,12 @@ function EventDetail({ event }) {
           </div>
         </aside>
       </div>
+      <div className="portal-event-sticky">
+        <span><small>{external ? 'From the organiser' : 'Solo Soul experience'}</small><strong>{price}</strong></span>
+        {external
+          ? <a className="portal-btn" href={event.url} target="_blank" rel="noreferrer" onClick={() => window.ssoulTrack?.('outbound_click', { eventId: key, eventName: title, metadata: { url: event.url, provider: event.source || '' } })}>Get tickets ↗</a>
+          : <a className="portal-btn" href={'/portal/?book=' + event.id}>Book this experience</a>}
+      </div>
     </div>
   );
 }
@@ -482,7 +492,11 @@ function Shell({ children, user, onSignOut }) {
       <header className="portal-header">
         <a href="/" className="portal-brand"><img src="/assets/images/logo.png" alt="" /> Solo Soul</a>
         <nav><a href="/about">About</a><a href="/experiences">Experiences</a><a href="/events">Events</a><a href="/gallery">Gallery</a><a href="/journal">Journal</a><a href="/contact">Contact</a></nav>
-        <a className="portal-header-cta" href="/experiences">Book Now</a>
+        <details className="portal-menu">
+          <summary aria-label="Open menu">Menu</summary>
+          <div><a href="/about">About</a><a href="/experiences">Experiences</a><a href="/events">Events</a><a href="/gallery">Gallery</a><a href="/journal">Journal</a><a href="/contact">Contact</a><a href="/portal">My Portal</a></div>
+        </details>
+        <a className="portal-header-cta" href="/events">What's On</a>
         {user && <div className="portal-user"><span>{user.email}</span><button onClick={onSignOut}>Sign out</button></div>}
       </header>
       <main className="portal-main">{children}</main>
