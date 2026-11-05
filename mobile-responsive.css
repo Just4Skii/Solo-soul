@@ -416,3 +416,8 @@ textarea:focus {
   .event-where { font-size: 11px !important; }
   .event-price { font-size: 12px !important; }
 }
+
+@media (max-width: 768px) {
+  /* The decorative preloader adds no value on a slow mobile connection. */
+  #preloader { display: none !important; }
+}
