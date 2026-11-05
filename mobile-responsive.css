@@ -421,3 +421,19 @@ textarea:focus {
   /* The decorative preloader adds no value on a slow mobile connection. */
   #preloader { display: none !important; }
 }
+
+@media (max-width: 768px) {
+  .exp-hero-actions { flex-direction: column !important; gap: 8px !important; }
+  .exp-hero-actions .btn { width: 100% !important; }
+  .exp-hero-actions .btn-outline {
+    background: transparent !important; border: 0 !important; box-shadow: none !important;
+    text-decoration: underline; text-underline-offset: 4px; min-height: 44px;
+  }
+  .hero-badge {
+    background: rgba(7,42,53,.72) !important;
+    border: 1px solid rgba(248,239,228,.32) !important;
+    color: #F8EFE4 !important;
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+  }
+}
