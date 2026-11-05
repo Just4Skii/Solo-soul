@@ -315,9 +315,10 @@ textarea:focus {
   .nav-container { height: auto; width: 100%; padding: 0; }
 
   /* Remove the old 120–150px dead band under the fixed header. */
+  main > section.hero:first-child { padding-top: 0 !important; }
   main > section:first-child:not(.hero),
   .events-page,
-  .exp-page { padding-top: 76px !important; }
+  .exp-page { padding-top: 90px !important; }
   .section-padding { padding: 56px 0; }
 
   /* Home hero: one job, one primary action, no decorative stats. */
@@ -363,9 +364,9 @@ textarea:focus {
   .event-actions { gap: 0 !important; }
 
   /* Contact: the form is the page's job; put it before the info list. */
-  .contact-grid { display: flex !important; flex-direction: column !important; gap: 24px !important; }
-  .contact-form-wrap { order: -1; }
-  .contact-info { order: 0; }
+  .contact-grid { display: flex !important; flex-direction: column !important; gap: 24px !important; align-items: stretch !important; }
+  .contact-form-wrap { order: -1; width: 100% !important; }
+  .contact-info { order: 0; width: 100%; }
 
   /* Stop the newsletter/QR block from creating horizontal overflow. */
   .newsletter-content { grid-template-columns: 1fr !important; }
@@ -375,11 +376,13 @@ textarea:focus {
   /* Gallery: larger tiles, no orphan, visible affordance on touch. */
   .gallery-grid { grid-auto-rows: 160px !important; }
   .gallery-item:last-child { grid-column: span 2 !important; }
-  .gallery-item-overlay {
-    opacity: 1 !important;
-    background: linear-gradient(180deg, transparent 55%, rgba(7,42,53,.42));
+  .gallery-item-overlay { display: none !important; }
+  .gallery-item::after {
+    content: "↗"; position: absolute; right: 10px; bottom: 10px; z-index: 2;
+    width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center;
+    background: rgba(248,239,228,.92); color: #0B3C49; font-size: 15px; font-weight: 700;
+    box-shadow: 0 2px 10px rgba(7,42,53,.18);
   }
-  .gallery-item-overlay i { opacity: .9; }
 
   .scroll-top-btn { display: none !important; }
 
@@ -393,6 +396,10 @@ textarea:focus {
     align-items: stretch;
   }
   .about-cta .btn { width: 100%; }
+  .about-cta .btn-outline {
+    background: transparent !important; border: 0 !important; box-shadow: none !important;
+    text-decoration: underline; text-underline-offset: 4px; min-height: 44px;
+  }
 }
 
 @media (max-width: 480px) {

@@ -3855,3 +3855,6 @@ body.page-inner .navbar.scrolled { background: rgba(7,42,53,.98); }
 
 .event-load-more{display:block;width:100%;margin:16px 0 0;padding:14px 18px;border:1px solid rgba(46,94,78,.25);border-radius:999px;background:#fff;color:var(--forest);font:inherit;font-size:14px;font-weight:600;cursor:pointer}
 .event-load-more:hover{background:#FBF4EA;border-color:rgba(46,94,78,.45)}
+
+#ticket-message.ticket-hint{color:#6b5e63}
+#ticket-unlock{background:#B8432F!important;border-color:#B8432F!important}

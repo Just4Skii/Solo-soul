@@ -426,6 +426,7 @@ function EventDetail({ event }) {
   const date = external ? event.dateLabel : event.date;
   const venue = external ? event.venue : event.location;
   const price = external ? event.price : (event.is_free ? 'FREE' : event.price);
+  const priceLabel = /^see listing$/i.test(String(price || '').trim()) ? 'Check listing' : price;
   const fallback = {
     creative: '/assets/images/experience_sip_paint_1783927393574.webp',
     food: '/assets/images/experience_brunch_1783927375716.webp',
@@ -474,7 +475,7 @@ function EventDetail({ event }) {
         <aside className="portal-event-aside">
           <div className="portal-card">
             <span className="portal-aside-label">{external ? 'Curated partner listing' : 'Hosted by Solo Soul'}</span>
-            <strong className={/^[R\d]/.test(String(price)) ? "portal-total" : "portal-price-note"}>{price}</strong>
+            <strong className={/^[R\d]/.test(String(price)) ? "portal-total" : "portal-price-note"}>{priceLabel}</strong>
             <p>{date}<br />{venue}</p>
             {external
               ? <a className="portal-btn" href={event.url} target="_blank" rel="noreferrer" onClick={() => window.ssoulTrack?.('outbound_click', { eventId: key, eventName: title, metadata: { url: event.url, provider: event.source || '' } })}>Get tickets ↗</a>
@@ -489,7 +490,7 @@ function EventDetail({ event }) {
         </aside>
       </div>
       <div className="portal-event-sticky">
-        <span><small>{external ? 'From the organiser' : 'Solo Soul experience'}</small><strong>{price}</strong></span>
+        <span><small>{external ? 'From the organiser' : 'Solo Soul experience'}</small><strong>{priceLabel}</strong></span>
         {external
           ? <a className="portal-btn" href={event.url} target="_blank" rel="noreferrer" onClick={() => window.ssoulTrack?.('outbound_click', { eventId: key, eventName: title, metadata: { url: event.url, provider: event.source || '' } })}>Get tickets ↗</a>
           : <a className="portal-btn" href={'/portal/?book=' + event.id}>Book this experience</a>}

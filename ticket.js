@@ -15,15 +15,19 @@
     }
     if (urlRef) $('ticket-ref-input').value = urlRef;
 
-    $('ticket-unlock').addEventListener('click', () => {
-      const ref = urlRef || $('ticket-ref-input').value.trim();
+    $('ticket-unlock').addEventListener('click', async () => {
+      const ref = $('ticket-ref-input').value.trim() || urlRef;
       const email = $('ticket-email').value.trim();
       if (!ref) return ($('ticket-message').textContent = 'Enter your booking reference.');
       if (!email) return ($('ticket-message').textContent = 'Enter your email.');
-      fetchTicket(email, ref);
+      const btn = $('ticket-unlock');
+      btn.disabled = true; btn.textContent = 'Opening…';
+      try { await fetchTicket(email, ref); }
+      finally { btn.disabled = false; btn.textContent = 'View ticket'; }
     });
 
     if (!urlRef) {
+      $('ticket-message').classList.add('ticket-hint');
       $('ticket-message').textContent = 'Enter your booking reference and email to unlock your ticket.';
       return;
     }
