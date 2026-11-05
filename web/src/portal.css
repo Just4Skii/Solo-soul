@@ -233,3 +233,15 @@ body { margin: 0; background: var(--sand); color: var(--charcoal); font-family: 
   .portal-auth-card .portal-card { padding: 20px 18px; }
   .portal-auth-card .portal-card input { min-height: 48px; }
 }
+
+@media (max-width: 780px) {
+  .portal-event-main { display: flex; flex-direction: column; }
+  .portal-event-media { order: 2; }
+  .portal-event-head { order: 1; }
+  .portal-share { order: 3; }
+  .portal-event-media img, .portal-event-fallback { max-height: 360px; background: #072A35; }
+  .portal-event-sticky span { gap: 1px; }
+  .portal-event-sticky em { font-style: normal; font-size: 11px; color: rgba(248,239,228,.68); max-width: 190px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .portal-event-sticky strong { font-size: 14px; }
+  .portal-breadcrumb span:last-child { max-width: 240px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+}

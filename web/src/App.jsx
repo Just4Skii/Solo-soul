@@ -448,7 +448,7 @@ function EventDetail({ event }) {
   }, [key]);
   return (
     <div className="portal-event-page">
-      <nav className="portal-breadcrumb"><a href="/events">Events</a><span>/</span><span>Durban</span></nav>
+      <nav className="portal-breadcrumb"><a href="/events">Events</a><span>/</span><span>{title}</span></nav>
       <div className="portal-event-grid">
         <div className="portal-event-main">
           <div className="portal-event-media">{image ? <EventImage src={image} fallback={fallback} alt={title} /> : <div className="portal-event-fallback">SS</div>}</div>
@@ -490,7 +490,7 @@ function EventDetail({ event }) {
         </aside>
       </div>
       <div className="portal-event-sticky">
-        <span><small>{external ? 'From the organiser' : 'Solo Soul experience'}</small><strong>{priceLabel}</strong></span>
+        <span><small>{date}</small><strong>{priceLabel}</strong><em>{venue}</em></span>
         {external
           ? <a className="portal-btn" href={event.url} target="_blank" rel="noreferrer" onClick={() => window.ssoulTrack?.('outbound_click', { eventId: key, eventName: title, metadata: { url: event.url, provider: event.source || '' } })}>Get tickets ↗</a>
           : <a className="portal-btn" href={'/portal/?book=' + event.id}>Book this experience</a>}

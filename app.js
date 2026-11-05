@@ -574,7 +574,7 @@ function renderEventCards(list) {
       '<div class="event-main"><div class="event-tags"><span class="event-cat">' + escapeHtml(category) + '</span><span class="event-src">' + escapeHtml(source) + '</span></div>' +
       '<h3><a href="' + details + '">' + escapeHtml(title) + '</a></h3>' +
       '<div class="event-where"><i class="fas fa-location-dot"></i> ' + escapeHtml(evt.location || '') + '</div></div>' +
-      '<div class="event-side"><div class="event-price">' + escapeHtml(evt.price || 'See listing') + '</div><div class="event-actions"><a class="event-details" href="' + details + '">' + (external ? 'View listing' : 'View details') + '</a></div></div>' +
+      '<div class="event-side">' + (/^see listing$/i.test(String(evt.price || '').trim()) ? '' : '<div class="event-price">' + escapeHtml(evt.price || '') + '</div>') + '<div class="event-actions"><a class="event-details" href="' + details + '">' + (external ? 'View listing' : 'View details') + '</a></div></div>' +
       '</article>';
   }).join('');
   applyEventFilters();
