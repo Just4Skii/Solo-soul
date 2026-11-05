@@ -214,3 +214,20 @@ body { margin: 0; background: var(--sand); color: var(--charcoal); font-family: 
   .portal-card label { font-size: 11px; }
   .portal-footer { padding: 26px 16px; }
 }
+
+/* Unified auth entry */
+.portal-auth-card { max-width: 520px; margin: 0 auto; }
+.portal-auth-tabs { display: flex; gap: 6px; padding: 5px; margin-bottom: 14px; background: #EDE3D7; border-radius: 999px; }
+.portal-auth-tabs button {
+  flex: 1; min-height: 44px; border: 0; border-radius: 999px; background: transparent;
+  color: #6b5e63; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer;
+}
+.portal-auth-tabs button.active { background: #fff; color: var(--forest); box-shadow: 0 3px 10px rgba(43,27,47,.08); }
+.portal-auth-card .portal-card { padding: 26px 24px; }
+.portal-auth-card .portal-card > p:first-of-type { margin: 0 0 14px; font-size: 13px; }
+.portal-auth-switch { margin: 14px 0 0 !important; font-size: 12px !important; text-align: center; }
+.portal-auth-switch button { background: none; border: 0; color: var(--coral-ink); font: inherit; font-weight: 700; cursor: pointer; padding: 4px; }
+@media (max-width: 780px) {
+  .portal-auth-card .portal-card { padding: 20px 18px; }
+  .portal-auth-card .portal-card input { min-height: 48px; }
+}

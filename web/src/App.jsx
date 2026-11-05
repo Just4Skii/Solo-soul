@@ -14,6 +14,7 @@ function App() {
   const [booted, setBooted] = useState(false);
   const [error, setError] = useState('');
   const [tab, setTab] = useState('bookings');
+  const [authMode, setAuthMode] = useState('signin');
   const [bookings, setBookings] = useState([]);
   const [payments, setPayments] = useState([]);
   const [support, setSupport] = useState([]);
@@ -205,20 +206,31 @@ function App() {
   if (!authed) {
     return (
       <Shell>
-        <div className="portal-grid">
-          <form className="portal-card" onSubmit={login}>
-            <h2>Welcome back</h2>
-            <label>Email<input name="email" type="email" required autoComplete="email" /></label>
-            <label>Password<input name="password" type="password" required autoComplete="current-password" /></label>
-            <button className="portal-btn" disabled={loading}>{loading ? 'Signing in…' : 'Sign in'}</button>
-          </form>
-          <form className="portal-card" onSubmit={register}>
-            <h2>Create your account</h2>
-            <label>Full name<input name="name" required autoComplete="name" /></label>
-            <label>Email<input name="email" type="email" required autoComplete="email" /></label>
-            <label>Password<input name="password" type="password" minLength={8} required autoComplete="new-password" /></label>
-            <button className="portal-btn" disabled={loading}>{loading ? 'Creating…' : 'Create account'}</button>
-          </form>
+        <div className="portal-auth-card">
+          <div className="portal-auth-tabs" role="tablist" aria-label="Account access">
+            <button type="button" role="tab" aria-selected={authMode === 'signin'} className={authMode === 'signin' ? 'active' : ''} onClick={() => { setAuthMode('signin'); setError(''); }}>Sign in</button>
+            <button type="button" role="tab" aria-selected={authMode === 'register'} className={authMode === 'register' ? 'active' : ''} onClick={() => { setAuthMode('register'); setError(''); }}>Create account</button>
+          </div>
+          {authMode === 'signin' ? (
+            <form className="portal-card" onSubmit={login}>
+              <h2>Welcome back</h2>
+              <p>View tickets, bookings and payment history.</p>
+              <label>Email<input name="email" type="email" required autoComplete="email" /></label>
+              <label>Password<input name="password" type="password" required autoComplete="current-password" /></label>
+              <button className="portal-btn" disabled={loading}>{loading ? 'Signing in…' : 'Sign in'}</button>
+              <p className="portal-auth-switch">New here? <button type="button" onClick={() => setAuthMode('register')}>Create an account</button></p>
+            </form>
+          ) : (
+            <form className="portal-card" onSubmit={register}>
+              <h2>Create your account</h2>
+              <p>Save your tickets and keep every booking in one place.</p>
+              <label>Full name<input name="name" required autoComplete="name" /></label>
+              <label>Email<input name="email" type="email" required autoComplete="email" /></label>
+              <label>Password<input name="password" type="password" minLength={8} required autoComplete="new-password" /></label>
+              <button className="portal-btn" disabled={loading}>{loading ? 'Creating…' : 'Create account'}</button>
+              <p className="portal-auth-switch">Already have an account? <button type="button" onClick={() => setAuthMode('signin')}>Sign in</button></p>
+            </form>
+          )}
         </div>
         {error && <p className="portal-error">{error}</p>}
       </Shell>

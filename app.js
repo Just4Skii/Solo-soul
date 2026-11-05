@@ -627,12 +627,42 @@ function syncEventQueryParams() {
   window.history.replaceState({}, '', url);
 }
 
+function renderEventLoadMore(total) {
+  const list = document.getElementById('events-list');
+  if (!list) return;
+  let more = document.getElementById('event-load-more');
+  if (!more) {
+    more = document.createElement('button');
+    more.id = 'event-load-more';
+    more.type = 'button';
+    more.className = 'event-load-more';
+    more.addEventListener('click', () => {
+      eventVisibleLimit += 12;
+      applyEventFilters();
+    });
+    list.insertAdjacentElement('afterend', more);
+  }
+  const remaining = Math.max(0, total - eventVisibleLimit);
+  more.hidden = remaining === 0;
+  more.textContent = remaining ? 'Show ' + Math.min(12, remaining) + ' more events' : '';
+}
+
 function resetEventDateFilter() {
   const dateSelect = document.getElementById('event-date');
   if (dateSelect) dateSelect.value = 'all';
   applyEventFilters();
 }
 window.resetEventDateFilter = resetEventDateFilter;
+
+let eventVisibleLimit = 12;
+
+function resetEventLimit() {
+  eventVisibleLimit = 12;
+}
+
+function setEventLimit(value) {
+  eventVisibleLimit = value;
+}
 
 function applyEventFilters() {
   const active = getActiveEventCategory();
@@ -654,6 +684,7 @@ function applyEventFilters() {
     return;
   }
 
+  let matched = 0;
   let visible = 0;
   rows.forEach(row => {
     const category = CATEGORY_ALIAS[row.dataset.category] || row.dataset.category;
@@ -664,12 +695,15 @@ function applyEventFilters() {
     const ts = row.dataset.date ? new Date(row.dataset.date).getTime() : 0;
     const okDate = when === 'all' || (ts && ts >= now - 864e5 && ts <= limit);
     const okSearch = !term || (row.dataset.search || '').includes(term);
-    const show = okCategory && okSource && okArea && okPrice && okDate && okSearch;
+    const matches = okCategory && okSource && okArea && okPrice && okDate && okSearch;
+    if (matches) matched++;
+    const show = matches && matched <= eventVisibleLimit;
     row.classList.toggle('hidden', !show);
     if (show) visible++;
   });
 
-  if (counter) counter.textContent = visible ? visible + (visible === 1 ? ' event' : ' events') : '';
+  if (counter) counter.textContent = matched ? (matched > eventVisibleLimit ? visible + ' of ' + matched + ' events' : matched + (matched === 1 ? ' event' : ' events')) : '';
+  renderEventLoadMore(matched);
 
   let empty = document.getElementById('event-no-match');
   if (!visible) {
@@ -706,14 +740,16 @@ function initEventFilters() {
     btn.addEventListener('click', () => {
       filterBtns.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
+      resetEventLimit();
       syncEventQueryParams();
       applyEventFilters();
     });
   });
   ['event-source', 'event-area', 'event-price', 'event-date'].forEach(id => {
-    document.getElementById(id)?.addEventListener('change', applyEventFilters);
+    document.getElementById(id)?.addEventListener('change', () => { resetEventLimit(); applyEventFilters(); });
   });
-  document.getElementById('event-search')?.addEventListener('input', applyEventFilters);
+  document.getElementById('event-search')?.addEventListener('input', () => { resetEventLimit(); applyEventFilters(); });
+  resetEventLimit();
   applyEventFilters();
 }
 
