@@ -346,12 +346,18 @@ textarea:focus {
 
   /* Events: chips wrap instead of clipping; one 44px action per card. */
   .event-chips {
-    flex-wrap: wrap !important;
-    overflow: visible !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
     justify-content: flex-start !important;
     gap: 7px !important;
+    padding: 2px 0 12px !important;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    mask-image: linear-gradient(90deg, #000 0%, #000 88%, transparent 100%);
+    -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 88%, transparent 100%);
   }
-  .event-chips .filter-btn { padding: 8px 12px; font-size: 12px; min-height: 36px; }
+  .event-chips::-webkit-scrollbar { display: none; }
+  .event-chips .filter-btn { flex: 0 0 auto; padding: 8px 12px; font-size: 12px; min-height: 36px; }
   .event-cat, .event-src { font-size: 11px !important; }
   .event-details, .event-ticket {
     min-height: 44px;

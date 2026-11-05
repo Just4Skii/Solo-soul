@@ -278,17 +278,17 @@ function initPreloader() {
   window.addEventListener('load', () => {
     setTimeout(() => {
       preloader.classList.add('hidden');
-      setTimeout(() => { preloader.style.display = 'none'; }, 700);
-    }, 1800);
+      setTimeout(() => { preloader.style.display = 'none'; }, 500);
+    }, 400);
   });
 
   // Fallback
   setTimeout(() => {
     if (preloader && !preloader.classList.contains('hidden')) {
       preloader.classList.add('hidden');
-      setTimeout(() => { preloader.style.display = 'none'; }, 700);
+      setTimeout(() => { preloader.style.display = 'none'; }, 500);
     }
-  }, 3500);
+  }, 1200);
 }
 
 // ---- AOS --------------------------------------------------
