@@ -5,8 +5,8 @@
 
 /* ---- VARIABLES ------------------------------------------- */
 :root {
-  --sand:         #F4F1EA;
-  --beige:        #E4DFD5;
+  --sand:         #F1F0EC;
+  --beige:        #E2E0DA;
   --sage:         #8FB7B2;
   --forest:       #0B3C49;
   --forest-dark:  #072A35;
@@ -36,26 +36,6 @@ html[data-theme="dark"] {
   --forest-light: #8FB7B2;
   --charcoal:     #E6F0EC;
   --white:        #1a2b25;
-}
-html[data-theme="autumn"] {
-  --sand:         #F7F4ED;
-  --beige:        #F0E5D8;
-  --sage:         #E0A96D;
-  --forest:       #5C3D2E;
-  --forest-dark:  #3D251E;
-  --forest-light: #865D4C;
-  --charcoal:     #5C3D2E;
-  --white:        #FFFFFF;
-}
-html[data-theme="ocean"] {
-  --sand:         #F2F3F0;
-  --beige:        #D9E2EC;
-  --sage:         #F19066;
-  --forest:       #1B4F63;
-  --forest-dark:  #182A4A;
-  --forest-light: #486581;
-  --charcoal:     #1B4F63;
-  --white:        #FFFFFF;
 }
 
 /* Accessibility: Font Size Overrides */
@@ -3402,8 +3382,8 @@ section[id], div[id="events"] { scroll-margin-top: 92px; }
    warm sand and deep plum. Overrides the old green palette.
    ============================================================ */
 :root {
-  --sand:         #F4F1EA;
-  --beige:        #E4DFD5;
+  --sand:         #F1F0EC;
+  --beige:        #E2E0DA;
   --sage:         #8FB7B2;
   --forest:       #0B3C49;
   --forest-dark:  #072A35;
@@ -3421,7 +3401,7 @@ html[data-theme="dark"] {
   --sand:         #14101B;
   --beige:        #241C2C;
   --sage:         #8FB7B2;
-  --forest:       #F4F1EA;
+  --forest:       #F1F0EC;
   --forest-dark:  #FFFFFF;
   --charcoal:     #F3E9DE;
   --dark-bg:      #0D1622;
@@ -3470,7 +3450,7 @@ body { background: var(--sand); color: var(--ink); }
 .events .section-eyebrow { color: var(--gold); }
 .events .section-title em { color: #D8A24A; }
 
-.testimonials { background: linear-gradient(135deg, #ECE8DF 0%, #DDD8CE 100%); }
+.testimonials { background: linear-gradient(135deg, #ECEAE4 0%, #DEDCD6 100%); }
 .testimonials .section-title, .testimonials .section-title em { color: var(--plum); }
 .testimonials .section-eyebrow { color: var(--coral); }
 
@@ -3487,7 +3467,7 @@ body { background: var(--sand); color: var(--ink); }
 
 .event-smart-filters { background: rgba(255,255,255,.06); border-color: rgba(127,196,207,.22); }
 .event-smart-filters input, .event-smart-filters select {
-  background: #131F2E; color: #F4F1EA; border-color: rgba(127,196,207,.25);
+  background: #131F2E; color: #F1F0EC; border-color: rgba(127,196,207,.25);
 }
 .event-count { color: var(--gold); }
 
@@ -3541,7 +3521,7 @@ body.page-inner .navbar.scrolled { background: rgba(7,42,53,.98); }
 
 
 /* Events page redesign */
-.events-page { background:#F4F1EA !important; color:var(--charcoal); padding-top:150px; }
+.events-page { background:#F1F0EC !important; color:var(--charcoal); padding-top:150px; }
 .events-page .container { max-width:1180px; }
 .events-hero { max-width:760px; margin:0 auto 30px; text-align:center; }
 .events-eyebrow { font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--coral-ink,#8A3D2D); font-weight:700; margin-bottom:14px; }
@@ -3558,7 +3538,7 @@ body.page-inner .navbar.scrolled { background: rgba(7,42,53,.98); }
 .event-feed { display:flex; flex-direction:column; gap:10px; margin-top:8px; }
 .event-card { display:grid; grid-template-columns:76px 1fr auto; gap:20px; align-items:center; background:#fff; border:1px solid rgba(46,94,78,.12); border-radius:16px; padding:18px 20px; transition:transform .2s ease, box-shadow .2s ease; }
 .event-card:hover { transform:translateY(-2px); box-shadow:0 14px 34px rgba(38,32,28,.08); }
-.event-date { background:#F0ECE3; border-radius:12px; padding:10px 8px; text-align:center; color:var(--forest); }
+.event-date { background:#EEECE7; border-radius:12px; padding:10px 8px; text-align:center; color:var(--forest); }
 .event-date strong { display:block; font-family:'Playfair Display',serif; font-size:30px; line-height:1; }
 .event-date span { font-size:10px; text-transform:uppercase; letter-spacing:.12em; color:#5C514A; }
 .event-tags { display:flex; gap:8px; margin-bottom:6px; }
@@ -3720,7 +3700,7 @@ body.page-inner .navbar.scrolled { background: rgba(7,42,53,.98); }
   display: inline-flex;
   padding: 4px 9px;
   border-radius: 999px;
-  background: #F0ECE3;
+  background: #EEECE7;
   color: #5C514A;
   font-size: 9.5px;
   font-weight: 600;
@@ -3855,7 +3835,7 @@ body.page-inner .navbar.scrolled { background: rgba(7,42,53,.98); }
 }
 
 .event-load-more{display:block;width:100%;margin:16px 0 0;padding:14px 18px;border:1px solid rgba(46,94,78,.25);border-radius:999px;background:#fff;color:var(--forest);font:inherit;font-size:14px;font-weight:600;cursor:pointer}
-.event-load-more:hover{background:#F0ECE3;border-color:rgba(46,94,78,.45)}
+.event-load-more:hover{background:#EEECE7;border-color:rgba(46,94,78,.45)}
 
 #ticket-message.ticket-hint{color:#5C514A}
 #ticket-unlock{background:#983D2D!important;border-color:#983D2D!important}
@@ -3879,7 +3859,7 @@ body.page-inner .navbar.scrolled { background: rgba(7,42,53,.98); }
   box-shadow: 0 10px 24px rgba(201,154,46,.24) !important;
 }
 .btn-primary i, .btn-hero-primary i { color: #072A35; }
-.filter-btn.active, .event-filters .filter-btn.active { background: #0B3C49 !important; border-color: #0B3C49 !important; color: #F4F1EA !important; }
+.filter-btn.active, .event-filters .filter-btn.active { background: #0B3C49 !important; border-color: #0B3C49 !important; color: #F1F0EC !important; }
 .portal-error, .auth-message, .error-msg, .contact-error, .portal-error { color: var(--danger) !important; }
 
 #ticket-unlock, .ticket-actions .btn-primary {
@@ -3929,3 +3909,7 @@ body.page-inner .navbar.scrolled { background: rgba(7,42,53,.98); }
 .blog-category-badge.city, .blog-modal-cat.city { background: #0B3C49; color: #fff; }
 .blog-category-badge.wellness, .blog-modal-cat.wellness { background: #8FB7B2; color: #072A35; }
 .blog-category-badge.creative, .blog-modal-cat.creative { background: #8A6517; color: #fff; }
+
+.why-learn-more { text-decoration: none; }
+.why-learn-more:visited { color: var(--sage); }
+.why-learn-more:hover { color: var(--white); }

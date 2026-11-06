@@ -2190,11 +2190,11 @@ function toggleReduceMotion(shouldReduce) {
 }
 
 function initUserSettings() {
-  // 1. Load theme preference
-  const savedTheme = localStorage.getItem('user-theme') || 'default';
-  if (savedTheme !== 'default') {
-    document.documentElement.setAttribute('data-theme', savedTheme);
-  }
+  // 1. Keep the brand palette fixed. Older visits may still have one of the
+  // retired autumn/ocean themes in localStorage; clear it instead of letting
+  // a stale skin make the site look peach or pink.
+  localStorage.removeItem('user-theme');
+  document.documentElement.removeAttribute('data-theme');
 
   // 2. Load font size accessibility
   const savedFontSize = localStorage.getItem('user-font-size') || 'standard';
