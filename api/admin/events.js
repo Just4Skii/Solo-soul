@@ -9,6 +9,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import jwt from 'jsonwebtoken';
+import { listBlogPosts, getBlogPost, saveBlogPost, deleteBlogPost, CATEGORIES } from '../../lib/blog-store.js';
 
 const SUPABASE_URL = process.env.SUPABASE_URL || '';
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
@@ -136,6 +137,25 @@ export default async function handler(req, res) {
         const { data, error } = await supabase.from('events').update({ active: false, updated_by: admin.id, updated_at: new Date().toISOString() }).eq('id', id).select().single();
         if (error) throw error;
         return res.json({ event: data, deleted: true });
+      }
+
+      // ── JOURNAL / BLOG (kept here to stay within the 12-function cap) ──
+      case 'blog-list': {
+        return res.json({ posts: await listBlogPosts(), categories: CATEGORIES });
+      }
+      case 'blog-get': {
+        const post = await getBlogPost(body.id);
+        if (!post) return res.status(404).json({ error: 'Post not found' });
+        return res.json({ post });
+      }
+      case 'blog-save': {
+        const post = await saveBlogPost({ ...body, author: body.author || admin.name || 'Solo Soul' });
+        return res.json({ post });
+      }
+      case 'blog-delete': {
+        const deleted = await deleteBlogPost(body.id);
+        if (!deleted) return res.status(404).json({ error: 'Post not found' });
+        return res.json({ deleted: true });
       }
 
       default:

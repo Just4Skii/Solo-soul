@@ -5,7 +5,7 @@
 const API = {
   auth: '/api/admin/auth',
   events: '/api/admin/events',
-  blog: '/api/admin/blog',
+  blog: '/api/admin/events',
   bookings: '/api/admin/bookings',
   stats: '/api/admin/stats',
   revenue: '/api/admin/stats',
@@ -712,7 +712,7 @@ async function loadBlogPosts() {
   if (!tbody) return;
   tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text-muted);">Loading...</td></tr>';
   try {
-    const res = await api('POST', API.blog, { action: 'list' });
+    const res = await api('POST', API.blog, { action: 'blog-list' });
     if (res.error) {
       tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--danger);">${esc(res.error)}</td></tr>`;
       return;
@@ -749,7 +749,7 @@ function renderBlogTable() {
 
 window.editBlog = async function(id) {
   try {
-    const res = await api('POST', API.blog, { action: 'get', id });
+    const res = await api('POST', API.blog, { action: 'blog-get', id });
     if (res.post) showBlogForm(res.post);
     else toast(res.error || 'Post not found', 'error');
   } catch {
@@ -759,7 +759,7 @@ window.editBlog = async function(id) {
 
 window.deleteBlog = async function(id) {
   if (!confirm('Delete this blog post? This cannot be undone.')) return;
-  const res = await api('POST', API.blog, { action: 'delete', id });
+  const res = await api('POST', API.blog, { action: 'blog-delete', id });
   if (res.error) return toast(res.error, 'error');
   toast('Post deleted', 'success');
   loadBlogPosts();
@@ -779,7 +779,7 @@ async function handleBlogSubmit(e) {
   btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
   try {
     const res = await api('POST', API.blog, {
-      action: 'save',
+      action: 'blog-save',
       id: $('bf-id').value || undefined,
       title,
       category: $('bf-category').value,
