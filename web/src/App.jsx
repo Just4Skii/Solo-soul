@@ -428,13 +428,13 @@ function EventDetail({ event }) {
   const price = external ? event.price : (event.is_free ? 'FREE' : event.price);
   const priceLabel = /^see listing$/i.test(String(price || '').trim()) ? 'Check listing' : price;
   const fallback = {
-    creative: '/assets/images/experience_sip_paint_1783927393574.webp',
+    creative: '/assets/images/gallery_paint_night_1783927512455.webp',
     food: '/assets/images/experience_brunch_1783927375716.webp',
-    outdoors: '/assets/images/experience_sunset_walk_1783927384287.webp',
-    wellness: '/assets/images/experience_coffee_journal_1783927404043.webp',
-    luxury: '/assets/images/experience_luxury_spa_1783927426028.webp',
-    fitness: '/assets/images/experience_nature_hike_1783927415406.webp',
-  }[event.category] || '/assets/images/experience_sunset_walk_1783927384287.webp';
+    outdoors: '/assets/images/hero_durban_beach.jpg',
+    wellness: '/assets/images/gallery_cafe_1783927503191.webp',
+    luxury: '/assets/images/gallery_wine_tasting_1783927462303.webp',
+    fitness: '/assets/images/hero_durban_beach.jpg',
+  }[event.category] || '/assets/images/hero_durban_beach.jpg';
   const image = event.image || event.image_url || fallback;
   const key = event.slug || event.id || '';
   const shareUrl = 'https://ssoul.co.za/e/' + encodeURIComponent(key) + '?utm_source=share&utm_medium=social&utm_campaign=event_share';
@@ -503,7 +503,7 @@ function Shell({ children, user, onSignOut }) {
   return (
     <div className="portal-shell">
       <header className="portal-header">
-        <a href="/" className="portal-brand"><img src="/assets/images/logo.png" alt="" /> Solo Soul</a>
+        <a href="/" className="portal-brand"><img src="/assets/images/logo.png?v=ssoul-gold-1" alt="" /> Solo Soul</a>
         <nav><a href="/about">About</a><a href="/experiences">Experiences</a><a href="/events">Events</a><a href="/gallery">Gallery</a><a href="/journal">Journal</a><a href="/contact">Contact</a></nav>
         <details className="portal-menu">
           <summary aria-label="Open menu">Menu</summary>

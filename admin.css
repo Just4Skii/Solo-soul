@@ -3,19 +3,19 @@
    ══════════════════════════════════════════════════════ */
 
 :root {
-  --bg: #f5f6fa;
+  --bg: #F6F0E4;
   --card-bg: #ffffff;
-  --text: #1a1a2e;
+  --text: #26201C;
   --text-muted: #6b7280;
   --border: #e5e7eb;
-  --primary: #2e7d32;
-  --primary-hover: #1b5e20;
+  --primary: #0B3C49;
+  --primary-hover: #072A35;
   --danger: #dc2626;
   --warning: #f59e0b;
   --success: #16a34a;
-  --sidebar-bg: #1a1a2e;
-  --sidebar-text: #a5b4fc;
-  --sidebar-active: #ffffff;
+  --sidebar-bg: #072A35;
+  --sidebar-text: #D8C7A7;
+  --sidebar-active: #C99A2E;
   --radius: 8px;
   --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
   --shadow-lg: 0 4px 6px rgba(0,0,0,0.1), 0 10px 15px rgba(0,0,0,0.1);
@@ -30,7 +30,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #1a1a2e 0%, #101C2C 50%, #2e7d32 100%);
+  background: linear-gradient(135deg, #072A35 0%, #101C24 58%, #8A6517 100%);
   padding: 20px;
 }
 
@@ -457,13 +457,13 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
 #section-operations textarea{font:inherit;}
 
 /* Durban identity overrides */
-:root { --primary:#0B3C49; --primary-dark:#072A35; --accent:#E76F51; --gold:#E9B44C; }
-.sidebar { background:#101C2C; }
-.nav-item.active { border-left-color:#E76F51; background:rgba(231,111,81,.10); color:#fff; }
+:root { --primary:#0B3C49; --primary-dark:#072A35; --accent:#B9563F; --gold:#C99A2E; }
+.sidebar { background:#101C24; }
+.nav-item.active { border-left-color:#B9563F; background:rgba(201,154,46,.10); color:#fff; }
 .btn-primary, .btn-primary:hover { background:#0B3C49; }
 .btn-primary:hover { background:#166B7C; }
 .status-badge.open { background:#FFF3D6; color:#8A5A00; }
-.status-badge.resolved { background:#E4F3E8; color:#22633A; }
+.status-badge.resolved { background:#E3EFEA; color:#22633A; }
 .status-badge.requested { background:#FFF3D6; color:#8A5A00; }
 
 
