@@ -56,7 +56,7 @@
 }
 .badge.paid, .badge.free { background: #E3EFEA; color: #22633A; }
 .badge.pending { background: #FFF3D6; color: #8A5A00; }
-.badge.cancelled, .badge.failed { background: #EFE5DE; color: #A13A26; }
+.badge.cancelled, .badge.failed { background: #ECE9E4; color: #A13A26; }
 .badge.refunded { background: #EDE3D4; color: #5B3A88; }
 .account-modal { position: fixed; inset: 0; z-index: 9999; background: rgba(11,24,32,.55); display: grid; place-items: center; padding: 20px; }
 .account-modal[hidden] { display: none; }
@@ -81,7 +81,7 @@
 .ticket-shell { max-width: 760px; }
 .ticket-gate { display: flex; flex-direction: column; gap: 14px; max-width: 520px; }
 .ticket-card {
-  background: linear-gradient(150deg,#0B3C49,#101C24 62%,#26201C); color: #F4F1EA;
+  background: linear-gradient(150deg,#0B3C49,#101C24 62%,#26201C); color: #F1F0EC;
   border-radius: 22px; padding: 32px; box-shadow: 0 24px 60px rgba(11,60,73,.28);
 }
 .ticket-top { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed rgba(244,241,234,.25); padding-bottom: 16px; }
@@ -93,7 +93,7 @@
 .ticket-meta strong { font-size: 14px; font-weight: 500; }
 .ticket-lower { display: flex; justify-content: space-between; gap: 20px; align-items: center; margin-top: 24px; padding-top: 20px; border-top: 1px dashed rgba(244,241,234,.25); }
 .ticket-lower strong { display: block; font-family: monospace; font-size: 14px; margin-bottom: 10px; }
-#ticket-qr { background: #F4F1EA; padding: 10px; border-radius: 10px; }
+#ticket-qr { background: #F1F0EC; padding: 10px; border-radius: 10px; }
 .ticket-actions { display: flex; gap: 10px; margin-top: 24px; flex-wrap: wrap; }
 @media (max-width: 900px) {
   .auth-grid, .help-layout { grid-template-columns: 1fr; }
@@ -108,5 +108,5 @@
 }
 
 [hidden] { display: none !important; }
-.ticket-actions .btn-secondary { color: #F4F1EA; border-color: rgba(244,241,234,.45); }
+.ticket-actions .btn-secondary { color: #F1F0EC; border-color: rgba(244,241,234,.45); }
 .ticket-actions .btn-secondary:hover { background: rgba(244,241,234,.12); }
