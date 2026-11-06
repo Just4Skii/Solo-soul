@@ -3913,3 +3913,37 @@ body.page-inner .navbar.scrolled { background: rgba(7,42,53,.98); }
 .why-learn-more { text-decoration: none; }
 .why-learn-more:visited { color: var(--sage); }
 .why-learn-more:hover { color: var(--white); }
+
+/* Homepage: real solo company, not a gender-coded lifestyle board. */
+.home-moments { background: var(--beige); }
+.moments-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+.moments-heading .section-title { margin: 0; }
+.moments-link { font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--forest); text-decoration: none; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
+.moments-link:hover { color: var(--coral-ink); gap: 12px; }
+.moments-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 28px; }
+.moment-card { margin: 0; border-radius: 18px; overflow: hidden; background: var(--white); box-shadow: var(--shadow-sm); }
+.moment-card img { display: block; width: 100%; height: 310px; object-fit: cover; filter: saturate(.9) sepia(.04); transition: transform .45s ease; }
+.moment-card:hover img { transform: scale(1.04); }
+.moment-card figcaption { padding: 14px 16px 16px; font-size: 12px; line-height: 1.5; color: #5C514A; }
+@media (max-width: 900px) {
+  .moments-grid { grid-template-columns: 1fr 1fr; }
+  .moment-card:first-child { grid-column: 1 / -1; }
+  .moment-card img { height: 250px; }
+}
+@media (max-width: 600px) {
+  .moments-heading { align-items: flex-start; flex-direction: column; gap: 12px; }
+  .moments-grid { display: flex; overflow-x: auto; gap: 12px; padding: 2px 2px 10px; scrollbar-width: none; }
+  .moments-grid::-webkit-scrollbar { display: none; }
+  .moment-card { flex: 0 0 82%; }
+  .moment-card:first-child { grid-column: auto; }
+  .moment-card img { height: 260px; }
+}
+
+/* A richer dark band for community stories. */
+.testimonials { background: linear-gradient(135deg, #0B3C49 0%, #072A35 70%, #101C24 100%); }
+.testimonials .section-title, .testimonials .section-title em { color: #F1F0EC; }
+.testimonials .section-subtitle { color: rgba(244,241,234,.76); }
+.testimonials .section-eyebrow { color: #D8A24A; }
+.testimonials .stories-note { color: rgba(244,241,234,.62); }
+.testimonials .testi-dot { background: rgba(244,241,234,.3); }
+.testimonials .testi-dot.active { background: #C99A2E; }
