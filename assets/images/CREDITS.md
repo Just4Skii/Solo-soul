@@ -7,3 +7,4 @@
 - `logo.png` and favicon set: supplied by Solo Soul Experiences (gold lotus SS mark), November 2026.
 - Existing Solo Soul photography remains the property of Solo Soul Experiences.
 - `durban_beach_detail.jpg`, `durban_beach_sky.jpg`, `brunch_detail.jpg`: crops derived from the CC0 Durban images and the existing Solo Soul brunch asset.
+- `about_durban_coast.jpg`, `durban_solo_walk.jpg`: crops derived from the CC0 Durban South Beach images above.

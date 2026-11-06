@@ -431,3 +431,6 @@ textarea:focus {
     backdrop-filter: blur(8px);
   }
 }
+@media (max-width: 768px) {
+  .gallery-item:last-child { grid-column: span 1 !important; }
+}
