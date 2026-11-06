@@ -503,14 +503,16 @@ function Shell({ children, user, onSignOut }) {
   return (
     <div className="portal-shell">
       <header className="portal-header">
-        <a href="/" className="portal-brand"><img src="/assets/images/logo.png?v=ssoul-gold-4" alt="" /> Solo Soul</a>
-        <nav><a href="/about">About</a><a href="/experiences">Experiences</a><a href="/events">Events</a><a href="/gallery">Gallery</a><a href="/journal">Journal</a><a href="/contact">Contact</a></nav>
-        <details className="portal-menu">
-          <summary aria-label="Open menu">Menu</summary>
-          <div><a href="/about">About</a><a href="/experiences">Experiences</a><a href="/events">Events</a><a href="/gallery">Gallery</a><a href="/journal">Journal</a><a href="/contact">Contact</a><a href="/portal">My Portal</a></div>
-        </details>
-        <a className="portal-header-cta" href="/events">What's On</a>
-        {user && <div className="portal-user"><span>{user.email}</span><button onClick={onSignOut}>Sign out</button></div>}
+        <div className="portal-nav-inner">
+          <a href="/" className="portal-brand"><img src="/assets/images/logo.png?v=logo-gold-6" alt="" /> Solo Soul</a>
+          <nav><a href="/about">About</a><a href="/experiences">Experiences</a><a href="/events">Events</a><a href="/gallery">Gallery</a><a href="/journal">Blog</a><a href="/about#founder">Meet Hazel</a><a href="/contact">Contact</a><a href="/portal">My Portal</a></nav>
+          <details className="portal-menu">
+            <summary aria-label="Open menu">Menu</summary>
+            <div><a href="/about">About</a><a href="/experiences">Experiences</a><a href="/events">Events</a><a href="/gallery">Gallery</a><a href="/journal">Blog</a><a href="/about#founder">Meet Hazel</a><a href="/contact">Contact</a><a href="/portal">My Portal</a></div>
+          </details>
+          <a className="portal-header-cta" href="/events">What's On</a>
+          {user && <div className="portal-user"><span>{user.email}</span><button onClick={onSignOut}>Sign out</button></div>}
+        </div>
       </header>
       <main className="portal-main">{children}</main>
       <footer className="portal-footer"><div><strong>Solo Soul Experiences</strong><span>Durban, KwaZulu-Natal</span></div><div><a href="/about">About</a><a href="/help">Help</a><a href="/contact">Contact</a></div><div><a href="mailto:SSoulZAR@outlook.com">SSoulZAR@outlook.com</a><span>© {new Date().getFullYear()} Solo Soul</span></div></footer>

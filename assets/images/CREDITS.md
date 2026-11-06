@@ -20,3 +20,15 @@
   https://www.pexels.com/photo/man-relaxing-with-book-and-coffee-outdoors-36092236/
 - `solo_man_dunes.webp`: Pexels photo 6073853, Pexels License.
   https://www.pexels.com/photo/man-in-black-coat-and-fedora-hat-standing-on-a-sand-dune-6073853/
+- `solo_woman_cafe.webp`: Pexels photo 30688916, Pexels License.
+  https://www.pexels.com/photo/30688916/
+- `solo_woman_cliff.webp`: Pexels photo 4840248, Pexels License.
+  https://www.pexels.com/photo/4840248/
+- `solo_woman_beach.webp`: Pexels photo 32360760, Pexels License.
+  https://www.pexels.com/photo/32360760/
+- `solo_woman_coffee.webp`: Pexels photo 19060186, Pexels License.
+  https://www.pexels.com/photo/19060186/
+- `solo_woman_hijab.webp`: Pexels photo 30418891, Pexels License.
+  https://www.pexels.com/photo/30418891/
+- `solo_woman_reading.webp`: Pexels photo 3395599, Pexels License.
+  https://www.pexels.com/photo/3395599/

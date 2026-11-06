@@ -426,7 +426,7 @@ textarea:focus {
   .hero-badge {
     background: rgba(7,42,53,.72) !important;
     border: 1px solid rgba(244,241,234,.32) !important;
-    color: #F1F0EC !important;
+    color: #E8EEEF !important;
     -webkit-backdrop-filter: blur(8px);
     backdrop-filter: blur(8px);
   }
