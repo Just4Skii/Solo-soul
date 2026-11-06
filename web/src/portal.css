@@ -1,7 +1,7 @@
 :root {
   --sand: #F6F0E4; --beige: #E7DCC7; --sage: #8FB7B2; --forest: #0B3C49;
   --forest-dark: #072A35; --charcoal: #2B2622; --coral: #B9563F; --gold: #C99A2E;
-  --plum: #26201C; --line: rgba(11,60,73,.16); --coral-ink: #9D4634;
+  --plum: #26201C; --line: rgba(11,60,73,.16); --coral-ink: #8A3D2D;
 }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--sand); color: var(--charcoal); font-family: 'Poppins', system-ui, sans-serif; }

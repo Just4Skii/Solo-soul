@@ -383,12 +383,6 @@ textarea:focus {
   .gallery-grid { grid-auto-rows: 160px !important; }
   .gallery-item:last-child { grid-column: span 2 !important; }
   .gallery-item-overlay { display: none !important; }
-  .gallery-item::after {
-    content: "↗"; position: absolute; right: 10px; bottom: 10px; z-index: 2;
-    width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center;
-    background: rgba(248,239,228,.92); color: #0B3C49; font-size: 15px; font-weight: 700;
-    box-shadow: 0 2px 10px rgba(7,42,53,.18);
-  }
 
   .scroll-top-btn { display: none !important; }
 
