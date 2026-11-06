@@ -504,7 +504,7 @@ function Shell({ children, user, onSignOut }) {
     <div className="portal-shell">
       <header className="portal-header">
         <div className="portal-nav-inner">
-          <a href="/" className="portal-brand"><img src="/assets/images/logo.png?v=logo-gold-6" alt="" /> Solo Soul</a>
+          <a href="/" className="portal-brand"><img src="/assets/images/logo.png?v=logo-gold-7" alt="" /> Solo Soul</a>
           <nav><a href="/about">About</a><a href="/experiences">Experiences</a><a href="/events">Events</a><a href="/gallery">Gallery</a><a href="/journal">Blog</a><a href="/about#founder">Meet Hazel</a><a href="/contact">Contact</a><a href="/portal">My Portal</a></nav>
           <details className="portal-menu">
             <summary aria-label="Open menu">Menu</summary>
