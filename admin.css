@@ -510,3 +510,43 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
   .analytics-day small { font-size: 8px; }
   .section-header { align-items: flex-start; flex-wrap: wrap; }
 }
+
+/* Admin on phones: the same sections, exposed as a horizontal rail instead of
+   an off-screen sidebar that has no trigger. */
+@media (max-width: 768px) {
+  .admin-app { display: block; }
+  .sidebar {
+    position: static;
+    width: 100%;
+    height: auto;
+    transform: none;
+    box-shadow: none;
+    border-bottom: 1px solid rgba(248,239,228,.12);
+  }
+  .sidebar-header { padding: 14px 16px 10px; }
+  .sidebar-logo { width: 32px; height: 32px; }
+  .sidebar-title { font-size: 15px; }
+  .sidebar-nav {
+    display: flex;
+    overflow-x: auto;
+    padding: 0 10px 8px;
+    gap: 4px;
+    scrollbar-width: none;
+  }
+  .sidebar-nav::-webkit-scrollbar { display: none; }
+  .sidebar-nav .nav-item {
+    flex: 0 0 auto;
+    border-left: 0;
+    border-bottom: 3px solid transparent;
+    padding: 10px 12px;
+    border-radius: 8px 8px 0 0;
+    font-size: 12px;
+  }
+  .sidebar-nav .nav-item.active { border-bottom-color: var(--sidebar-active); background: rgba(201,154,46,.12); }
+  .sidebar-footer { display: none; }
+  .main-content { margin-left: 0; padding: 18px 14px 28px; }
+  .section-header { gap: 10px; }
+  .section-header h2 { font-size: 22px; }
+  .analytics-tools { width: 100%; }
+  .analytics-tools select, .analytics-tools .btn-primary { flex: 1 1 auto; }
+}
