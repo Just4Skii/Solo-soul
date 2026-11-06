@@ -256,4 +256,4 @@ body { margin: 0; background: var(--sand); color: var(--charcoal); font-family: 
 .portal-btn:not(.ghost):hover,
 .portal-header-cta:hover { background: #A47A1E !important; border-color: #A47A1E !important; }
 .portal-btn.ghost { background: transparent !important; color: #0B3C49 !important; }
-.portal-brand img { width: 40px; height: 40px; }
+.portal-brand img { width: 44px; height: 44px; }
