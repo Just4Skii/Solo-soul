@@ -3922,3 +3922,10 @@ body.page-inner .navbar.scrolled { background: rgba(7,42,53,.98); }
 
 /* The supplied lotus lockup leads the header; the SS tile is reserved for the favicon. */
 .nav-logo-img { width: 46px !important; height: 46px !important; }
+
+/* Admin-created journal categories keep the existing badge language. */
+.blog-category-badge.self-love, .blog-modal-cat.self-love { background: #C99A2E; color: #072A35; }
+.blog-category-badge.food, .blog-modal-cat.food { background: #A94B37; color: #fff; }
+.blog-category-badge.city, .blog-modal-cat.city { background: #0B3C49; color: #fff; }
+.blog-category-badge.wellness, .blog-modal-cat.wellness { background: #8FB7B2; color: #072A35; }
+.blog-category-badge.creative, .blog-modal-cat.creative { background: #8A6517; color: #fff; }

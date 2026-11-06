@@ -8,6 +8,7 @@ import { createClient } from '@supabase/supabase-js';
 import { sendEmail, ticketEmail } from '../lib/email.js';
 import { sharePage } from '../lib/share-page.js';
 import { trackServer } from '../lib/analytics.js';
+import { listBlogPosts } from '../lib/blog-store.js';
 
 const supabase = createClient(process.env.SUPABASE_URL || '', process.env.SUPABASE_SERVICE_ROLE_KEY || '');
 const ANALYTICS_TYPES = new Set(['pageview', 'event_view', 'outbound_click', 'registration', 'booking_start', 'booking_completed']);
@@ -128,6 +129,10 @@ export default async function handler(req, res) {
         const { data, error } = await supabase.from('events').select('*').eq('active', true).order('date', { ascending: true });
         if (error) throw error;
         return json(res, 200, { experiences: data || [] });
+      }
+
+      case 'blog': {
+        return json(res, 200, { posts: await listBlogPosts({ publishedOnly: true }) });
       }
 
       case 'experience': {

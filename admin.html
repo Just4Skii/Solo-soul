@@ -6,7 +6,7 @@
   <title>Admin — Solo Soul Experiences</title>
   <link rel="icon" href="favicon.svg?v=ssoul-gold-3" type="image/svg+xml" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  <link rel="stylesheet" href="admin.css?v=20261106analytics" />
+  <link rel="stylesheet" href="admin.css?v=20261106blog" />
 </head>
 <body class="page-inner">
 
@@ -60,6 +60,9 @@
         </a>
         <a href="#" class="nav-item" data-section="events">
           <i class="fas fa-calendar-alt"></i> Events
+        </a>
+        <a href="#" class="nav-item" data-section="blog">
+          <i class="fas fa-newspaper"></i> Blog
         </a>
         <a href="#" class="nav-item" data-section="bookings">
           <i class="fas fa-ticket-alt"></i> Bookings
@@ -278,6 +281,107 @@
         </div>
       </section>
 
+      <!-- ═══ BLOG ═══ -->
+      <section id="section-blog" class="section">
+        <div class="section-header">
+          <h2><i class="fas fa-newspaper"></i> Blog</h2>
+          <button id="new-blog-btn" class="btn-primary"><i class="fas fa-plus"></i> New Post</button>
+        </div>
+
+        <div id="blog-form-container" class="card blog-editor" style="display:none;">
+          <h3 id="blog-form-title">New Post</h3>
+          <form id="blog-form">
+            <input type="hidden" id="bf-id" />
+            <div class="form-row">
+              <div class="form-group">
+                <label>Title *</label>
+                <input type="text" id="bf-title" maxlength="180" placeholder="e.g. A slower Saturday in Durban" required />
+              </div>
+              <div class="form-group">
+                <label>Category</label>
+                <select id="bf-category">
+                  <option>Self Love</option>
+                  <option>Adventure</option>
+                  <option>Mindfulness</option>
+                  <option>Healing</option>
+                  <option>Food &amp; Drink</option>
+                  <option>City Notes</option>
+                  <option>Wellness</option>
+                  <option>Creative</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Excerpt</label>
+              <textarea id="bf-excerpt" rows="2" maxlength="320" placeholder="One or two lines shown on the journal card."></textarea>
+            </div>
+            <div class="form-group">
+              <label>Article *</label>
+              <div class="blog-editor-toolbar" aria-label="Article formatting">
+                <button type="button" data-blog-tag="p">Paragraph</button>
+                <button type="button" data-blog-tag="h2">Heading</button>
+                <button type="button" data-blog-tag="strong">Bold</button>
+                <button type="button" data-blog-tag="em">Italic</button>
+                <button type="button" data-blog-tag="blockquote">Quote</button>
+                <button type="button" data-blog-tag="a">Link</button>
+              </div>
+              <textarea id="bf-content" rows="14" required placeholder="Write the article here. Leave a blank line between paragraphs. The toolbar inserts basic HTML, which is cleaned before publishing."></textarea>
+              <p class="blog-field-note">Blank lines become paragraphs. Formatting buttons insert HTML; scripts and unsafe attributes are stripped on save.</p>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Cover image URL</label>
+                <input type="url" id="bf-image" placeholder="https://..." />
+              </div>
+              <div class="form-group">
+                <label>Or upload a cover</label>
+                <input type="file" id="bf-image-upload" accept="image/png,image/jpeg,image/webp,image/gif" />
+              </div>
+            </div>
+            <div class="blog-image-preview" id="blog-image-preview" hidden><img alt="Cover preview" /></div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Image alt text</label>
+                <input type="text" id="bf-image-alt" maxlength="220" placeholder="Describe the image for accessibility." />
+              </div>
+              <div class="form-group">
+                <label>Read time (minutes)</label>
+                <input type="number" id="bf-read-time" min="1" max="60" value="4" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Status</label>
+                <select id="bf-status">
+                  <option value="draft">Draft</option>
+                  <option value="published">Published</option>
+                </select>
+              </div>
+              <div class="form-group" style="justify-content:flex-end;">
+                <label class="blog-check"><input type="checkbox" id="bf-featured" /> Feature this post on the journal</label>
+              </div>
+            </div>
+            <div id="blog-form-error" class="error-msg"></div>
+            <div class="form-actions">
+              <button type="submit" id="blog-save-btn" class="btn-primary"><i class="fas fa-save"></i> Save Post</button>
+              <button type="button" id="blog-cancel-btn" class="btn-secondary">Cancel</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card">
+          <div class="table-toolbar">
+            <input type="text" id="blog-search" placeholder="Search posts..." class="search-input" />
+          </div>
+          <div class="table-wrapper">
+            <table class="admin-table" id="blog-table">
+              <thead><tr><th>Title</th><th>Category</th><th>Status</th><th>Published</th><th>Updated</th><th>Actions</th></tr></thead>
+              <tbody id="blog-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
       <!-- ═══ BOOKINGS ═══ -->
       <section id="section-bookings" class="section">
         <div class="section-header">
@@ -454,6 +558,6 @@
 
   <div id="toast" class="toast"></div>
 
-  <script src="admin.js?v=20261106analytics"></script>
+  <script src="admin.js?v=20261106blog"></script>
 </body>
 </html>

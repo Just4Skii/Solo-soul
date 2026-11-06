@@ -209,6 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initMobileMenu();
   initSmoothScroll();
   initTestimonials();
+  initPublishedBlogs();
   initFAQ();
   initScrollToTop();
   initParallax();
@@ -1297,6 +1298,89 @@ window.handleBookingSubmit = function(e) {
     alert('Online card checkout is not available right now. Please contact SSoulZAR@outlook.com to arrange payment for this experience.');
   }
 };
+
+// ---- PUBLISHED BLOG POSTS ---------------------------------
+function blogCategoryClass(category) {
+  return {
+    'Self Love': 'self-love',
+    'Adventure': 'adventure',
+    'Mindfulness': 'mindful',
+    'Healing': 'healing',
+    'Food & Drink': 'food',
+    'City Notes': 'city',
+    'Wellness': 'wellness',
+    'Creative': 'creative',
+  }[category] || 'self-love';
+}
+
+function blogDateLabel(value) {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '';
+  return date.toLocaleDateString('en-ZA', { month: 'long', year: 'numeric' });
+}
+
+async function initPublishedBlogs() {
+  const grid = document.getElementById('blog-grid');
+  if (!grid) return;
+
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 8000);
+    const response = await fetch('/api/app', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'blog' }),
+      signal: controller.signal,
+    });
+    clearTimeout(timer);
+    if (!response.ok) return;
+    const data = await response.json();
+    const posts = Array.isArray(data.posts) ? data.posts : [];
+    if (!posts.length) return;
+
+    const staticFeatured = grid.querySelector('.featured-blog');
+    if (staticFeatured) staticFeatured.classList.remove('featured-blog');
+    const requestedFeatured = posts.findIndex(post => post.featured);
+    const featuredIndex = requestedFeatured >= 0 ? requestedFeatured : 0;
+
+    const cards = posts.map((post, index) => {
+      const id = String(post.id || '').replace(/[^a-f0-9-]/gi, '');
+      if (!id) return '';
+      const category = String(post.category || 'Self Love');
+      const catClass = blogCategoryClass(category);
+      const image = post.image_url || 'assets/images/gallery_cafe_1783927503191.webp';
+      const imageAlt = post.image_alt || post.title || 'Solo Soul journal article';
+      const readTime = Number(post.read_time) || 4;
+      const featured = index === featuredIndex;
+      blogContent[id] = {
+        title: post.title || 'Journal',
+        category,
+        catClass,
+        readTime: `${readTime} min read`,
+        date: blogDateLabel(post.published_at || post.created_at),
+        image,
+        content: post.content || `<p>${escapeHtml(post.excerpt || '')}</p>`,
+      };
+      return `<div class="blog-card${featured ? ' featured-blog' : ''}" onclick="openBlogModal('${id}')">
+        <div class="blog-img">
+          <img loading="lazy" decoding="async" src="${escapeHtml(image)}" alt="${escapeHtml(imageAlt)}" />
+          <div class="blog-category-badge ${catClass}">${escapeHtml(category)}</div>
+        </div>
+        <div class="blog-body">
+          <div class="blog-meta"><i class="fas fa-calendar"></i> ${escapeHtml(blogDateLabel(post.published_at || post.created_at))} · <i class="fas fa-clock"></i> ${readTime} min read</div>
+          <h3>${escapeHtml(post.title || 'Journal')}</h3>
+          <p>${escapeHtml(post.excerpt || '')}</p>
+          <span class="blog-read-more">Read Article <i class="fas fa-arrow-right"></i></span>
+        </div>
+      </div>`;
+    }).filter(Boolean);
+
+    if (cards.length) grid.insertAdjacentHTML('afterbegin', cards.join(''));
+  } catch {
+    // The static journal remains the source of truth if the API is unavailable.
+  }
+}
 
 // ---- BLOG MODAL -------------------------------------------
 window.openBlogModal = function(id) {

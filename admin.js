@@ -5,6 +5,7 @@
 const API = {
   auth: '/api/admin/auth',
   events: '/api/admin/events',
+  blog: '/api/admin/blog',
   bookings: '/api/admin/bookings',
   stats: '/api/admin/stats',
   revenue: '/api/admin/stats',
@@ -189,6 +190,7 @@ function initNavigation() {
           case 'dashboard': loadDashboard(); break;
           case 'analytics': loadAnalytics(); break;
           case 'events': loadEvents(); break;
+          case 'blog': loadBlogPosts(); break;
           case 'bookings': loadBookings(); break;
           case 'revenue': loadRevenue(); break;
           case 'operations': loadOperations(); break;
@@ -658,6 +660,190 @@ async function handleEventFormSubmit(e) {
   }
 }
 
+// ══════════════════════════════════════════════════════════
+// BLOG
+// ══════════════════════════════════════════════════════════
+
+let blogData = [];
+
+function blogPreview(url) {
+  const box = $('blog-image-preview');
+  if (!box) return;
+  const img = box.querySelector('img');
+  if (url && img) {
+    img.src = url;
+    box.hidden = false;
+  } else {
+    img?.removeAttribute('src');
+    box.hidden = true;
+  }
+}
+
+function showBlogForm(post) {
+  const box = $('blog-form-container');
+  if (!box) return;
+  box.style.display = '';
+  $('blog-form-title').textContent = post ? 'Edit Post' : 'New Post';
+  $('bf-id').value = post?.id || '';
+  $('bf-title').value = post?.title || '';
+  $('bf-category').value = post?.category || 'Self Love';
+  $('bf-excerpt').value = post?.excerpt || '';
+  $('bf-content').value = post?.content || '';
+  $('bf-image').value = post?.image_url || '';
+  $('bf-image-alt').value = post?.image_alt || '';
+  $('bf-read-time').value = post?.read_time || 4;
+  $('bf-status').value = post?.status || 'draft';
+  $('bf-featured').checked = Boolean(post?.featured);
+  $('blog-form-error').textContent = '';
+  blogPreview(post?.image_url || '');
+  box.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function hideBlogForm() {
+  const box = $('blog-form-container');
+  if (box) box.style.display = 'none';
+  $('blog-form')?.reset();
+  if ($('bf-id')) $('bf-id').value = '';
+  blogPreview('');
+}
+
+async function loadBlogPosts() {
+  const tbody = $('blog-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text-muted);">Loading...</td></tr>';
+  try {
+    const res = await api('POST', API.blog, { action: 'list' });
+    if (res.error) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--danger);">${esc(res.error)}</td></tr>`;
+      return;
+    }
+    blogData = res.posts || [];
+    renderBlogTable();
+  } catch {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--danger);">Failed to load posts</td></tr>';
+  }
+}
+
+function renderBlogTable() {
+  const tbody = $('blog-tbody');
+  if (!tbody) return;
+  const query = ($('blog-search')?.value || '').trim().toLowerCase();
+  const posts = blogData.filter(post => !query || `${post.title} ${post.category}`.toLowerCase().includes(query));
+  if (!posts.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--text-muted);">No posts yet. Click “New Post” to write one.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = posts.map(post => `
+    <tr>
+      <td><strong>${esc(post.title)}</strong><br><span style="font-size:11px;color:var(--text-muted)">${esc(post.slug)}</span></td>
+      <td>${esc(post.category)}</td>
+      <td><span class="status-badge ${post.status === 'published' ? 'active' : 'inactive'}">${post.status === 'published' ? 'Published' : 'Draft'}</span>${post.featured ? ' <span class="status-badge open">Featured</span>' : ''}</td>
+      <td>${post.published_at ? esc(formatDate(post.published_at)) : '—'}</td>
+      <td>${esc(formatDate(post.updated_at))}</td>
+      <td>
+        <button class="btn-sm btn-edit" onclick="editBlog('${esc(post.id)}')" title="Edit"><i class="fas fa-edit"></i></button>
+        <button class="btn-sm btn-delete" onclick="deleteBlog('${esc(post.id)}')" title="Delete"><i class="fas fa-trash"></i></button>
+      </td>
+    </tr>`).join('');
+}
+
+window.editBlog = async function(id) {
+  try {
+    const res = await api('POST', API.blog, { action: 'get', id });
+    if (res.post) showBlogForm(res.post);
+    else toast(res.error || 'Post not found', 'error');
+  } catch {
+    toast('Could not load post', 'error');
+  }
+};
+
+window.deleteBlog = async function(id) {
+  if (!confirm('Delete this blog post? This cannot be undone.')) return;
+  const res = await api('POST', API.blog, { action: 'delete', id });
+  if (res.error) return toast(res.error, 'error');
+  toast('Post deleted', 'success');
+  loadBlogPosts();
+};
+
+async function handleBlogSubmit(e) {
+  e.preventDefault();
+  const btn = $('blog-save-btn');
+  const errorEl = $('blog-form-error');
+  errorEl.textContent = '';
+  const title = $('bf-title').value.trim();
+  const content = $('bf-content').value.trim();
+  if (!title) { errorEl.textContent = 'A title is required.'; return; }
+  if (!content) { errorEl.textContent = 'The article is required.'; return; }
+
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+  try {
+    const res = await api('POST', API.blog, {
+      action: 'save',
+      id: $('bf-id').value || undefined,
+      title,
+      category: $('bf-category').value,
+      excerpt: $('bf-excerpt').value.trim(),
+      content,
+      image_url: $('bf-image').value.trim(),
+      image_alt: $('bf-image-alt').value.trim(),
+      read_time: Number($('bf-read-time').value) || 4,
+      status: $('bf-status').value,
+      featured: $('bf-featured').checked,
+    });
+    if (res.error) {
+      errorEl.textContent = res.error;
+      return;
+    }
+    toast(res.post?.status === 'published' ? 'Post published' : 'Draft saved', 'success');
+    hideBlogForm();
+    loadBlogPosts();
+  } catch {
+    errorEl.textContent = 'Network error. Try again.';
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-save"></i> Save Post';
+  }
+}
+
+async function handleBlogImageUpload(file) {
+  if (!file) return;
+  const formData = new FormData();
+  formData.append('image', file);
+  try {
+    const res = await fetch(API.upload, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${adminToken}` },
+      body: formData,
+    });
+    const data = await res.json();
+    if (data.url) {
+      $('bf-image').value = data.url;
+      blogPreview(data.url);
+      toast('Cover uploaded', 'success');
+    } else {
+      toast(data.error || 'Upload failed', 'error');
+    }
+  } catch {
+    toast('Upload failed', 'error');
+  }
+}
+
+function insertBlogTag(tag) {
+  const area = $('bf-content');
+  if (!area) return;
+  const start = area.selectionStart || 0;
+  const end = area.selectionEnd || 0;
+  const selected = area.value.slice(start, end);
+  const open = `<${tag}>`;
+  const close = `</${tag}>`;
+  const insert = tag === 'a'
+    ? `<a href="https://">${selected || 'link text'}</a>`
+    : `${open}${selected}${close}`;
+  area.setRangeText(insert, start, end, 'end');
+  area.focus();
+}
+
 // ── Image Upload ──────────────────────────────────────
 async function handleImageUpload(file) {
   if (!file) return;
@@ -779,6 +965,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
   $('ef-image-upload').addEventListener('change', e => {
     if (e.target.files[0]) handleImageUpload(e.target.files[0]);
+  });
+
+  $('new-blog-btn').addEventListener('click', () => showBlogForm(null));
+  $('blog-cancel-btn').addEventListener('click', hideBlogForm);
+  $('blog-form').addEventListener('submit', handleBlogSubmit);
+  $('blog-search').addEventListener('input', renderBlogTable);
+  $('bf-image').addEventListener('input', e => blogPreview(e.target.value.trim()));
+  $('bf-image-upload').addEventListener('change', e => {
+    if (e.target.files[0]) handleBlogImageUpload(e.target.files[0]);
+  });
+  document.querySelectorAll('[data-blog-tag]').forEach(button => {
+    button.addEventListener('click', () => insertBlogTag(button.dataset.blogTag));
   });
 
   $('bookings-search').addEventListener('input', loadBookings);
