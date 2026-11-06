@@ -6,4 +6,4 @@
   https://commons.wikimedia.org/wiki/File:Durban_South_Beach_Promenade.jpg
 - `logo.png` and favicon set: supplied by Solo Soul Experiences (gold lotus SS mark), November 2026.
 - Existing Solo Soul photography remains the property of Solo Soul Experiences.
-- `durban_beach_detail.jpg`, `durban_promenade_detail.jpg`, `brunch_detail.jpg`: crops derived from the CC0 Durban images and the existing Solo Soul brunch asset.
+- `durban_beach_detail.jpg`, `durban_beach_sky.jpg`, `brunch_detail.jpg`: crops derived from the CC0 Durban images and the existing Solo Soul brunch asset.
