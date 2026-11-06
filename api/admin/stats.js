@@ -31,6 +31,140 @@ function requireAdmin(req, res) {
   return decoded;
 }
 
+const ANALYTICS_RANGES = [7, 30, 90];
+const analyticsDay = (d) => d.toISOString().slice(0, 10);
+const analyticsTop = (map, limit) => [...map.entries()]
+  .sort(([, a], [, b]) => b - a)
+  .slice(0, limit)
+  .map(([name, value]) => ({ name, value }));
+
+async function analyticsHandler(req, res) {
+  const requested = Number((req.body || {}).days);
+  const days = ANALYTICS_RANGES.includes(requested) ? requested : 30;
+  const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+
+  const { data, error } = await supabase
+    .from('analytics_events')
+    .select('event_type,path,event_name,event_id,source,medium,device,visitor_id,metadata,occurred_at')
+    .gte('occurred_at', since.toISOString())
+    .order('occurred_at', { ascending: false })
+    .limit(10000);
+
+  if (error) {
+    // The analytics migration may not be applied in a fresh environment.
+    if (String(error.code) === '42P01') {
+      return res.json({
+        empty: true,
+        days,
+        since: since.toISOString(),
+        notice: 'Analytics table is not installed yet. Apply migrations/20261103_analytics_events.sql.',
+        totals: { pageviews: 0, visitors: 0, eventViews: 0, outboundClicks: 0, bookingsStarted: 0, bookingsCompleted: 0, registrations: 0 },
+        topPages: [], topSources: [], topEvents: [], providers: [], devices: [], daily: [], recent: [],
+      });
+    }
+    throw error;
+  }
+
+  const rows = data || [];
+  const visitors = new Set();
+  const pageviews = new Map();
+  const sources = new Map();
+  const sourceVisitors = new Map();
+  const eventViews = new Map();
+  const providers = new Map();
+  const devices = new Map();
+  const daily = new Map();
+  const totals = {
+    pageviews: 0,
+    visitors: 0,
+    eventViews: 0,
+    outboundClicks: 0,
+    registrations: 0,
+    bookingsStarted: 0,
+    bookingsCompleted: 0,
+  };
+
+  for (let i = 0; i < days; i += 1) {
+    const d = new Date(since.getTime() + i * 24 * 60 * 60 * 1000);
+    daily.set(analyticsDay(d), { date: analyticsDay(d), pageviews: 0, visitors: new Set() });
+  }
+
+  rows.forEach(row => {
+    if (row.visitor_id) visitors.add(row.visitor_id);
+    if (row.event_type === 'pageview') {
+      totals.pageviews += 1;
+      if (row.path) pageviews.set(row.path, (pageviews.get(row.path) || 0) + 1);
+    }
+    if (row.event_type === 'event_view') {
+      totals.eventViews += 1;
+      const key = row.event_name || row.path || 'Unknown experience';
+      eventViews.set(key, (eventViews.get(key) || 0) + 1);
+    }
+    if (row.event_type === 'outbound_click') {
+      totals.outboundClicks += 1;
+      const provider = row.metadata?.provider || row.source || 'unknown';
+      providers.set(provider, (providers.get(provider) || 0) + 1);
+    }
+    if (row.event_type === 'registration') totals.registrations += 1;
+    if (row.event_type === 'booking_start') totals.bookingsStarted += 1;
+    if (row.event_type === 'booking_completed') totals.bookingsCompleted += 1;
+
+    const sourceKey = `${row.source || 'direct'} / ${row.medium || 'none'}`;
+    sources.set(sourceKey, (sources.get(sourceKey) || 0) + 1);
+    if (row.visitor_id) {
+      if (!sourceVisitors.has(sourceKey)) sourceVisitors.set(sourceKey, new Set());
+      sourceVisitors.get(sourceKey).add(row.visitor_id);
+    }
+    if (row.device) devices.set(row.device, (devices.get(row.device) || 0) + 1);
+
+    const day = String(row.occurred_at || '').slice(0, 10);
+    if (daily.has(day)) {
+      const bucket = daily.get(day);
+      if (row.event_type === 'pageview') bucket.pageviews += 1;
+      if (row.visitor_id) bucket.visitors.add(row.visitor_id);
+    }
+  });
+
+  totals.visitors = visitors.size;
+  const dailySeries = [...daily.values()].map(d => ({
+    date: d.date,
+    pageviews: d.pageviews,
+    visitors: d.visitors.size,
+  }));
+  const completed = totals.bookingsCompleted;
+  const started = totals.bookingsStarted;
+
+  return res.json({
+    days,
+    since: since.toISOString(),
+    generatedAt: new Date().toISOString(),
+    totals: {
+      ...totals,
+      conversionRate: started ? Math.round((completed / started) * 100) : 0,
+      eventViewRate: totals.pageviews ? Math.round((totals.eventViews / totals.pageviews) * 100) : 0,
+      outboundRate: totals.eventViews ? Math.round((totals.outboundClicks / totals.eventViews) * 100) : 0,
+    },
+    topPages: analyticsTop(pageviews, 10).map(({ name, value }) => ({ path: name, views: value })),
+    topSources: analyticsTop(sources, 8).map(({ name, value }) => ({
+      source: name,
+      events: value,
+      visitors: sourceVisitors.get(name)?.size || 0,
+    })),
+    topEvents: analyticsTop(eventViews, 10).map(({ name, value }) => ({ name, views: value })),
+    providers: analyticsTop(providers, 8).map(({ name, value }) => ({ provider: name, clicks: value })),
+    devices: analyticsTop(devices, 5).map(({ name, value }) => ({ device: name, events: value })),
+    daily: dailySeries,
+    recent: rows.filter(r => ['event_view', 'outbound_click', 'booking_completed', 'registration'].includes(r.event_type)).slice(0, 20).map(r => ({
+      type: r.event_type,
+      path: r.path,
+      name: r.event_name,
+      source: r.source,
+      device: r.device,
+      occurredAt: r.occurred_at,
+    })),
+  });
+}
+
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -43,12 +177,14 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
-  if ((req.body || {}).action === 'revenue') return revenueHandler(req, res);
+  const action = (req.body || {}).action;
+  if (action === 'revenue') return revenueHandler(req, res);
 
   const admin = requireAdmin(req, res);
   if (!admin) return;
 
   try {
+    if (action === 'analytics') return await analyticsHandler(req, res);
     // ── All active events ─────────────────────────────────
     const { data: events, error: eventsErr } = await supabase
       .from('events')

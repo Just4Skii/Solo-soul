@@ -305,7 +305,7 @@ textarea:focus {
     background: rgba(7,42,53,.97) !important;
     -webkit-backdrop-filter: blur(18px);
     backdrop-filter: blur(18px);
-    box-shadow: 0 1px 0 rgba(248,239,228,.08);
+    box-shadow: 0 1px 0 rgba(244,241,234,.08);
     height: 60px;
     padding: 0 18px !important;
     display: flex;
@@ -425,8 +425,8 @@ textarea:focus {
   }
   .hero-badge {
     background: rgba(7,42,53,.72) !important;
-    border: 1px solid rgba(248,239,228,.32) !important;
-    color: #F6F0E4 !important;
+    border: 1px solid rgba(244,241,234,.32) !important;
+    color: #F4F1EA !important;
     -webkit-backdrop-filter: blur(8px);
     backdrop-filter: blur(8px);
   }

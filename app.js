@@ -192,7 +192,6 @@ function getTicketStatus(title) {
 document.addEventListener('DOMContentLoaded', () => {
   // Paint the interface first: never let a slow/dead API hold the page hostage.
   // Inner pages have no hero, so keep the navigation legible immediately.
-  if (!document.querySelector('.hero')) document.getElementById('navbar')?.classList.add('scrolled');
 
   // Mark the current page in the navigation. Works for clean URLs (/experiences)
   // as well as direct .html previews.

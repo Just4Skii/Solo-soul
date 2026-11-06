@@ -6,7 +6,7 @@
   <title>Admin — Solo Soul Experiences</title>
   <link rel="icon" href="favicon.svg?v=ssoul-gold-3" type="image/svg+xml" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  <link rel="stylesheet" href="admin.css" />
+  <link rel="stylesheet" href="admin.css?v=20261106analytics" />
 </head>
 <body class="page-inner">
 
@@ -23,7 +23,7 @@
       <form id="login-form">
         <div class="form-group">
           <label for="login-email"><i class="fas fa-envelope"></i> Email</label>
-          <input type="email" id="login-email" placeholder="admin@solosoul.co.za" required />
+          <input type="email" id="login-email" placeholder="mphojunior6@gmail.com" required />
         </div>
         <div class="form-group">
           <label for="login-password"><i class="fas fa-lock"></i> Password</label>
@@ -54,6 +54,9 @@
       <nav class="sidebar-nav">
         <a href="#" class="nav-item active" data-section="dashboard">
           <i class="fas fa-chart-pie"></i> Dashboard
+        </a>
+        <a href="#" class="nav-item" data-section="analytics">
+          <i class="fas fa-chart-line"></i> Analytics
         </a>
         <a href="#" class="nav-item" data-section="events">
           <i class="fas fa-calendar-alt"></i> Events
@@ -94,7 +97,7 @@
         <div class="stats-grid" id="stats-grid">
           <div class="stat-card"><div class="stat-icon" style="background:#E5F0EC;"><i class="fas fa-calendar-check" style="color:#0B3C49;"></i></div><div><span class="stat-value" id="stat-events">-</span><span class="stat-label">Events</span></div></div>
           <div class="stat-card"><div class="stat-icon" style="background:#E8EEF1;"><i class="fas fa-ticket-alt" style="color:#3F6F78;"></i></div><div><span class="stat-value" id="stat-bookings">-</span><span class="stat-label">Total Bookings</span></div></div>
-          <div class="stat-card"><div class="stat-icon" style="background:#F2E0D8;"><i class="fas fa-rands" style="color:#9D4634;"></i></div><div><span class="stat-value" id="stat-revenue">R0</span><span class="stat-label">Revenue</span></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:#EFE5DE;"><i class="fas fa-rands" style="color:#9D4634;"></i></div><div><span class="stat-value" id="stat-revenue">R0</span><span class="stat-label">Revenue</span></div></div>
           <div class="stat-card"><div class="stat-icon" style="background:#F7EEDC;"><i class="fas fa-users" style="color:#8A6517;"></i></div><div><span class="stat-value" id="stat-fillrate">-</span><span class="stat-label">Spots Filled</span></div></div>
         </div>
         <div class="dashboard-grid">
@@ -110,6 +113,73 @@
         <div class="card">
           <h3><i class="fas fa-chart-bar"></i> Monthly Bookings</h3>
           <div id="monthly-chart" class="chart-container"></div>
+        </div>
+      </section>
+
+      <!-- ═══ ANALYTICS ═══ -->
+      <section id="section-analytics" class="section">
+        <div class="section-header">
+          <h2><i class="fas fa-chart-line"></i> Analytics</h2>
+          <div class="analytics-tools">
+            <select id="analytics-range" aria-label="Analytics date range">
+              <option value="7">Last 7 days</option>
+              <option value="30" selected>Last 30 days</option>
+              <option value="90">Last 90 days</option>
+            </select>
+            <button id="analytics-refresh" class="btn-primary" type="button"><i class="fas fa-rotate"></i> Refresh</button>
+          </div>
+        </div>
+        <div class="stats-grid analytics-stats">
+          <div class="stat-card"><div class="stat-icon" style="background:#E5F0EC;"><i class="fas fa-eye" style="color:#0B3C49;"></i></div><div><span class="stat-value" id="an-pageviews">0</span><span class="stat-label">Page views</span></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:#E8EEF1;"><i class="fas fa-users" style="color:#3F6F78;"></i></div><div><span class="stat-value" id="an-visitors">0</span><span class="stat-label">Unique visitors</span></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:#F7EEDC;"><i class="fas fa-calendar-day" style="color:#8A6517;"></i></div><div><span class="stat-value" id="an-eventviews">0</span><span class="stat-label">Experience views</span></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:#EFE5DE;"><i class="fas fa-arrow-up-right-from-square" style="color:#9D4634;"></i></div><div><span class="stat-value" id="an-outbound">0</span><span class="stat-label">Ticket clicks out</span></div></div>
+        </div>
+        <p id="analytics-note" class="analytics-note">First-party, cookie-free analytics. No IP addresses, names or advertising pixels.</p>
+
+        <div class="analytics-grid">
+          <div class="card analytics-wide">
+            <h3><i class="fas fa-chart-column"></i> Page views <span id="analytics-range-label" class="analytics-muted"></span></h3>
+            <div id="analytics-daily-chart" class="analytics-chart"></div>
+            <div class="analytics-funnel" id="analytics-funnel"></div>
+          </div>
+          <div class="card">
+            <h3><i class="fas fa-share-nodes"></i> Traffic sources</h3>
+            <div id="analytics-sources" class="analytics-list"></div>
+          </div>
+        </div>
+
+        <div class="analytics-grid">
+          <div class="card">
+            <h3><i class="fas fa-file-lines"></i> Top pages</h3>
+            <div class="table-wrapper">
+              <table class="admin-table"><thead><tr><th>Page</th><th>Views</th></tr></thead><tbody id="analytics-pages"></tbody></table>
+            </div>
+          </div>
+          <div class="card">
+            <h3><i class="fas fa-heart"></i> Most viewed experiences</h3>
+            <div class="table-wrapper">
+              <table class="admin-table"><thead><tr><th>Experience</th><th>Views</th></tr></thead><tbody id="analytics-events"></tbody></table>
+            </div>
+          </div>
+        </div>
+
+        <div class="analytics-grid">
+          <div class="card">
+            <h3><i class="fas fa-ticket"></i> Provider handoffs</h3>
+            <div class="table-wrapper">
+              <table class="admin-table"><thead><tr><th>Provider</th><th>Clicks</th></tr></thead><tbody id="analytics-providers"></tbody></table>
+            </div>
+          </div>
+          <div class="card">
+            <h3><i class="fas fa-mobile-screen"></i> Devices</h3>
+            <div id="analytics-devices" class="analytics-list"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3><i class="fas fa-clock-rotate-left"></i> Recent activity</h3>
+          <div id="analytics-recent" class="recent-list"></div>
         </div>
       </section>
 
@@ -248,7 +318,7 @@
           <div class="stat-card"><div class="stat-icon" style="background:#F7EEDC;"><i class="fas fa-wallet" style="color:#8A6517;"></i></div><div><span class="stat-value" id="rev-net">R0</span><span class="stat-label">Estimated net</span></div></div>
           <div class="stat-card"><div class="stat-icon" style="background:#E5F0EC;"><i class="fas fa-users" style="color:#0B3C49;"></i></div><div><span class="stat-value" id="rev-seats">0</span><span class="stat-label">Seats sold</span></div></div>
           <div class="stat-card"><div class="stat-icon" style="background:#E8EEF1;"><i class="fas fa-chart-simple" style="color:#3F6F78;"></i></div><div><span class="stat-value" id="rev-occupancy">0%</span><span class="stat-label">Occupancy</span></div></div>
-          <div class="stat-card"><div class="stat-icon" style="background:#f3e8ff;"><i class="fas fa-receipt" style="color:#6b21a8;"></i></div><div><span class="stat-value" id="rev-aov">R0</span><span class="stat-label">Avg order</span></div></div>
+          <div class="stat-card"><div class="stat-icon" style="background:#EEE9DF;"><i class="fas fa-receipt" style="color:#6b21a8;"></i></div><div><span class="stat-value" id="rev-aov">R0</span><span class="stat-label">Avg order</span></div></div>
         </div>
         <div class="card">
           <h3><i class="fas fa-calendar-check"></i> Revenue by experience</h3>
@@ -384,6 +454,6 @@
 
   <div id="toast" class="toast"></div>
 
-  <script src="admin.js"></script>
+  <script src="admin.js?v=20261106analytics"></script>
 </body>
 </html>

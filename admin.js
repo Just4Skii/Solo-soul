@@ -187,6 +187,7 @@ function initNavigation() {
         section.classList.add('active');
         switch (item.dataset.section) {
           case 'dashboard': loadDashboard(); break;
+          case 'analytics': loadAnalytics(); break;
           case 'events': loadEvents(); break;
           case 'bookings': loadBookings(); break;
           case 'revenue': loadRevenue(); break;
@@ -252,6 +253,127 @@ function renderChart(monthly) {
       <span class="bar-label">${esc(m.month)}</span>
     </div>`;
   }).join('');
+}
+
+// ══════════════════════════════════════════════════════════
+// ANALYTICS
+// ══════════════════════════════════════════════════════════
+
+function analyticsNumber(n) {
+  return Number(n || 0).toLocaleString('en-ZA');
+}
+
+function analyticsShare(value, total) {
+  return total ? Math.max(2, Math.round((Number(value || 0) / total) * 100)) : 0;
+}
+
+function renderAnalyticsList(target, items, renderRow, emptyText) {
+  const el = $(target);
+  if (!el) return;
+  el.innerHTML = items?.length
+    ? items.map(renderRow).join('')
+    : `<p class="analytics-empty">${esc(emptyText)}</p>`;
+}
+
+function renderAnalyticsChart(daily) {
+  const el = $('analytics-daily-chart');
+  if (!el) return;
+  const rows = daily || [];
+  if (!rows.length) {
+    el.innerHTML = '<p class="analytics-empty">No page views in this period yet.</p>';
+    return;
+  }
+  const max = Math.max(...rows.map(d => Number(d.pageviews) || 0), 1);
+  el.innerHTML = rows.map(d => {
+    const h = Math.max(3, Math.round(((Number(d.pageviews) || 0) / max) * 100));
+    return `<div class="analytics-day" title="${esc(d.date)} · ${analyticsNumber(d.pageviews)} views · ${analyticsNumber(d.visitors)} visitors">
+      <div class="analytics-bar-track"><span class="analytics-bar" style="height:${h}%"></span></div>
+      <small>${esc(String(d.date).slice(8, 10))}</small>
+    </div>`;
+  }).join('');
+}
+
+function renderAnalyticsFunnel(totals) {
+  const el = $('analytics-funnel');
+  if (!el) return;
+  const steps = [
+    ['Page views', totals.pageviews],
+    ['Experience views', totals.eventViews],
+    ['Provider clicks', totals.outboundClicks],
+    ['Bookings started', totals.bookingsStarted],
+    ['Bookings completed', totals.bookingsCompleted],
+  ];
+  const max = Math.max(Number(totals.pageviews) || 0, 1);
+  el.innerHTML = steps.map(([label, value]) => `
+    <div class="analytics-funnel-row">
+      <span>${esc(label)}</span>
+      <div class="analytics-funnel-track"><span style="width:${analyticsShare(value, max)}%"></span></div>
+      <strong>${analyticsNumber(value)}</strong>
+    </div>`).join('');
+}
+
+async function loadAnalytics() {
+  const note = $('analytics-note');
+  const range = Number($('analytics-range')?.value) || 30;
+  if (note) note.textContent = 'Loading first-party analytics…';
+
+  try {
+    const res = await api('POST', API.stats, { action: 'analytics', days: range });
+    if (res.error) {
+      toast(res.error, 'error');
+      if (note) note.textContent = res.error;
+      return;
+    }
+
+    const totals = res.totals || {};
+    $('an-pageviews').textContent = analyticsNumber(totals.pageviews);
+    $('an-visitors').textContent = analyticsNumber(totals.visitors);
+    $('an-eventviews').textContent = analyticsNumber(totals.eventViews);
+    $('an-outbound').textContent = analyticsNumber(totals.outboundClicks);
+    $('analytics-range-label').textContent = `· last ${res.days || range} days`;
+    if (note) {
+      note.textContent = res.notice || `First-party, cookie-free analytics · ${analyticsNumber(res.totals?.registrations)} registrations · ${analyticsNumber(res.totals?.bookingsCompleted)} completed bookings · ${analyticsNumber(res.totals?.conversionRate)}% start-to-complete conversion.`;
+    }
+
+    renderAnalyticsChart(res.daily);
+    renderAnalyticsFunnel(totals);
+
+    renderAnalyticsList('analytics-sources', res.topSources, item => `
+      <div class="analytics-list-row">
+        <span>${esc(item.source)}</span>
+        <strong>${analyticsNumber(item.events)}</strong>
+        <small>${analyticsNumber(item.visitors)} visitors</small>
+      </div>`, 'No traffic sources recorded yet.');
+
+    renderAnalyticsList('analytics-devices', res.devices, item => `
+      <div class="analytics-list-row">
+        <span>${esc(item.device)}</span>
+        <strong>${analyticsNumber(item.events)}</strong>
+        <small>events</small>
+      </div>`, 'No device data yet.');
+
+    $('analytics-pages').innerHTML = res.topPages?.length
+      ? res.topPages.map(p => `<tr><td>${esc(p.path || '/')}</td><td>${analyticsNumber(p.views)}</td></tr>`).join('')
+      : '<tr><td colspan="2" class="analytics-empty">No page views yet.</td></tr>';
+
+    $('analytics-events').innerHTML = res.topEvents?.length
+      ? res.topEvents.map(e => `<tr><td>${esc(e.name)}</td><td>${analyticsNumber(e.views)}</td></tr>`).join('')
+      : '<tr><td colspan="2" class="analytics-empty">No experience views yet.</td></tr>';
+
+    $('analytics-providers').innerHTML = res.providers?.length
+      ? res.providers.map(p => `<tr><td>${esc(p.provider)}</td><td>${analyticsNumber(p.clicks)}</td></tr>`).join('')
+      : '<tr><td colspan="2" class="analytics-empty">No outbound clicks yet.</td></tr>';
+
+    $('analytics-recent').innerHTML = res.recent?.length
+      ? res.recent.map(r => `<div class="recent-item">
+          <span><strong>${esc(r.type.replace(/_/g, ' '))}</strong> ${r.name ? '· ' + esc(r.name) : r.path ? '· ' + esc(r.path) : ''}</span>
+          <span>${esc(r.source || 'direct')} · ${esc(r.device || 'unknown')} · ${esc(formatDate(r.occurredAt))}</span>
+        </div>`).join('')
+      : '<p class="analytics-empty">No recent activity yet.</p>';
+  } catch {
+    if (note) note.textContent = 'Could not load analytics. Check the analytics migration and try again.';
+    toast('Failed to load analytics', 'error');
+  }
 }
 
 async function loadRevenue() {
@@ -661,6 +783,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   $('bookings-search').addEventListener('input', loadBookings);
   $('bookings-filter').addEventListener('change', loadBookings);
+
+  $('analytics-range').addEventListener('change', loadAnalytics);
+  $('analytics-refresh').addEventListener('click', loadAnalytics);
 
   verifySession();
 });
